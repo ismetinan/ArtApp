@@ -1,0 +1,27 @@
+# Ortam / sırlar
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Yüklenen dosyalar / çıktılar
+storage/
+prototype/test_images/*
+!prototype/test_images/README.md
+prototype/output/
+
+# Flutter / Dart
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins*
+mobile/.packages
+mobile/android/.gradle/
+mobile/ios/Pods/
+
+# IDE
+.idea/
+.vscode/

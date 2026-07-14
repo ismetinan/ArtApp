@@ -1,0 +1,27 @@
+import os
+
+import pytest
+
+# Ayarlar import edilmeden ÖNCE test ortamını kur
+os.environ["AI_PROVIDER"] = "mock"
+
+
+@pytest.fixture()
+def client(tmp_path, monkeypatch):
+    os.environ["DATABASE_URL"] = f"sqlite:///{tmp_path}/test.db"
+    os.environ["STORAGE_DIR"] = str(tmp_path / "storage")
+
+    # Modül seviyesindeki engine/ayar önbelleklerini sıfırla
+    from app import db as db_module
+    from app.core import config
+
+    config.get_settings.cache_clear()
+    db_module.engine = db_module._make_engine()
+    db_module.SessionLocal.configure(bind=db_module.engine)
+
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    with TestClient(app) as c:
+        yield c
