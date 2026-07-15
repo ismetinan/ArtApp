@@ -19,6 +19,7 @@ class SkillAxis(str, Enum):
     ORAN = "oran"
     CIZGI_KALITESI = "cizgi_kalitesi"
     KOMPOZISYON = "kompozisyon"
+    RENK = "renk"
 
 
 class Severity(str, Enum):

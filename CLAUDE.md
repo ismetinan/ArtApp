@@ -55,10 +55,15 @@ Kapsam: Çoklu dil desteği, bölgesel mentor havuzları, AI modelinin kendi ver
 
 **Şu anki aktif faz: Faz 1 (Faz 0 doğrulama prototipi paralel yürüyor — `prototype/redline_test.py`, Gemini anahtarı gelince gerçek çizimlerle koşulacak)**
 
-> AI sağlayıcı kararı (2026-07-14): Anthropic anahtarı henüz yok. Tüm AI çağrıları
-> `backend/app/ai/` içindeki sağlayıcı-bağımsız arayüz üzerinden gider (`AI_PROVIDER`
-> env değişkeni: `mock` | `gemini`). İlk gerçek sağlayıcı Gemini ücretsiz katmanı;
-> Claude/OpenAI adaptörleri ileride tek dosyayla eklenir. Fine-tuning Faz 4 konusu.
+> AI sağlayıcı kararı (güncel 2026-07-15): Anthropic anahtarı henüz yok. Tüm AI
+> çağrıları `backend/app/ai/` içindeki sağlayıcı-bağımsız arayüz üzerinden gider
+> (`AI_PROVIDER` env değişkeni: `mock` | `gemini` | `openrouter`). Aktif canlı
+> sağlayıcı: **OpenRouter** (ücretsiz anahtar, OpenAI-uyumlu API, ücretsiz vision
+> modelleri; model `OPENROUTER_MODEL` ile seçilir). Gemini adaptörü kodda duruyor
+> ama devre dışı: kullanıcının Google hesabı yalnız `AQ.` formatlı anahtar üretiyor
+> ve bunlar Google tarafındaki bir hata yüzünden 401 alıyor (2026-07 itibarıyla
+> çözümsüz). Claude/OpenAI adaptörleri ileride tek dosyayla eklenir. Fine-tuning
+> Faz 4 konusu. Prompt'lar sağlayıcı-ortak: `backend/app/ai/prompts.py`.
 
 ---
 
@@ -179,7 +184,11 @@ Bu akışın çıktısı doğrudan Bölüm 2'deki "Seviye Belirleme" adımını 
 ## 8. AÇIK SORULAR (Kullanıcının netleştirmesi gereken)
 
 - Jeton fiyatlandırması ve mentor gelir paylaşım oranı henüz belirlenmedi.
-- Yetenek ağacındaki düğüm sayısı ve içerik müfredatı (hangi YouTube videoları) henüz hazır değil — bu bir içerik/uzman işi, kod işi değil.
+- ~~İçerik müfredatı hazır değil~~ → ÇÖZÜLDÜ (2026-07-15): kullanıcı kaynakları
+  `art_sources.md`'de derledi; 7 eksende 16 düğümlük ağaç `backend/app/data/skill_tree.py`
+  ile seed'leniyor. Eksik: `temel-oranlar` kaynağı + bozuk bir playlist linki (bkz.
+  art_sources.md "Açık noktalar").
 - Mentor onay/kalite kontrol süreci (kim mentor olabilir, nasıl doğrulanır) tanımlanmadı.
-- Ability Chart'taki eksenlerin (beceri kategorilerinin) kesin listesi ve skor hesaplama mantığı netleştirilmeli.
+- Ability Chart eksenleri (2026-07-15): anatomi, perspektif, ışık-gölge, oran,
+  çizgi kalitesi, kompozisyon, renk — 7 eksen. Skor hesaplama mantığının ince ayarı açık.
 - "Gelişim Macerası" galerisindeki gizlilik ayarının varsayılan değeri (herkese açık mı, özel mi) belirlenmeli.

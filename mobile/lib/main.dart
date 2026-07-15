@@ -21,7 +21,7 @@ class ArtApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4)),
         useMaterial3: true,
       ),
-      home: ApiClient.instance.userId == null
+      home: ApiClient.instance.token == null
           ? const WelcomeScreen()
           : const HomeShell(),
     );

@@ -15,6 +15,10 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    # Google Sign-In: ID token'daki kalıcı "sub" kimliği (e-posta değişse de sabit)
+    google_sub: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    api_token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     display_name: Mapped[str] = mapped_column(String(100), default="Misafir Çizer")
     is_guest: Mapped[bool] = mapped_column(Boolean, default=True)
     level: Mapped[int] = mapped_column(Integer, default=1)
@@ -40,6 +44,8 @@ class SkillNode(Base):
     skill_axis: Mapped[str] = mapped_column(String(32))  # ai.schemas.SkillAxis değeri
     xp_reward: Mapped[int] = mapped_column(Integer, default=50)
     prerequisites: Mapped[list] = mapped_column(JSON, default=list)  # node id listesi
+    # [{kind: video|playlist, youtube_id, title, author}] — art_sources.md müfredatı
+    resources: Mapped[list] = mapped_column(JSON, default=list)
 
 
 class UserProgress(Base):
@@ -71,6 +77,19 @@ class Submission(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     user: Mapped[User] = relationship(back_populates="submissions")
+
+
+class AiUsage(Base):
+    """Kullanıcı başına günlük AI çağrı sayacı (beta kotası — OpenRouter ücretsiz
+    katmanını bir avuç kullanıcının tüketmesini engeller)."""
+
+    __tablename__ = "ai_usage"
+    __table_args__ = (UniqueConstraint("user_id", "day"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    day: Mapped[str] = mapped_column(String(10))  # YYYY-MM-DD (UTC)
+    count: Mapped[int] = mapped_column(Integer, default=0)
 
 
 class AbilityScore(Base):

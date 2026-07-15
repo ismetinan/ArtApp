@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -7,7 +9,10 @@ from ..api.deps import get_current_user
 from ..db import get_db
 from ..models.tables import SkillNode, Submission, User, UserProgress
 from ..services.gamification import award_xp, bump_ability
+from ..services.quota import consume_ai_quota
 from ..services.storage import save_drawing
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/skill-tree", tags=["skill-tree"])
 
@@ -39,6 +44,7 @@ def get_tree(user: User = Depends(get_current_user), db: Session = Depends(get_d
                 "skill_axis": n.skill_axis,
                 "xp_reward": n.xp_reward,
                 "prerequisites": n.prerequisites,
+                "resources": n.resources,
                 "status": _node_status(n, completed),
             }
             for n in nodes
@@ -61,6 +67,7 @@ async def submit_assignment(
     completed = _completed_ids(db, user)
     if _node_status(node, completed) == "locked":
         raise HTTPException(status_code=403, detail="Bu dersin önkoşulları henüz tamamlanmadı")
+    consume_ai_quota(db, user)
 
     content = await file.read()
     try:
@@ -68,9 +75,16 @@ async def submit_assignment(
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-    result = guard_redline(
-        await get_ai_provider().redline_analysis(content, node.title)
-    )
+    try:
+        result = guard_redline(
+            await get_ai_provider().redline_analysis(content, node.title)
+        )
+    except Exception:
+        logger.exception("AI redline analizi başarısız (node=%s)", node.id)
+        raise HTTPException(
+            status_code=503,
+            detail="AI şu an yanıt veremiyor, lütfen birazdan tekrar dene.",
+        )
 
     submission = Submission(
         user_id=user.id,

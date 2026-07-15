@@ -7,8 +7,8 @@ void main() {
   testWidgets('Hoş geldin ekranı üç seçeneği gösterir', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
     expect(find.text('Misafir Olarak Devam Et'), findsOneWidget);
-    expect(find.text('Giriş Yap (yakında)'), findsOneWidget);
-    expect(find.text('Kayıt Ol (yakında)'), findsOneWidget);
+    expect(find.text('Giriş Yap'), findsOneWidget);
+    expect(find.text('Kayıt Ol'), findsOneWidget);
   });
 
   testWidgets('Sonuç ekranı seviye ve eksenleri listeler', (tester) async {

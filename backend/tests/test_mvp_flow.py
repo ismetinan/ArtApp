@@ -17,7 +17,7 @@ def _png_file(name="cizim.png"):
 def _guest(client) -> dict:
     r = client.post("/users/guest", json={"display_name": "Test Çizer"})
     assert r.status_code == 200
-    return {"X-User-Id": str(r.json()["id"])}
+    return {"Authorization": f"Bearer {r.json()['token']}"}
 
 
 def test_health(client):
@@ -36,14 +36,16 @@ def test_full_mvp_loop(client):
     assert r.status_code == 200
     assessment = r.json()
     assert 1 <= assessment["level"] <= 10
-    assert len(assessment["ability_scores"]) == 6
+    assert len(assessment["ability_scores"]) == 7  # renk dahil
     assert assessment["summary_tr"]
 
-    # 2. Yetenek ağacı: kök ders açık, önkoşullular kilitli
+    # 2. Yetenek ağacı: kök ders açık, önkoşullular kilitli, kaynaklar seed'li
     tree = client.get("/skill-tree", headers=headers).json()["nodes"]
     by_id = {n["id"]: n for n in tree}
     assert by_id["cizgi-temelleri"]["status"] == "available"
     assert by_id["temel-oranlar"]["status"] == "locked"
+    assert by_id["cizgi-temelleri"]["resources"][0]["kind"] == "playlist"
+    assert by_id["kafa-oranlari"]["resources"][0]["youtube_id"] == "wAOldLWIDSM"
 
     # 3. Kilitli derse ödev gönderilemez
     r = client.post(
@@ -95,4 +97,7 @@ def test_full_mvp_loop(client):
 
 def test_auth_required(client):
     assert client.get("/profile").status_code in (401, 422)
-    assert client.get("/profile", headers={"X-User-Id": "9999"}).status_code == 401
+    assert (
+        client.get("/profile", headers={"Authorization": "Bearer gecersiz"}).status_code
+        == 401
+    )

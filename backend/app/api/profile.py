@@ -1,4 +1,7 @@
+import mimetypes
+
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -6,8 +9,27 @@ from sqlalchemy.orm import Session
 from ..api.deps import get_current_user
 from ..db import get_db
 from ..models.tables import AbilityScore, Submission, User
+from ..services.storage import load_drawing
 
 router = APIRouter(tags=["profile"])
+
+
+@router.get("/submissions/{submission_id}/image")
+def get_submission_image(
+    submission_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Çizim dosyasını döner. Sadece sahibi — veya herkese açıksa herkes — görebilir."""
+    submission = db.get(Submission, submission_id)
+    if submission is None or (submission.user_id != user.id and not submission.is_public):
+        raise HTTPException(status_code=404, detail="Gönderi bulunamadı")
+    try:
+        content = load_drawing(submission.file_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Dosya bulunamadı")
+    media_type = mimetypes.guess_type(submission.file_path)[0] or "image/jpeg"
+    return Response(content=content, media_type=media_type)
 
 
 @router.get("/profile")

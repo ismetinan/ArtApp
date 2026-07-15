@@ -3,6 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../api.dart';
+import 'auth_form.dart';
+import 'onboarding.dart';
+import 'redline.dart';
 
 /// Profil sekmesi: seviye rozeti + tıklanabilir Ability Chart + Gelişim Macerası
 /// (CLAUDE.md §7.3 — chart hem görselleştirme hem navigasyon).
@@ -51,6 +54,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (ApiClient.instance.isGuest)
+                Card(
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                  child: ListTile(
+                    leading: const Icon(Icons.shield_outlined),
+                    title: const Text('Hesap oluştur'),
+                    subtitle:
+                        const Text('İlerlemen cihaz silinse bile güvende kalsın.'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      final upgraded = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                const AuthFormScreen(mode: AuthMode.upgrade)),
+                      );
+                      if (upgraded == true) {
+                        setState(
+                            () => _future = ApiClient.instance.getProfile());
+                      }
+                    },
+                  ),
+                ),
+              const SizedBox(height: 8),
               Row(children: [
                 const CircleAvatar(radius: 32, child: Icon(Icons.person, size: 32)),
                 const SizedBox(width: 16),
@@ -109,13 +135,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               for (final item in gallery)
                 Card(
                   child: ListTile(
-                    leading: const Icon(Icons.image),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Image.network(
+                        ApiClient.instance
+                            .imageUrl(item['submission_id'] as int),
+                        headers: ApiClient.instance.authHeaders,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(Icons.image),
+                      ),
+                    ),
                     title: Text(item['node_id'] ?? 'Ödev'),
                     subtitle: Text(
                       (item['ai_result']?['overall_comment_tr'] ?? '') as String,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    onTap: item['ai_result'] == null
+                        ? null
+                        : () => Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => RedlineScreen(
+                                image: NetworkImage(
+                                  ApiClient.instance.imageUrl(
+                                      item['submission_id'] as int),
+                                  headers: ApiClient.instance.authHeaders,
+                                ),
+                                analysis: RedlineResult.fromJson(
+                                    Map<String, dynamic>.from(
+                                        item['ai_result'] as Map)),
+                              ),
+                            )),
                     trailing: Switch(
                       value: item['is_public'] as bool,
                       onChanged: (v) async {
@@ -135,11 +186,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
+              const SizedBox(height: 32),
+              // Play Store şartı: hesap silme uygulama içinden erişilebilir olmalı
+              ListTile(
+                leading: Icon(Icons.delete_forever,
+                    color: Theme.of(context).colorScheme.error),
+                title: Text('Hesabı Sil',
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error)),
+                subtitle: const Text('Hesabın ve tüm çizimlerin kalıcı silinir.'),
+                onTap: () => _confirmDelete(context),
+              ),
             ],
           );
         },
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final first = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hesabı sil?'),
+        content: const Text(
+            'Hesabın, ilerlemen ve yüklediğin tüm çizimler kalıcı olarak '
+            'silinecek. Bu işlem geri alınamaz.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Vazgeç')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Devam Et')),
+        ],
+      ),
+    );
+    if (first != true || !context.mounted) return;
+    final second = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Emin misin?'),
+        content: const Text('Son onay: tüm verilerin şimdi silinecek.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Vazgeç')),
+          FilledButton.tonal(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Hesabımı Kalıcı Olarak Sil')),
+        ],
+      ),
+    );
+    if (second != true || !context.mounted) return;
+    try {
+      await ApiClient.instance.deleteAccount();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+          (_) => false,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      }
+    }
   }
 }
 

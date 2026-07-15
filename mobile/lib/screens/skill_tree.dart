@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -173,7 +175,7 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
       if (mounted) {
         await Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => RedlineScreen(
-            imagePath: file.path,
+            image: FileImage(File(file.path)),
             analysis: result.analysis,
             xpAwarded: result.xpAwarded,
           ),
@@ -182,7 +184,7 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Yükleme başarısız: $e')));
+            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -192,8 +194,6 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final node = widget.node;
-    final hasVideo =
-        node.youtubeVideoId.isNotEmpty && node.youtubeVideoId != 'PLACEHOLDER';
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -204,17 +204,29 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.ondemand_video),
-                title: Text(hasVideo ? 'Ders videosunu izle' : 'Video yakında'),
-                subtitle: Text(node.description),
-                onTap: hasVideo
-                    ? () => launchUrl(
-                        Uri.parse('https://youtu.be/${node.youtubeVideoId}'))
-                    : null,
-              ),
-            ),
+            Text(node.description),
+            const SizedBox(height: 12),
+            if (node.resources.isEmpty)
+              const Card(
+                child: ListTile(
+                  leading: Icon(Icons.ondemand_video),
+                  title: Text('Video yakında'),
+                  subtitle: Text('Bu dersin içeriği henüz eklenmedi.'),
+                ),
+              )
+            else
+              for (final r in node.resources)
+                Card(
+                  child: ListTile(
+                    leading: Icon(
+                        r.isPlaylist ? Icons.playlist_play : Icons.play_circle),
+                    title: Text(r.title),
+                    subtitle: Text(
+                        '${r.author} • ${r.isPlaylist ? 'Oynatma listesi' : 'Video'}'),
+                    trailing: const Icon(Icons.open_in_new, size: 18),
+                    onTap: () => launchUrl(r.url),
+                  ),
+                ),
             const SizedBox(height: 16),
             Text('Ödevini yükle',
                 style: Theme.of(context).textTheme.titleMedium),

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../api.dart';
@@ -12,15 +10,15 @@ const _severityColors = {
 
 /// AI redline sonucu: çizim + koordinatlı bulgu işaretleri + yapıcı notlar
 class RedlineScreen extends StatelessWidget {
-  final String imagePath;
+  final ImageProvider image;
   final RedlineResult analysis;
   final int xpAwarded;
 
   const RedlineScreen({
     super.key,
-    required this.imagePath,
+    required this.image,
     required this.analysis,
-    required this.xpAwarded,
+    this.xpAwarded = 0,
   });
 
   @override
@@ -50,7 +48,7 @@ class RedlineScreen extends StatelessWidget {
               builder: (context, constraints) => Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.file(File(imagePath), fit: BoxFit.contain),
+                  Image(image: image, fit: BoxFit.contain),
                   for (var i = 0; i < analysis.findings.length; i++)
                     Positioned(
                       left: analysis.findings[i].x * constraints.maxWidth - 14,

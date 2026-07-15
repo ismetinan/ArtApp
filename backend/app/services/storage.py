@@ -1,22 +1,67 @@
-"""Dosya depolama arayüzü. Dev: yerel disk. Prod: R2/S3 (aynı arayüzle eklenecek)."""
+"""Dosya depolama. STORAGE_BACKEND=local (dev) | s3 (prod — Cloudflare R2).
+
+Çağıranlar yalnız save/load/delete_drawing kullanır; backend seçimi burada
+gizlidir. R2, S3-uyumlu API sunduğu için boto3 ile konuşulur.
+"""
 
 import uuid
+from functools import lru_cache
 from pathlib import Path
 
 from ..core.config import get_settings
 
+MAX_UPLOAD_BYTES = 8 * 1024 * 1024  # 8 MB
+_ALLOWED_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+
+
+@lru_cache
+def _s3_client():
+    import boto3  # lazy: local modda boto3 gerekmez
+
+    s = get_settings()
+    return boto3.client(
+        "s3",
+        endpoint_url=s.s3_endpoint,
+        aws_access_key_id=s.s3_access_key,
+        aws_secret_access_key=s.s3_secret_key,
+        region_name="auto",
+    )
+
 
 def save_drawing(content: bytes, original_name: str) -> str:
-    """Çizimi kaydeder, göreli yolunu döner."""
+    """Çizimi kaydeder, göreli yolunu döner. Tür/boyut hatasında ValueError."""
     suffix = Path(original_name).suffix.lower() or ".png"
-    if suffix not in {".png", ".jpg", ".jpeg", ".webp"}:
+    if suffix not in _ALLOWED_SUFFIXES:
         raise ValueError(f"Desteklenmeyen dosya türü: {suffix}")
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise ValueError("Dosya çok büyük — en fazla 8 MB yükleyebilirsin")
     rel_path = f"drawings/{uuid.uuid4().hex}{suffix}"
-    full_path = Path(get_settings().storage_dir) / rel_path
-    full_path.parent.mkdir(parents=True, exist_ok=True)
-    full_path.write_bytes(content)
+
+    settings = get_settings()
+    if settings.storage_backend == "s3":
+        _s3_client().put_object(Bucket=settings.s3_bucket, Key=rel_path, Body=content)
+    else:
+        full_path = Path(settings.storage_dir) / rel_path
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        full_path.write_bytes(content)
     return rel_path
 
 
 def load_drawing(rel_path: str) -> bytes:
-    return (Path(get_settings().storage_dir) / rel_path).read_bytes()
+    """Kaydı okur; yoksa FileNotFoundError."""
+    settings = get_settings()
+    if settings.storage_backend == "s3":
+        try:
+            obj = _s3_client().get_object(Bucket=settings.s3_bucket, Key=rel_path)
+        except _s3_client().exceptions.NoSuchKey:
+            raise FileNotFoundError(rel_path)
+        return obj["Body"].read()
+    return (Path(settings.storage_dir) / rel_path).read_bytes()
+
+
+def delete_drawing(rel_path: str) -> None:
+    settings = get_settings()
+    if settings.storage_backend == "s3":
+        _s3_client().delete_object(Bucket=settings.s3_bucket, Key=rel_path)
+    else:
+        (Path(settings.storage_dir) / rel_path).unlink(missing_ok=True)

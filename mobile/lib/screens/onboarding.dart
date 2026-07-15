@@ -4,7 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../api.dart';
+import '../google_auth.dart';
+import 'auth_form.dart';
 import 'home_shell.dart';
+
+/// Google ile giriş → yeni kullanıcıysa onboarding'e, değilse ana ekrana.
+/// Welcome ve AuthForm ekranlarının ortak akışı.
+Future<void> signInWithGoogleAndRoute(BuildContext context) async {
+  try {
+    final idToken = await getGoogleIdToken();
+    if (idToken == null) return; // kullanıcı vazgeçti
+    await ApiClient.instance.googleLogin(idToken);
+    final profile = await ApiClient.instance.getProfile();
+    final hasChart = (profile['ability_chart'] as Map).isNotEmpty;
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (_) =>
+                hasChart ? const HomeShell() : const PickImagesScreen()),
+        (_) => false,
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+    }
+  }
+}
 
 /// Onboarding ekran 1: Hoş geldin (CLAUDE.md §7.2)
 class WelcomeScreen extends StatelessWidget {
@@ -38,14 +65,22 @@ class WelcomeScreen extends StatelessWidget {
                 child: const Text('Misafir Olarak Devam Et'),
               ),
               const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: null,
-                child: const Text('Giriş Yap (yakında)'),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.g_mobiledata, size: 28),
+                label: const Text('Google ile Devam Et'),
+                onPressed: () => signInWithGoogleAndRoute(context),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: null,
-                child: const Text('Kayıt Ol (yakında)'),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const AuthFormScreen(mode: AuthMode.login))),
+                child: const Text('Giriş Yap'),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const AuthFormScreen(mode: AuthMode.register))),
+                child: const Text('Kayıt Ol'),
               ),
             ],
           ),
@@ -57,12 +92,10 @@ class WelcomeScreen extends StatelessWidget {
   Future<void> _continueAsGuest(BuildContext context) async {
     try {
       await ApiClient.instance.createGuest('Misafir Çizer');
-    } catch (_) {
+    } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Sunucuya ulaşılamadı. Backend çalışıyor mu? '
-              '(docker compose up -d && uvicorn app.main:app)'),
-        ));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
       }
       return;
     }
@@ -196,8 +229,8 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Analiz sırasında sorun oluştu, birazdan tekrar denenecek.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('${friendlyError(e)} Birazdan tekrar denenecek.')));
         await Future.delayed(const Duration(seconds: 3));
         if (mounted) _analyze();
       }

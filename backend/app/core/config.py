@@ -6,13 +6,32 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    ai_provider: str = "mock"  # mock | gemini (ileride: claude, openai)
+    ai_provider: str = "mock"  # mock | gemini | openrouter (ileride: claude, openai)
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
+    openrouter_api_key: str = ""
+    # Ücretsiz model listesi dönüşümlü; güncel liste: openrouter.ai/collections/free-models
+    openrouter_model: str = "google/gemma-4-26b-a4b-it:free"
+    openrouter_fallback_model: str = "nvidia/nemotron-nano-12b-v2-vl:free"
 
     database_url: str = "postgresql+psycopg://artapp:artapp@localhost:5433/artapp"
     redis_url: str = "redis://localhost:6379/0"
+
+    # Depolama: local (dev) | s3 (prod — Cloudflare R2, S3-uyumlu)
+    storage_backend: str = "local"
     storage_dir: str = "./storage"
+    s3_endpoint: str = ""
+    s3_bucket: str = ""
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
+
+    # Google Sign-In: backend, ID token'ı bu (web/server) client ID'ye karşı doğrular
+    google_client_id: str = ""
+
+    # Beta koruması: kullanıcı başına günlük AI çağrı limiti
+    ai_daily_limit: int = 10
+
+    sentry_dsn: str = ""
 
     mentor_market_enabled: bool = False  # Faz 2'de açılacak
 
