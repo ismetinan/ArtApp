@@ -9,5 +9,7 @@ COPY alembic ./alembic
 COPY alembic.ini ./
 RUN pip install --no-cache-dir .
 
-# Migration'lar uygulama açılışında (lifespan) çalışır
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Migration'lar uygulama açılışında (lifespan) çalışır.
+# Host `::`: Railway'in edge proxy'si konteynere IPv6 üzerinden ulaşır;
+# 0.0.0.0 (yalnız IPv4) dinlemek prod'da 502 üretir. `::` çift yığın dinler.
+CMD ["sh", "-c", "uvicorn app.main:app --host :: --port ${PORT:-8000}"]
