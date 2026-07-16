@@ -121,3 +121,41 @@ def test_privacy_page(client):
     r = client.get("/privacy")
     assert r.status_code == 200
     assert "Gizlilik" in r.text
+
+
+def test_partial_ai_axes_still_yield_full_chart(client, monkeypatch):
+    """Model eksen atlarsa guard 0 ile doldurmalı, profil 7 ekseni de dönmeli."""
+    from app.ai.schemas import LevelAssessment, SkillAxis
+    from app.ai.tone_guard import guard_assessment
+
+    partial = LevelAssessment(
+        level=2,
+        ability_scores={SkillAxis.ANATOMI: 40, SkillAxis.CIZGI_KALITESI: 55},
+        summary_tr="Güzel bir başlangıç.",
+        focus_axes=[SkillAxis.ANATOMI],
+    )
+    guarded = guard_assessment(partial)
+    assert set(guarded.ability_scores) == set(SkillAxis)
+    assert guarded.ability_scores[SkillAxis.RENK] == 0
+    assert guarded.ability_scores[SkillAxis.CIZGI_KALITESI] == 55
+
+
+def test_profile_chart_fills_missing_axes(client):
+    """Tek eksen skoru olan kullanıcıda (örn. sadece ödevden bump) chart 7 eksen döner."""
+    headers = _guest(client)
+    # Onboarding yok; doğrudan bir ödevle tek eksene skor yaz
+    r = client.post(
+        "/skill-tree/cizgi-temelleri/submit", files={"file": _png_file()}, headers=headers
+    )
+    assert r.status_code == 200
+    chart = client.get("/profile", headers=headers).json()["ability_chart"]
+    assert len(chart) == 7
+    assert chart["cizgi_kalitesi"] > 0
+    assert chart["renk"] == 0
+
+
+def test_profile_chart_empty_before_onboarding(client):
+    """Hiç skor yokken chart boş kalmalı — onboarding yönlendirmesi buna bakıyor."""
+    headers = _guest(client)
+    chart = client.get("/profile", headers=headers).json()["ability_chart"]
+    assert chart == {}

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..ai.schemas import SkillAxis
 from ..api.deps import get_current_user
 from ..db import get_db
 from ..models.tables import AbilityScore, Submission, User
@@ -42,12 +43,17 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         .where(Submission.user_id == user.id, Submission.kind == "assignment")
         .order_by(Submission.created_at)
     ).scalars().all()
+    score_map = {s.axis: s.score for s in scores}
     return {
         "id": user.id,
         "display_name": user.display_name,
         "level": user.level,
         "xp": user.xp,
-        "ability_chart": {s.axis: s.score for s in scores},
+        # Skor varsa 7 eksenin hepsi döner (eksikler 0) — radar chart hep tam çizilir.
+        # Hiç skor yoksa boş kalır: onboarding yönlendirmesi buna bakıyor.
+        "ability_chart": (
+            {a.value: score_map.get(a.value, 0) for a in SkillAxis} if score_map else {}
+        ),
         # "Gelişim Macerası": kronolojik, her ödev kendi AI notlarıyla
         "gelisim_macerasi": [
             {

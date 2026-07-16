@@ -49,7 +49,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           final p = snapshot.data!;
-          final chart = Map<String, int>.from(p['ability_chart'] as Map);
+          final serverChart = Map<String, int>.from(p['ability_chart'] as Map);
+          // Chart doluysa 7 ekseni de göster — eksikler 0 (eski backend'e karşı emniyet)
+          final chart = serverChart.isEmpty
+              ? serverChart
+              : {
+                  for (final k in axisLabels.keys) k: serverChart[k] ?? 0,
+                };
           final gallery = p['gelisim_macerasi'] as List;
           return ListView(
             padding: const EdgeInsets.all(16),

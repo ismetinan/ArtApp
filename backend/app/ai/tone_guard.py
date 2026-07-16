@@ -5,7 +5,7 @@ Hedef kitle motivasyonu kırılgan, kendi kendine öğrenen çizerler. Bu katman
 2. Her analizde en az bir güçlü yön bulunmasını garanti eder.
 """
 
-from .schemas import LevelAssessment, RedlineResult
+from .schemas import LevelAssessment, RedlineResult, SkillAxis
 
 # Bilerek geniş tutulmuş kaba/olumsuz kalıplar (Türkçe + İngilizce sızıntılara karşı)
 _HARSH_PATTERNS = [
@@ -39,4 +39,9 @@ def guard_redline(result: RedlineResult) -> RedlineResult:
 
 def guard_assessment(result: LevelAssessment) -> LevelAssessment:
     result.summary_tr = _soften(result.summary_tr)
+    # Model eksen atlayabiliyor — chart'ın 7 ekseni de her zaman dolu olmalı
+    for axis in SkillAxis:
+        result.ability_scores.setdefault(axis, 0)
+    for axis, score in result.ability_scores.items():
+        result.ability_scores[axis] = max(0, min(100, score))
     return result
