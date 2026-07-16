@@ -30,8 +30,13 @@ her adımın çıktısını (URL/ID/anahtar) Claude'a ver, gerisini o bağlar.
    SENTRY_DSN=<opsiyonel>
    ```
 5. **Settings → Networking → Generate Domain** → `https://xxx.up.railway.app`.
+   ⚠️ Domain'in **target port'u**, Railway'in enjekte ettiği `PORT` ile eşleşmeli
+   (bizim deployda 8080 çıktı; deploy loglarında "Uvicorn running on ...:PORT"
+   satırından görülür). Eşleşmezse edge "connection refused" → 502 döner.
    Test: `curl https://xxx.up.railway.app/health` → `{"status":"ok"}`.
    Migration'lar açılışta otomatik koşar, ağaç otomatik seed'lenir.
+   Not: uvicorn `--host 0.0.0.0` kalmalı; `::` asyncio'da v6only bağlanır ve
+   Railway edge'in IPv4 bağlantıları reddedilir.
 
 ## 2. Cloudflare R2 (çizim depolama) — ücretsiz (10 GB)
 
