@@ -83,7 +83,7 @@ class OpenRouterProvider(AIProvider):
             "Authorization": f"Bearer {self._api_key}",
             # OpenRouter sıralama/istatistik başlıkları (opsiyonel ama önerilen)
             "HTTP-Referer": "https://github.com/artapp",
-            "X-Title": "ArtApp",
+            "X-Title": "Artora",
         }
         async with httpx.AsyncClient(timeout=90) as client:
             response = await client.post(_API_URL, json=payload, headers=headers)

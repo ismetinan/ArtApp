@@ -13,7 +13,7 @@ _PRIVACY_HTML = """<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ArtApp Gizlilik Politikası</title>
+  <title>Artora Gizlilik Politikası</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto;
            padding: 0 1rem; line-height: 1.6; color: #222; }
@@ -21,7 +21,7 @@ _PRIVACY_HTML = """<!doctype html>
   </style>
 </head>
 <body>
-  <h1>ArtApp Gizlilik Politikası</h1>
+  <h1>Artora Gizlilik Politikası</h1>
   <p><em>Son güncelleme: 15 Temmuz 2026 (beta sürümü)</em></p>
 
   <h2>Hangi verileri topluyoruz?</h2>

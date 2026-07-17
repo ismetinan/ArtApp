@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="ArtApp API", lifespan=lifespan)
+app = FastAPI(title="Artora API", lifespan=lifespan)
 
 app.include_router(users.router)
 app.include_router(onboarding.router)

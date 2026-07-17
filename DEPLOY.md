@@ -79,7 +79,7 @@ cd mobile
 ## 5. Google Play Console — $25 (tek seferlik)
 
 1. https://play.google.com/console → geliştirici hesabı aç.
-2. **Create app**: ArtApp, Türkçe, Uygulama (oyun değil), ücretsiz.
+2. **Create app**: **Artora** (marka adı; paket adı `com.ismetinan.artapp` kalır), Türkçe, Uygulama (oyun değil), ücretsiz.
 3. **Testing → Closed testing → Create track** → `app-release.aab` yükle →
    test kullanıcılarının e-postalarını ekle → paylaşılan katılım linkini dağıt.
 4. Zorunlu formlar (App content):

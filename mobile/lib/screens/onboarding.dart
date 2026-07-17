@@ -49,7 +49,7 @@ class WelcomeScreen extends StatelessWidget {
             children: [
               const Icon(Icons.brush, size: 72),
               const SizedBox(height: 16),
-              Text('ArtApp',
+              Text('Artora',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 8),
