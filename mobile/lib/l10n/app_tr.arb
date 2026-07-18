@@ -153,6 +153,57 @@
   "deleteConfirm2Body": "Son onay: tüm verilerin şimdi silinecek.",
   "deleteFinalButton": "Hesabımı Kalıcı Olarak Sil",
 
+  "mentorsEmpty": "Henüz onaylı mentor yok — ilk mentor sen olabilirsin!",
+  "mentorStyleAll": "Tümü",
+  "mentorAnsweredCount": "{count} cevap",
+  "@mentorAnsweredCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mentorPortfolioTitle": "Portfolyo",
+  "mentorAsk": "Mentora sor — 1 jeton",
+  "mentorAskSent": "Ödevin {name} adlı mentora iletildi!",
+  "@mentorAskSent": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "jetonBalance": "{count} jeton",
+  "@jetonBalance": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "becomeMentor": "Mentor Ol",
+  "becomeMentorBody": "Deneyimini paylaş, öğrencilerin ödevlerine geri bildirim ver.",
+  "mentorApplyTitle": "Mentor Başvurusu",
+  "mentorBioLabel": "Kısa biyografi",
+  "mentorStylesLabel": "Uzman olduğun stiller",
+  "mentorPortfolioPick": "Galerinden örnek eser seç (herkese açık olur)",
+  "mentorApplySubmit": "Başvuruyu Gönder",
+  "mentorApplyPending": "Mentor başvurun inceleniyor.",
+  "mentorApplyRejected": "Başvurun onaylanmadı — güncelleyip tekrar başvurabilirsin.",
+  "mentorPanelTitle": "Mentor Paneli",
+  "mentorAvailableSwitch": "Yeni istek almaya açığım",
+  "mentorQueueEmpty": "Şu an bekleyen istek yok — biri ödev gönderince burada görünecek.",
+  "mentorFeedbackTitle": "Mentor geri bildirimi",
+  "writeFeedback": "Geri bildirim yaz",
+  "feedbackHint": "Yapıcı ol: önce güçlü yönler, sonra somut öneriler.",
+  "sendFeedback": "Gönder",
+  "myRequestsTitle": "Mentor İsteklerim",
+  "requestStatusAssigned": "Mentor inceliyor",
+  "requestStatusAnswered": "Cevaplandı",
+  "requestStatusExpired": "Süresi doldu — jetonun iade edildi",
+  "rateFeedback": "Puanla",
+  "ratedThanks": "Teşekkürler, puanın kaydedildi!",
+  "styleManga": "Manga",
+  "styleRealist": "Realist",
+  "styleKarikatur": "Karikatür",
+  "styleAnime": "Anime",
+  "styleDijital": "Dijital",
+  "styleKarakalem": "Karakalem",
+
   "axisAnatomi": "Anatomi",
   "axisPerspektif": "Perspektif",
   "axisIsikGolge": "Işık-Gölge",

@@ -8,9 +8,10 @@ from sqlalchemy.orm import Session
 
 from ..ai.schemas import SkillAxis
 from ..api.deps import get_current_user
+from ..core.config import get_settings
 from ..core.messages import msg
 from ..db import get_db
-from ..models.tables import AbilityScore, Submission, User
+from ..models.tables import AbilityScore, MentorProfile, Submission, User
 from ..services.storage import load_drawing
 
 router = APIRouter(tags=["profile"])
@@ -45,12 +46,21 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         .order_by(Submission.created_at)
     ).scalars().all()
     score_map = {s.axis: s.score for s in scores}
+    mentor = db.execute(
+        select(MentorProfile).where(MentorProfile.user_id == user.id)
+    ).scalar_one_or_none()
     return {
         "id": user.id,
         "display_name": user.display_name,
         "level": user.level,
         "xp": user.xp,
         "language": user.language,
+        "jeton_balance": user.jeton_balance,
+        "mentor_market_enabled": get_settings().mentor_market_enabled,
+        # Faz 2: mentor rolü — Flutter buna bakarak paneli gösterir
+        "mentor": None
+        if mentor is None
+        else {"status": mentor.status, "is_available": mentor.is_available},
         # Skor varsa 7 eksenin hepsi döner (eksikler 0) — radar chart hep tam çizilir.
         # Hiç skor yoksa boş kalır: onboarding yönlendirmesi buna bakıyor.
         "ability_chart": (

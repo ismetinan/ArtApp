@@ -110,3 +110,19 @@ Jeton satışı **uygulama içinde** yapılacaksa Google Play Billing zorunlu
 (dijital ürün; Stripe uygulama içinde kullanılamaz, %15-30 komisyon).
 Stripe Connect, mentorlara **ödeme dağıtımı** (payout) için kullanılır.
 Bu ayrım Faz 2 planlanırken masada olmalı.
+
+## 7. Faz 2 rollout (mentor pazarı, ödemesiz beta)
+
+1. Kod deploy edilince migration otomatik koşar: mentor tabloları + herkese
+   3 hoşgeldin jetonu backfill'i. Flag kapalıyken tüm mentor uçları 404 döner.
+2. **Flag'i aç**: Railway → Variables → `MENTOR_MARKET_ENABLED=true` → redeploy.
+3. **Admin hesabı** (mentor başvurularını onaylamak için, bir kez):
+   Railway → Postgres → Data/Query sekmesinde:
+   `UPDATE users SET is_admin = true WHERE email = 'SENIN-EPOSTAN';`
+4. Onay akışı: admin hesabıyla `GET /admin/mentor-applications` →
+   `POST /admin/mentor-applications/{id}/approve`. (Beta'da uygulama içi admin
+   ekranı yok; curl/HTTP istemcisiyle yapılır.)
+5. Test senaryosu: bir hesap mentor olur (başvur + onayla), ikinci hesap bir
+   ödevin redline ekranından "Mentora sor — 1 jeton" ile istek atar; mentor
+   panelinden cevap yazılır; öğrenci puanlar. 48 saat cevapsız istek otomatik
+   iade edilir.

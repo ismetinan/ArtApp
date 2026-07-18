@@ -554,6 +554,216 @@ abstract class AppLocalizations {
   /// **'Hesabımı Kalıcı Olarak Sil'**
   String get deleteFinalButton;
 
+  /// No description provided for @mentorsEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz onaylı mentor yok — ilk mentor sen olabilirsin!'**
+  String get mentorsEmpty;
+
+  /// No description provided for @mentorStyleAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tümü'**
+  String get mentorStyleAll;
+
+  /// No description provided for @mentorAnsweredCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} cevap'**
+  String mentorAnsweredCount(int count);
+
+  /// No description provided for @mentorPortfolioTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Portfolyo'**
+  String get mentorPortfolioTitle;
+
+  /// No description provided for @mentorAsk.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentora sor — 1 jeton'**
+  String get mentorAsk;
+
+  /// No description provided for @mentorAskSent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödevin {name} adlı mentora iletildi!'**
+  String mentorAskSent(String name);
+
+  /// No description provided for @jetonBalance.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} jeton'**
+  String jetonBalance(int count);
+
+  /// No description provided for @becomeMentor.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor Ol'**
+  String get becomeMentor;
+
+  /// No description provided for @becomeMentorBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Deneyimini paylaş, öğrencilerin ödevlerine geri bildirim ver.'**
+  String get becomeMentorBody;
+
+  /// No description provided for @mentorApplyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor Başvurusu'**
+  String get mentorApplyTitle;
+
+  /// No description provided for @mentorBioLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kısa biyografi'**
+  String get mentorBioLabel;
+
+  /// No description provided for @mentorStylesLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uzman olduğun stiller'**
+  String get mentorStylesLabel;
+
+  /// No description provided for @mentorPortfolioPick.
+  ///
+  /// In tr, this message translates to:
+  /// **'Galerinden örnek eser seç (herkese açık olur)'**
+  String get mentorPortfolioPick;
+
+  /// No description provided for @mentorApplySubmit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başvuruyu Gönder'**
+  String get mentorApplySubmit;
+
+  /// No description provided for @mentorApplyPending.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor başvurun inceleniyor.'**
+  String get mentorApplyPending;
+
+  /// No description provided for @mentorApplyRejected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başvurun onaylanmadı — güncelleyip tekrar başvurabilirsin.'**
+  String get mentorApplyRejected;
+
+  /// No description provided for @mentorPanelTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor Paneli'**
+  String get mentorPanelTitle;
+
+  /// No description provided for @mentorAvailableSwitch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni istek almaya açığım'**
+  String get mentorAvailableSwitch;
+
+  /// No description provided for @mentorQueueEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şu an bekleyen istek yok — biri ödev gönderince burada görünecek.'**
+  String get mentorQueueEmpty;
+
+  /// No description provided for @mentorFeedbackTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor geri bildirimi'**
+  String get mentorFeedbackTitle;
+
+  /// No description provided for @writeFeedback.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri bildirim yaz'**
+  String get writeFeedback;
+
+  /// No description provided for @feedbackHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yapıcı ol: önce güçlü yönler, sonra somut öneriler.'**
+  String get feedbackHint;
+
+  /// No description provided for @sendFeedback.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönder'**
+  String get sendFeedback;
+
+  /// No description provided for @myRequestsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor İsteklerim'**
+  String get myRequestsTitle;
+
+  /// No description provided for @requestStatusAssigned.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor inceliyor'**
+  String get requestStatusAssigned;
+
+  /// No description provided for @requestStatusAnswered.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cevaplandı'**
+  String get requestStatusAnswered;
+
+  /// No description provided for @requestStatusExpired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Süresi doldu — jetonun iade edildi'**
+  String get requestStatusExpired;
+
+  /// No description provided for @rateFeedback.
+  ///
+  /// In tr, this message translates to:
+  /// **'Puanla'**
+  String get rateFeedback;
+
+  /// No description provided for @ratedThanks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Teşekkürler, puanın kaydedildi!'**
+  String get ratedThanks;
+
+  /// No description provided for @styleManga.
+  ///
+  /// In tr, this message translates to:
+  /// **'Manga'**
+  String get styleManga;
+
+  /// No description provided for @styleRealist.
+  ///
+  /// In tr, this message translates to:
+  /// **'Realist'**
+  String get styleRealist;
+
+  /// No description provided for @styleKarikatur.
+  ///
+  /// In tr, this message translates to:
+  /// **'Karikatür'**
+  String get styleKarikatur;
+
+  /// No description provided for @styleAnime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anime'**
+  String get styleAnime;
+
+  /// No description provided for @styleDijital.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dijital'**
+  String get styleDijital;
+
+  /// No description provided for @styleKarakalem.
+  ///
+  /// In tr, this message translates to:
+  /// **'Karakalem'**
+  String get styleKarakalem;
+
   /// No description provided for @axisAnatomi.
   ///
   /// In tr, this message translates to:

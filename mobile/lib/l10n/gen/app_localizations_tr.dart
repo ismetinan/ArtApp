@@ -273,6 +273,123 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteFinalButton => 'Hesabımı Kalıcı Olarak Sil';
 
   @override
+  String get mentorsEmpty =>
+      'Henüz onaylı mentor yok — ilk mentor sen olabilirsin!';
+
+  @override
+  String get mentorStyleAll => 'Tümü';
+
+  @override
+  String mentorAnsweredCount(int count) {
+    return '$count cevap';
+  }
+
+  @override
+  String get mentorPortfolioTitle => 'Portfolyo';
+
+  @override
+  String get mentorAsk => 'Mentora sor — 1 jeton';
+
+  @override
+  String mentorAskSent(String name) {
+    return 'Ödevin $name adlı mentora iletildi!';
+  }
+
+  @override
+  String jetonBalance(int count) {
+    return '$count jeton';
+  }
+
+  @override
+  String get becomeMentor => 'Mentor Ol';
+
+  @override
+  String get becomeMentorBody =>
+      'Deneyimini paylaş, öğrencilerin ödevlerine geri bildirim ver.';
+
+  @override
+  String get mentorApplyTitle => 'Mentor Başvurusu';
+
+  @override
+  String get mentorBioLabel => 'Kısa biyografi';
+
+  @override
+  String get mentorStylesLabel => 'Uzman olduğun stiller';
+
+  @override
+  String get mentorPortfolioPick =>
+      'Galerinden örnek eser seç (herkese açık olur)';
+
+  @override
+  String get mentorApplySubmit => 'Başvuruyu Gönder';
+
+  @override
+  String get mentorApplyPending => 'Mentor başvurun inceleniyor.';
+
+  @override
+  String get mentorApplyRejected =>
+      'Başvurun onaylanmadı — güncelleyip tekrar başvurabilirsin.';
+
+  @override
+  String get mentorPanelTitle => 'Mentor Paneli';
+
+  @override
+  String get mentorAvailableSwitch => 'Yeni istek almaya açığım';
+
+  @override
+  String get mentorQueueEmpty =>
+      'Şu an bekleyen istek yok — biri ödev gönderince burada görünecek.';
+
+  @override
+  String get mentorFeedbackTitle => 'Mentor geri bildirimi';
+
+  @override
+  String get writeFeedback => 'Geri bildirim yaz';
+
+  @override
+  String get feedbackHint =>
+      'Yapıcı ol: önce güçlü yönler, sonra somut öneriler.';
+
+  @override
+  String get sendFeedback => 'Gönder';
+
+  @override
+  String get myRequestsTitle => 'Mentor İsteklerim';
+
+  @override
+  String get requestStatusAssigned => 'Mentor inceliyor';
+
+  @override
+  String get requestStatusAnswered => 'Cevaplandı';
+
+  @override
+  String get requestStatusExpired => 'Süresi doldu — jetonun iade edildi';
+
+  @override
+  String get rateFeedback => 'Puanla';
+
+  @override
+  String get ratedThanks => 'Teşekkürler, puanın kaydedildi!';
+
+  @override
+  String get styleManga => 'Manga';
+
+  @override
+  String get styleRealist => 'Realist';
+
+  @override
+  String get styleKarikatur => 'Karikatür';
+
+  @override
+  String get styleAnime => 'Anime';
+
+  @override
+  String get styleDijital => 'Dijital';
+
+  @override
+  String get styleKarakalem => 'Karakalem';
+
+  @override
   String get axisAnatomi => 'Anatomi';
 
   @override

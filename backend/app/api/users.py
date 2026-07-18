@@ -8,7 +8,17 @@ from sqlalchemy.orm import Session
 from ..api.deps import get_current_user, get_optional_user, get_request_lang
 from ..core.messages import SUPPORTED_LANGUAGES, msg, normalize_lang
 from ..db import get_db
-from ..models.tables import AbilityScore, AiUsage, Submission, User, UserProgress
+from ..models.tables import (
+    AbilityScore,
+    AiUsage,
+    JetonTransaction,
+    MentorProfile,
+    MentorshipRequest,
+    Submission,
+    User,
+    UserProgress,
+)
+from ..services import jetons
 from ..services.auth import (
     generate_token,
     hash_password,
@@ -54,9 +64,12 @@ class AuthResponse(BaseModel):
     level: int
     xp: int
     language: str
+    mentor_market_enabled: bool  # istemci mentor UI'ını buna göre gösterir
 
 
 def _auth_response(user: User) -> AuthResponse:
+    from ..core.config import get_settings
+
     return AuthResponse(
         token=user.api_token,
         id=user.id,
@@ -65,6 +78,7 @@ def _auth_response(user: User) -> AuthResponse:
         level=user.level,
         xp=user.xp,
         language=user.language,
+        mentor_market_enabled=get_settings().mentor_market_enabled,
     )
 
 
@@ -86,6 +100,8 @@ def create_guest(
         language=normalize_lang(body.language or lang),
     )
     db.add(user)
+    db.flush()
+    jetons.grant_welcome(db, user)
     db.commit()
     return _auth_response(user)
 
@@ -110,6 +126,8 @@ def register(
         language=lang,
     )
     db.add(user)
+    db.flush()
+    jetons.grant_welcome(db, user)
     db.commit()
     return _auth_response(user)
 
@@ -180,6 +198,8 @@ def google_sign_in(
             language=lang,
         )
         db.add(user)
+        db.flush()
+        jetons.grant_welcome(db, user)
 
     user.api_token = generate_token()  # her girişte tek aktif token
     db.commit()
@@ -197,6 +217,36 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
             delete_drawing(s.file_path)
         except Exception:
             logger.exception("Çizim dosyası silinemedi: %s", s.file_path)
+
+    # Faz 2 temizliği — FK sırası: transaction'lar → istekler → profil.
+    # Mentor olarak üstlendiği açık istekler: öğrencinin jetonu iade edilir,
+    # kayıt mentor'suz kalır (öğrencinin geçmişi korunur).
+    open_as_mentor = db.execute(
+        select(MentorshipRequest).where(
+            MentorshipRequest.mentor_id == user.id,
+            MentorshipRequest.status == "assigned",
+        )
+    ).scalars().all()
+    for r in open_as_mentor:
+        student = db.get(User, r.student_id)
+        if student is not None:
+            jetons.refund(db, student, r)
+        r.status = "expired"
+    db.execute(
+        MentorshipRequest.__table__.update()
+        .where(MentorshipRequest.mentor_id == user.id)
+        .values(mentor_id=None)
+    )
+    db.execute(delete(JetonTransaction).where(JetonTransaction.user_id == user.id))
+    student_request_ids = select(MentorshipRequest.id).where(
+        MentorshipRequest.student_id == user.id
+    )
+    db.execute(
+        delete(JetonTransaction).where(JetonTransaction.request_id.in_(student_request_ids))
+    )
+    db.execute(delete(MentorshipRequest).where(MentorshipRequest.student_id == user.id))
+    db.execute(delete(MentorProfile).where(MentorProfile.user_id == user.id))
+
     for table in (Submission, UserProgress, AbilityScore, AiUsage):
         db.execute(delete(table).where(table.user_id == user.id))
     db.delete(user)

@@ -117,12 +117,71 @@ class Assessment {
         focusAxes = List<String>.from(j['focus_axes']);
 }
 
+/// Faz 2: mentor kartı/profili
+class MentorInfo {
+  final int id, userId, answeredCount;
+  final String displayName, bio;
+  final List<String> styles;
+  final List<int> portfolioSubmissionIds;
+  final double? rating;
+  final bool isAvailable;
+
+  MentorInfo.fromJson(Map<String, dynamic> j)
+      : id = j['id'],
+        userId = j['user_id'],
+        displayName = j['display_name'],
+        bio = j['bio'],
+        styles = List<String>.from(j['styles'] ?? []),
+        portfolioSubmissionIds = List<int>.from(j['portfolio_submission_ids'] ?? []),
+        rating = (j['rating'] as num?)?.toDouble(),
+        answeredCount = j['answered_count'] ?? 0,
+        isAvailable = j['is_available'] ?? true;
+}
+
+/// Faz 2: öğrencinin mentor isteği
+class MentorRequestInfo {
+  final int id, submissionId;
+  final String? nodeId, mentorDisplayName;
+  final String status, feedbackText;
+  final int? rating;
+
+  MentorRequestInfo.fromJson(Map<String, dynamic> j)
+      : id = j['id'],
+        submissionId = j['submission_id'],
+        nodeId = j['node_id'],
+        mentorDisplayName = j['mentor_display_name'],
+        status = j['status'],
+        feedbackText = j['feedback_text'] ?? '',
+        rating = j['rating'];
+}
+
+/// Faz 2: mentor kuyruğundaki istek (öğrenci bağlamıyla)
+class MentorQueueItem {
+  final int id, submissionId;
+  final String? nodeId;
+  final String status, studentDisplayName;
+  final RedlineResult? aiResult;
+
+  MentorQueueItem.fromJson(Map<String, dynamic> j)
+      : id = j['id'],
+        submissionId = j['submission_id'],
+        nodeId = j['node_id'],
+        status = j['status'],
+        studentDisplayName = j['student_display_name'] ?? '',
+        aiResult = j['ai_result'] == null
+            ? null
+            : RedlineResult.fromJson(Map<String, dynamic>.from(j['ai_result']));
+}
+
 class ApiClient {
   ApiClient._();
   static final instance = ApiClient._();
 
   String? token;
   bool isGuest = true;
+
+  /// Backend'deki mentor_market_enabled flag'i — mentor UI'ı buna göre görünür.
+  bool mentorMarketEnabled = false;
 
   /// Kullanıcının açıkça seçtiği dil (profildeki seçici). null = cihaz dili.
   String? savedLanguage;
@@ -145,6 +204,7 @@ class ApiClient {
     token = prefs.getString('token');
     isGuest = prefs.getBool('is_guest') ?? true;
     savedLanguage = prefs.getString('language');
+    mentorMarketEnabled = prefs.getBool('mentor_market') ?? false;
   }
 
   /// Dil seçici: yerelde saklar, oturum varsa backend'e de yazar
@@ -166,9 +226,11 @@ class ApiClient {
   Future<void> _saveSession(Map<String, dynamic> auth) async {
     token = auth['token'];
     isGuest = auth['is_guest'];
+    mentorMarketEnabled = auth['mentor_market_enabled'] ?? false;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token!);
     await prefs.setBool('is_guest', isGuest);
+    await prefs.setBool('mentor_market', mentorMarketEnabled);
   }
 
   Future<void> createGuest(String displayName) async {
@@ -257,8 +319,8 @@ class ApiClient {
     return (_decode(r)['nodes'] as List).map((n) => SkillNode.fromJson(n)).toList();
   }
 
-  Future<({RedlineResult analysis, int xpAwarded, int level})> submitAssignment(
-      String nodeId, List<int> bytes, String name) async {
+  Future<({RedlineResult analysis, int xpAwarded, int level, int submissionId})>
+      submitAssignment(String nodeId, List<int> bytes, String name) async {
     final req =
         http.MultipartRequest('POST', Uri.parse('$apiBase/skill-tree/$nodeId/submit'))
           ..headers.addAll(authHeaders)
@@ -269,12 +331,96 @@ class ApiClient {
       analysis: RedlineResult.fromJson(j['analysis']),
       xpAwarded: j['xp_awarded'] as int,
       level: j['level'] as int,
+      submissionId: j['submission_id'] as int,
     );
   }
 
   Future<Map<String, dynamic>> getProfile() async {
     final r = await http.get(Uri.parse('$apiBase/profile'), headers: authHeaders);
-    return _decode(r);
+    final j = _decode(r);
+    mentorMarketEnabled = j['mentor_market_enabled'] ?? mentorMarketEnabled;
+    return j;
+  }
+
+  // ---------- Faz 2: mentor pazarı ----------
+
+  Future<List<MentorInfo>> getMentors({String? style}) async {
+    final uri = Uri.parse('$apiBase/mentors')
+        .replace(queryParameters: style == null ? null : {'style': style});
+    final r = await http.get(uri, headers: authHeaders);
+    return (_decode(r)['mentors'] as List)
+        .map((m) => MentorInfo.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+  }
+
+  /// 1 jeton harcayarak ödevi havuzdaki rastgele mentora gönderir.
+  Future<({String mentorName, int jetonBalance})> requestMentor(
+      int submissionId) async {
+    final r = await http.post(
+      Uri.parse('$apiBase/submissions/$submissionId/mentor-request'),
+      headers: authHeaders,
+    );
+    final j = _decode(r);
+    return (
+      mentorName: j['mentor_display_name'] as String,
+      jetonBalance: j['jeton_balance'] as int,
+    );
+  }
+
+  Future<List<MentorRequestInfo>> getMyMentorRequests() async {
+    final r =
+        await http.get(Uri.parse('$apiBase/mentor-requests'), headers: authHeaders);
+    return (_decode(r)['requests'] as List)
+        .map((m) => MentorRequestInfo.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+  }
+
+  Future<void> rateMentorRequest(int requestId, int rating) async {
+    final r = await http.post(
+      Uri.parse('$apiBase/mentor-requests/$requestId/rating'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'rating': rating}),
+    );
+    _decode(r);
+  }
+
+  Future<void> applyMentor(
+      String bio, List<String> styles, List<int> portfolioIds) async {
+    final r = await http.post(
+      Uri.parse('$apiBase/mentors/apply'),
+      headers: _jsonHeaders,
+      body: jsonEncode({
+        'bio': bio,
+        'styles': styles,
+        'portfolio_submission_ids': portfolioIds,
+      }),
+    );
+    _decode(r);
+  }
+
+  Future<void> setMentorAvailability(bool isAvailable) async {
+    final r = await http.patch(
+      Uri.parse('$apiBase/mentor/me'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'is_available': isAvailable}),
+    );
+    _decode(r);
+  }
+
+  Future<List<MentorQueueItem>> getMentorQueue() async {
+    final r = await http.get(Uri.parse('$apiBase/mentor/queue'), headers: authHeaders);
+    return (_decode(r)['requests'] as List)
+        .map((m) => MentorQueueItem.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+  }
+
+  Future<void> sendMentorFeedback(int requestId, String text) async {
+    final r = await http.post(
+      Uri.parse('$apiBase/mentor-requests/$requestId/feedback'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'feedback_text': text}),
+    );
+    _decode(r);
   }
 
   Future<void> setPrivacy(int submissionId, bool isPublic) async {
@@ -286,6 +432,16 @@ class ApiClient {
     _decode(r);
   }
 }
+
+/// Mentor stil anahtarlarının görünen halleri (backend anahtar saklar).
+Map<String, String> styleLabels(AppLocalizations t) => {
+      'manga': t.styleManga,
+      'realist': t.styleRealist,
+      'karikatur': t.styleKarikatur,
+      'anime': t.styleAnime,
+      'dijital': t.styleDijital,
+      'karakalem': t.styleKarakalem,
+    };
 
 /// Eksen adlarının kullanıcıya görünen halleri (seçili UI dilinde).
 /// Sıra sabit — radar chart eksen dizilimi buna dayanır.

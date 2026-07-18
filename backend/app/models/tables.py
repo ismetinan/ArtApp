@@ -25,8 +25,10 @@ class User(Base):
     language: Mapped[str] = mapped_column(String(5), default="tr")
     level: Mapped[int] = mapped_column(Integer, default=1)
     xp: Mapped[int] = mapped_column(Integer, default=0)
-    # Faz 1'de altyapı var ama harcama akışı yok (CLAUDE.md Faz 1 kapsamı)
+    # Faz 2: mentor istekleri jetonla; beta'da satın alma yok, hoşgeldin jetonu var
     jeton_balance: Mapped[int] = mapped_column(Integer, default=0)
+    # Mentor başvurularını onaylayan hesap (beta'da SQL ile bir kez atanır)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     ability_scores: Mapped[list["AbilityScore"]] = relationship(back_populates="user")
@@ -95,6 +97,61 @@ class AiUsage(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     day: Mapped[str] = mapped_column(String(10))  # YYYY-MM-DD (UTC)
     count: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class MentorProfile(Base):
+    """Faz 2: mentor başvurusu/profili. Portfolyo, mentorun KENDİ galeri
+    gönderilerinden seçilir (seçilenler public yapılır) — ayrı upload yok."""
+
+    __tablename__ = "mentor_profiles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
+    bio: Mapped[str] = mapped_column(Text, default="")
+    styles: Mapped[list] = mapped_column(JSON, default=list)  # ör. ["manga", "realist"]
+    portfolio_submission_ids: Mapped[list] = mapped_column(JSON, default=list)
+    status: Mapped[str] = mapped_column(String(16), default="pending")  # pending|approved|rejected
+    is_available: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    user: Mapped[User] = relationship()
+
+
+class MentorshipRequest(Base):
+    """1 jetonluk havuz isteği: ödev → rastgele müsait mentor → metin geri bildirim.
+    48 saat cevapsız kalırsa erişim anında expired + jeton iadesi (tembel kontrol)."""
+
+    __tablename__ = "mentorship_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    submission_id: Mapped[int] = mapped_column(ForeignKey("submissions.id"))
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    mentor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    jeton_cost: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String(16), default="assigned")  # assigned|answered|expired
+    feedback_text: Mapped[str] = mapped_column(Text, default="")
+    rating: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-5, öğrenci verir
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    assigned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    answered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    submission: Mapped[Submission] = relationship()
+
+
+class JetonTransaction(Base):
+    """Jeton hareket kaydı — bakiye değişimi her zaman bir satırla belgelenir
+    (para/güven akışı, CLAUDE.md §6)."""
+
+    __tablename__ = "jeton_transactions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    delta: Mapped[int] = mapped_column(Integer)  # +hoşgeldin/iade, -harcama
+    reason: Mapped[str] = mapped_column(String(24))  # welcome|mentor_request|refund
+    request_id: Mapped[int | None] = mapped_column(
+        ForeignKey("mentorship_requests.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class AbilityScore(Base):

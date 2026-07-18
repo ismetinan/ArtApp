@@ -184,6 +184,7 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
             image: FileImage(File(file.path)),
             analysis: result.analysis,
             xpAwarded: result.xpAwarded,
+            submissionId: result.submissionId,
           ),
         ));
       }

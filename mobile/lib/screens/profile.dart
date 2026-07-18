@@ -6,6 +6,7 @@ import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../main.dart';
 import 'auth_form.dart';
+import 'mentor_panel.dart';
 import 'onboarding.dart';
 import 'redline.dart';
 
@@ -98,6 +99,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     label: Text(t.levelBadge(p['level'] as int, p['xp'] as int)),
                     avatar: const Icon(Icons.military_tech, size: 18),
                   ),
+                  if (ApiClient.instance.mentorMarketEnabled)
+                    Chip(
+                      label: Text(
+                          t.jetonBalance((p['jeton_balance'] ?? 0) as int)),
+                      avatar: const Icon(Icons.toll, size: 18),
+                    ),
                 ]),
               ]),
               const SizedBox(height: 16),
@@ -181,6 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 analysis: RedlineResult.fromJson(
                                     Map<String, dynamic>.from(
                                         item['ai_result'] as Map)),
+                                submissionId: item['submission_id'] as int,
                               ),
                             )),
                     trailing: Switch(
@@ -202,6 +210,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
+              if (ApiClient.instance.mentorMarketEnabled) ...[
+                const SizedBox(height: 24),
+                _MentorSection(
+                  mentor: p['mentor'] as Map<String, dynamic>?,
+                  gallery: gallery,
+                  onChanged: () =>
+                      setState(() => _future = ApiClient.instance.getProfile()),
+                ),
+                const SizedBox(height: 16),
+                const _MyRequestsSection(),
+              ],
               const SizedBox(height: 24),
               // Dil seçici: UI + backend hata mesajları + AI çıktı dili
               Text(t.languageTitle,
@@ -292,6 +311,300 @@ class _ProfileScreenState extends State<ProfileScreen> {
             .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     }
+  }
+}
+
+/// Faz 2: profildeki mentor bölümü — başvuru / bekleme / panel girişi.
+class _MentorSection extends StatelessWidget {
+  final Map<String, dynamic>? mentor;
+  final List gallery;
+  final VoidCallback onChanged;
+  const _MentorSection(
+      {required this.mentor, required this.gallery, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final status = mentor?['status'] as String?;
+
+    if (status == 'approved') {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.school),
+          title: Text(t.mentorPanelTitle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => MentorPanelScreen(
+                initialAvailable: (mentor?['is_available'] ?? true) as bool),
+          )),
+        ),
+      );
+    }
+    if (status == 'pending') {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.hourglass_top),
+          title: Text(t.mentorApplyPending),
+        ),
+      );
+    }
+    // hiç başvuru yok ya da reddedildi → (yeniden) başvuru
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.school_outlined),
+        title: Text(t.becomeMentor),
+        subtitle: Text(
+            status == 'rejected' ? t.mentorApplyRejected : t.becomeMentorBody),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          final applied = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(builder: (_) => MentorApplyScreen(gallery: gallery)),
+          );
+          if (applied == true) onChanged();
+        },
+      ),
+    );
+  }
+}
+
+/// Faz 2: mentor başvuru formu — bio + stil seçimi + galeriden portfolyo.
+class MentorApplyScreen extends StatefulWidget {
+  final List gallery;
+  const MentorApplyScreen({super.key, required this.gallery});
+
+  @override
+  State<MentorApplyScreen> createState() => _MentorApplyScreenState();
+}
+
+class _MentorApplyScreenState extends State<MentorApplyScreen> {
+  final _bio = TextEditingController();
+  final Set<String> _styles = {};
+  final Set<int> _portfolio = {};
+  bool _busy = false;
+
+  Future<void> _submit() async {
+    setState(() => _busy = true);
+    try {
+      await ApiClient.instance
+          .applyMentor(_bio.text.trim(), _styles.toList(), _portfolio.toList());
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final styles = styleLabels(t);
+    return Scaffold(
+      appBar: AppBar(title: Text(t.mentorApplyTitle)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          TextField(
+            controller: _bio,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: t.mentorBioLabel,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(t.mentorStylesLabel,
+              style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final e in styles.entries)
+                FilterChip(
+                  label: Text(e.value),
+                  selected: _styles.contains(e.key),
+                  onSelected: (sel) => setState(() =>
+                      sel ? _styles.add(e.key) : _styles.remove(e.key)),
+                ),
+            ],
+          ),
+          if (widget.gallery.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(t.mentorPortfolioPick,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              children: [
+                for (final item in widget.gallery)
+                  GestureDetector(
+                    onTap: () => setState(() {
+                      final sid = item['submission_id'] as int;
+                      _portfolio.contains(sid)
+                          ? _portfolio.remove(sid)
+                          : _portfolio.add(sid);
+                    }),
+                    child: Stack(fit: StackFit.expand, children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          ApiClient.instance
+                              .imageUrl(item['submission_id'] as int),
+                          headers: ApiClient.instance.authHeaders,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const Icon(Icons.image),
+                        ),
+                      ),
+                      if (_portfolio.contains(item['submission_id'] as int))
+                        const Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: EdgeInsets.all(4),
+                            child: Icon(Icons.check_circle, color: Colors.green),
+                          ),
+                        ),
+                    ]),
+                  ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 24),
+          _busy
+              ? const Center(child: CircularProgressIndicator())
+              : FilledButton(
+                  onPressed: _submit, child: Text(t.mentorApplySubmit)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Faz 2: öğrencinin mentor istekleri — durum + gelen geri bildirim + puanlama.
+class _MyRequestsSection extends StatefulWidget {
+  const _MyRequestsSection();
+
+  @override
+  State<_MyRequestsSection> createState() => _MyRequestsSectionState();
+}
+
+class _MyRequestsSectionState extends State<_MyRequestsSection> {
+  late Future<List<MentorRequestInfo>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = ApiClient.instance.getMyMentorRequests();
+  }
+
+  void _reload() =>
+      setState(() => _future = ApiClient.instance.getMyMentorRequests());
+
+  Future<void> _rate(MentorRequestInfo r, int rating) async {
+    try {
+      await ApiClient.instance.rateMentorRequest(r.id, rating);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).ratedThanks)));
+      }
+      _reload();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return FutureBuilder(
+      future: _future,
+      builder: (context, snapshot) {
+        final requests = snapshot.data ?? const <MentorRequestInfo>[];
+        if (requests.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.myRequestsTitle,
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final r in requests)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Icon(
+                          switch (r.status) {
+                            'answered' => Icons.check_circle,
+                            'expired' => Icons.timer_off,
+                            _ => Icons.pending_outlined,
+                          },
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            '${r.nodeId ?? t.homeworkFallback}'
+                            '${r.mentorDisplayName != null ? ' • ${r.mentorDisplayName}' : ''}',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                        Text(
+                          switch (r.status) {
+                            'answered' => t.requestStatusAnswered,
+                            'expired' => t.requestStatusExpired,
+                            _ => t.requestStatusAssigned,
+                          },
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ]),
+                      if (r.status == 'answered') ...[
+                        const SizedBox(height: 8),
+                        Text(t.mentorFeedbackTitle,
+                            style: Theme.of(context).textTheme.bodySmall),
+                        Text(r.feedbackText),
+                        const SizedBox(height: 4),
+                        if (r.rating == null)
+                          Row(children: [
+                            Text('${t.rateFeedback}: '),
+                            for (var star = 1; star <= 5; star++)
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                icon: const Icon(Icons.star_border, size: 20),
+                                onPressed: () => _rate(r, star),
+                              ),
+                          ])
+                        else
+                          Row(children: [
+                            for (var star = 1; star <= 5; star++)
+                              Icon(
+                                star <= r.rating!
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                size: 18,
+                                color: Colors.amber,
+                              ),
+                          ]),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 }
 

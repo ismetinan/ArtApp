@@ -87,6 +87,71 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Dosya bulunamadı",
         "en": "File not found",
     },
+    # --- Faz 2: mentor pazarı ---
+    "jeton_insufficient": {
+        "tr": "Jetonun yetersiz — bu istek 1 jeton gerektiriyor.",
+        "en": "Not enough jetons — this request costs 1 jeton.",
+    },
+    "no_mentor_available": {
+        "tr": "Şu an müsait mentor yok — jetonun harcanmadı, biraz sonra tekrar dene.",
+        "en": "No mentor is available right now — your jeton wasn't spent, try again soon.",
+    },
+    "mentor_request_exists": {
+        "tr": "Bu ödev için zaten aktif bir mentor isteğin var.",
+        "en": "You already have an active mentor request for this assignment.",
+    },
+    "mentor_not_found": {
+        "tr": "Mentor bulunamadı",
+        "en": "Mentor not found",
+    },
+    "request_not_found": {
+        "tr": "İstek bulunamadı",
+        "en": "Request not found",
+    },
+    "not_request_mentor": {
+        "tr": "Bu istek sana atanmadı",
+        "en": "This request isn't assigned to you",
+    },
+    "request_expired": {
+        "tr": "Bu isteğin süresi dolmuş — öğrencinin jetonu iade edildi.",
+        "en": "This request has expired — the student's jeton was refunded.",
+    },
+    "request_not_answered": {
+        "tr": "Bu istek henüz cevaplanmadı",
+        "en": "This request hasn't been answered yet",
+    },
+    "already_rated": {
+        "tr": "Bu geri bildirimi zaten puanladın",
+        "en": "You've already rated this feedback",
+    },
+    "rating_invalid": {
+        "tr": "Puan 1 ile 5 arasında olmalı",
+        "en": "Rating must be between 1 and 5",
+    },
+    "mentor_apply_exists": {
+        "tr": "Zaten bir mentor başvurun var",
+        "en": "You already have a mentor application",
+    },
+    "mentor_not_approved": {
+        "tr": "Mentor hesabın henüz onaylanmadı",
+        "en": "Your mentor account isn't approved yet",
+    },
+    "feedback_empty": {
+        "tr": "Geri bildirim metni boş olamaz",
+        "en": "Feedback text can't be empty",
+    },
+    "portfolio_not_yours": {
+        "tr": "Portfolyoya yalnız kendi çizimlerini ekleyebilirsin",
+        "en": "You can only add your own drawings to your portfolio",
+    },
+    "admin_only": {
+        "tr": "Bu işlem için yetkin yok",
+        "en": "You're not authorized for this action",
+    },
+    "application_not_found": {
+        "tr": "Başvuru bulunamadı",
+        "en": "Application not found",
+    },
 }
 
 

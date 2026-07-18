@@ -273,6 +273,123 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteFinalButton => 'Permanently Delete My Account';
 
   @override
+  String get mentorsEmpty =>
+      'No approved mentors yet — you could be the first!';
+
+  @override
+  String get mentorStyleAll => 'All';
+
+  @override
+  String mentorAnsweredCount(int count) {
+    return '$count answers';
+  }
+
+  @override
+  String get mentorPortfolioTitle => 'Portfolio';
+
+  @override
+  String get mentorAsk => 'Ask a mentor — 1 jeton';
+
+  @override
+  String mentorAskSent(String name) {
+    return 'Your assignment was sent to mentor $name!';
+  }
+
+  @override
+  String jetonBalance(int count) {
+    return '$count jetons';
+  }
+
+  @override
+  String get becomeMentor => 'Become a Mentor';
+
+  @override
+  String get becomeMentorBody =>
+      'Share your experience and give feedback on students\' assignments.';
+
+  @override
+  String get mentorApplyTitle => 'Mentor Application';
+
+  @override
+  String get mentorBioLabel => 'Short bio';
+
+  @override
+  String get mentorStylesLabel => 'Styles you specialize in';
+
+  @override
+  String get mentorPortfolioPick =>
+      'Pick sample works from your gallery (they become public)';
+
+  @override
+  String get mentorApplySubmit => 'Submit Application';
+
+  @override
+  String get mentorApplyPending => 'Your mentor application is under review.';
+
+  @override
+  String get mentorApplyRejected =>
+      'Your application wasn\'t approved — you can update it and apply again.';
+
+  @override
+  String get mentorPanelTitle => 'Mentor Panel';
+
+  @override
+  String get mentorAvailableSwitch => 'Open to new requests';
+
+  @override
+  String get mentorQueueEmpty =>
+      'No pending requests right now — they\'ll appear here when a student sends one.';
+
+  @override
+  String get mentorFeedbackTitle => 'Mentor feedback';
+
+  @override
+  String get writeFeedback => 'Write feedback';
+
+  @override
+  String get feedbackHint =>
+      'Be constructive: strengths first, then concrete suggestions.';
+
+  @override
+  String get sendFeedback => 'Send';
+
+  @override
+  String get myRequestsTitle => 'My Mentor Requests';
+
+  @override
+  String get requestStatusAssigned => 'Being reviewed';
+
+  @override
+  String get requestStatusAnswered => 'Answered';
+
+  @override
+  String get requestStatusExpired => 'Expired — your jeton was refunded';
+
+  @override
+  String get rateFeedback => 'Rate';
+
+  @override
+  String get ratedThanks => 'Thanks, your rating was saved!';
+
+  @override
+  String get styleManga => 'Manga';
+
+  @override
+  String get styleRealist => 'Realistic';
+
+  @override
+  String get styleKarikatur => 'Cartoon';
+
+  @override
+  String get styleAnime => 'Anime';
+
+  @override
+  String get styleDijital => 'Digital';
+
+  @override
+  String get styleKarakalem => 'Pencil';
+
+  @override
   String get axisAnatomi => 'Anatomy';
 
   @override
