@@ -89,8 +89,8 @@ _CATALOG: dict[str, dict[str, str]] = {
     },
     # --- Faz 2: mentor pazarı ---
     "jeton_insufficient": {
-        "tr": "Jetonun yetersiz — bu istek 1 jeton gerektiriyor.",
-        "en": "Not enough jetons — this request costs 1 jeton.",
+        "tr": "Jetonun yetersiz — bu istek {cost} jeton gerektiriyor.",
+        "en": "Not enough jetons — this request costs {cost} jeton(s).",
     },
     "no_mentor_available": {
         "tr": "Şu an müsait mentor yok — jetonun harcanmadı, biraz sonra tekrar dene.",
@@ -99,6 +99,10 @@ _CATALOG: dict[str, dict[str, str]] = {
     "mentor_request_exists": {
         "tr": "Bu ödev için zaten aktif bir mentor isteğin var.",
         "en": "You already have an active mentor request for this assignment.",
+    },
+    "mentor_unavailable": {
+        "tr": "Bu mentor şu an yeni istek almıyor — başka bir mentor seç ya da havuzu dene.",
+        "en": "This mentor isn't taking new requests right now — pick another or try the pool.",
     },
     "mentor_not_found": {
         "tr": "Mentor bulunamadı",

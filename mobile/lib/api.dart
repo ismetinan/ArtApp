@@ -367,21 +367,29 @@ class ApiClient {
 
   // ---------- Faz 2: mentor pazarı ----------
 
-  Future<List<MentorInfo>> getMentors({String? style}) async {
+  Future<List<MentorInfo>> getMentors({String? style, String? query}) async {
+    final params = <String, String>{
+      'style': ?style,
+      if (query != null && query.isNotEmpty) 'q': query,
+    };
     final uri = Uri.parse('$apiBase/mentors')
-        .replace(queryParameters: style == null ? null : {'style': style});
+        .replace(queryParameters: params.isEmpty ? null : params);
     final r = await http.get(uri, headers: authHeaders);
     return (_decode(r)['mentors'] as List)
         .map((m) => MentorInfo.fromJson(Map<String, dynamic>.from(m)))
         .toList();
   }
 
-  /// 1 jeton harcayarak ödevi havuzdaki rastgele mentora gönderir.
+  /// Ödevi mentora gönderir: mentorProfileId verilirse seçmeli (3 jeton),
+  /// verilmezse havuzdan rastgele (1 jeton).
   Future<({String mentorName, int jetonBalance})> requestMentor(
-      int submissionId) async {
+      int submissionId, {int? mentorProfileId}) async {
     final r = await http.post(
       Uri.parse('$apiBase/submissions/$submissionId/mentor-request'),
-      headers: authHeaders,
+      headers: _jsonHeaders,
+      body: mentorProfileId == null
+          ? null
+          : jsonEncode({'mentor_id': mentorProfileId}),
     );
     final j = _decode(r);
     return (

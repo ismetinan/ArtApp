@@ -378,6 +378,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get ratedThanks => 'Teşekkürler, puanın kaydedildi!';
 
   @override
+  String get mentorSearchHint => 'Mentor ara (ad veya bio)...';
+
+  @override
+  String get mentorAskDirect => 'Soru sor — 3 jeton';
+
+  @override
+  String get mentorPickDrawing => 'Hangi çizimini göndereceksin?';
+
+  @override
+  String get mentorNoDrawings =>
+      'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.';
+
+  @override
   String get styleManga => 'Manga';
 
   @override

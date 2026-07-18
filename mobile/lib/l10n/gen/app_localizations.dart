@@ -740,6 +740,30 @@ abstract class AppLocalizations {
   /// **'Teşekkürler, puanın kaydedildi!'**
   String get ratedThanks;
 
+  /// No description provided for @mentorSearchHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor ara (ad veya bio)...'**
+  String get mentorSearchHint;
+
+  /// No description provided for @mentorAskDirect.
+  ///
+  /// In tr, this message translates to:
+  /// **'Soru sor — 3 jeton'**
+  String get mentorAskDirect;
+
+  /// No description provided for @mentorPickDrawing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hangi çizimini göndereceksin?'**
+  String get mentorPickDrawing;
+
+  /// No description provided for @mentorNoDrawings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.'**
+  String get mentorNoDrawings;
+
   /// No description provided for @styleManga.
   ///
   /// In tr, this message translates to:

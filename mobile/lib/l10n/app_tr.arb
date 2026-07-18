@@ -200,6 +200,11 @@
   "requestStatusExpired": "Süresi doldu — jetonun iade edildi",
   "rateFeedback": "Puanla",
   "ratedThanks": "Teşekkürler, puanın kaydedildi!",
+  "mentorSearchHint": "Mentor ara (ad veya bio)...",
+  "mentorAskDirect": "Soru sor — 3 jeton",
+  "mentorPickDrawing": "Hangi çizimini göndereceksin?",
+  "mentorNoDrawings": "Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.",
+
   "styleManga": "Manga",
   "styleRealist": "Realist",
   "styleKarikatur": "Karikatür",

@@ -103,9 +103,11 @@ def _profile_json(p: MentorProfile, display_name: str, stats: tuple[float | None
 @router.get("/mentors", dependencies=[Depends(require_mentor_market)])
 def list_mentors(
     style: str | None = None,
+    q: str | None = None,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Onaylı mentorlar; stil filtresi + ad/bio araması, rating'e göre sıralı."""
     rows = db.execute(
         select(MentorProfile, User.display_name)
         .join(User, User.id == MentorProfile.user_id)
@@ -113,12 +115,22 @@ def list_mentors(
     ).all()
     if style:
         rows = [r for r in rows if style in (r[0].styles or [])]
-    stats = _mentor_stats(db, [r[0].user_id for r in rows])
-    return {
-        "mentors": [
-            _profile_json(p, name, stats.get(p.user_id, (None, 0))) for p, name in rows
+    if q:
+        needle = q.strip().lower()
+        rows = [
+            r for r in rows
+            if needle in r[1].lower() or needle in (r[0].bio or "").lower()
         ]
-    }
+    stats = _mentor_stats(db, [r[0].user_id for r in rows])
+    mentors = [
+        _profile_json(p, name, stats.get(p.user_id, (None, 0))) for p, name in rows
+    ]
+    # Puanlılar önce (yüksekten düşüğe), sonra cevap sayısı
+    mentors.sort(
+        key=lambda m: (m["rating"] is not None, m["rating"] or 0, m["answered_count"]),
+        reverse=True,
+    )
+    return {"mentors": mentors}
 
 
 @router.get("/mentors/{profile_id}", dependencies=[Depends(require_mentor_market)])
@@ -135,16 +147,28 @@ def get_mentor(
     return _profile_json(profile, owner.display_name if owner else "", stats)
 
 
+POOL_COST = 1  # havuzdan rastgele mentor
+DIRECT_COST = 3  # seçmeli mentorluk (Faz 3, CLAUDE.md §2.5)
+
+
+class MentorRequestBody(BaseModel):
+    """Boş gövde / mentor_id yoksa havuz; mentor_id (profil id) verilirse seçmeli."""
+
+    mentor_id: int | None = None
+
+
 @router.post(
     "/submissions/{submission_id}/mentor-request",
     dependencies=[Depends(require_mentor_market)],
 )
 def create_mentor_request(
     submission_id: int,
+    body: MentorRequestBody | None = None,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """1 jeton karşılığı ödevi havuzdaki rastgele müsait mentora gönderir."""
+    """Ödevi mentora gönderir: havuzdan rastgele (1 jeton) ya da mentor_id ile
+    doğrudan seçilen mentora (3 jeton)."""
     submission = db.get(Submission, submission_id)
     if submission is None or submission.user_id != user.id:
         raise HTTPException(
@@ -161,31 +185,46 @@ def create_mentor_request(
             status_code=409, detail=msg("mentor_request_exists", user.language)
         )
 
-    candidates = db.execute(
-        select(MentorProfile).where(
-            MentorProfile.status == "approved",
-            MentorProfile.is_available.is_(True),
-            MentorProfile.user_id != user.id,  # kendi ödevine kendisi atanmasın
-        )
-    ).scalars().all()
-    if not candidates:
-        raise HTTPException(
-            status_code=409, detail=msg("no_mentor_available", user.language)
-        )
-    mentor_profile = random.choice(candidates)
+    chosen_id = body.mentor_id if body is not None else None
+    if chosen_id is not None:
+        # Seçmeli: profil onaylı + müsait + kendisi değil, yoksa 409
+        mentor_profile = db.get(MentorProfile, chosen_id)
+        if mentor_profile is None or mentor_profile.status != "approved":
+            raise HTTPException(
+                status_code=404, detail=msg("mentor_not_found", user.language)
+            )
+        if not mentor_profile.is_available or mentor_profile.user_id == user.id:
+            raise HTTPException(
+                status_code=409, detail=msg("mentor_unavailable", user.language)
+            )
+        cost = DIRECT_COST
+    else:
+        candidates = db.execute(
+            select(MentorProfile).where(
+                MentorProfile.status == "approved",
+                MentorProfile.is_available.is_(True),
+                MentorProfile.user_id != user.id,  # kendi ödevine kendisi atanmasın
+            )
+        ).scalars().all()
+        if not candidates:
+            raise HTTPException(
+                status_code=409, detail=msg("no_mentor_available", user.language)
+            )
+        mentor_profile = random.choice(candidates)
+        cost = POOL_COST
 
     now = datetime.now(timezone.utc)
     request = MentorshipRequest(
         submission_id=submission_id,
         student_id=user.id,
         mentor_id=mentor_profile.user_id,
-        jeton_cost=1,
+        jeton_cost=cost,
         status="assigned",
         assigned_at=now,
     )
     db.add(request)
     db.flush()  # request.id, transaction kaydına girsin
-    jetons.spend(db, user, 1, request)  # yetersizse 402, hiçbir şey commit edilmez
+    jetons.spend(db, user, cost, request)  # yetersizse 402, hiçbir şey commit edilmez
     db.commit()
 
     mentor_user = db.get(User, mentor_profile.user_id)

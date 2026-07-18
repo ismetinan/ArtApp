@@ -122,6 +122,11 @@
   "requestStatusExpired": "Expired — your jeton was refunded",
   "rateFeedback": "Rate",
   "ratedThanks": "Thanks, your rating was saved!",
+  "mentorSearchHint": "Search mentors (name or bio)...",
+  "mentorAskDirect": "Ask this mentor — 3 jetons",
+  "mentorPickDrawing": "Which drawing do you want to send?",
+  "mentorNoDrawings": "Upload a lesson assignment first — after the analysis you can send it to a mentor from here.",
+
   "styleManga": "Manga",
   "styleRealist": "Realistic",
   "styleKarikatur": "Cartoon",

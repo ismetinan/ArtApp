@@ -34,7 +34,7 @@ def spend(db: Session, user: User, amount: int, request: MentorshipRequest) -> N
         raise ValueError("spend miktarı pozitif olmalı")
     if user.jeton_balance < amount:
         raise HTTPException(
-            status_code=402, detail=msg("jeton_insufficient", user.language)
+            status_code=402, detail=msg("jeton_insufficient", user.language, cost=amount)
         )
     user.jeton_balance -= amount
     db.add(

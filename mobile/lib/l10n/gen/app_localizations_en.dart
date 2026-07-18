@@ -378,6 +378,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratedThanks => 'Thanks, your rating was saved!';
 
   @override
+  String get mentorSearchHint => 'Search mentors (name or bio)...';
+
+  @override
+  String get mentorAskDirect => 'Ask this mentor — 3 jetons';
+
+  @override
+  String get mentorPickDrawing => 'Which drawing do you want to send?';
+
+  @override
+  String get mentorNoDrawings =>
+      'Upload a lesson assignment first — after the analysis you can send it to a mentor from here.';
+
+  @override
   String get styleManga => 'Manga';
 
   @override
