@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'api.dart';
 import 'l10n/gen/app_localizations.dart';
+import 'push.dart';
 import 'screens/home_shell.dart';
 import 'screens/onboarding.dart';
 
@@ -14,6 +17,7 @@ Future<void> main() async {
   await ApiClient.instance.loadSession();
   final saved = ApiClient.instance.savedLanguage;
   if (saved != null) appLocale.value = Locale(saved);
+  unawaited(initPush()); // açılışı bloklamaz; oturum yoksa kendisi atlar
   runApp(const ArtApp());
 }
 
@@ -26,6 +30,7 @@ class ArtApp extends StatelessWidget {
       valueListenable: appLocale,
       builder: (context, locale, _) => MaterialApp(
         title: 'Artora', // marka adı — çevrilmez
+        scaffoldMessengerKey: messengerKey, // öndeyken push → SnackBar
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         // en listede önce: desteklenmeyen cihaz dillerinde İngilizce'ye düşülür

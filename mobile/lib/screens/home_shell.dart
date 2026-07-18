@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/gen/app_localizations.dart';
+import '../push.dart';
 import 'mentors.dart';
 import 'profile.dart';
 import 'skill_tree.dart';
@@ -15,6 +16,13 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 1; // açılışta Dersler
+
+  @override
+  void initState() {
+    super.initState();
+    // Girişten sonra ana ekrana her varışta token kaydı tazelenir
+    initPush();
+  }
 
   /// Ability Chart'tan gelen yönlendirme: ilgili eksenin dersine odaklan
   String? _focusAxis;

@@ -218,6 +218,16 @@ class ApiClient {
     await prefs.setBool('onboarding_skipped', true);
   }
 
+  /// FCM cihaz token'ını backend'e kaydeder (push bildirimleri için).
+  Future<void> registerDevice(String fcmToken) async {
+    final r = await http.put(
+      Uri.parse('$apiBase/users/me/device'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'fcm_token': fcmToken}),
+    );
+    _decode(r);
+  }
+
   /// Dil seçici: yerelde saklar, oturum varsa backend'e de yazar
   /// (AI çıktıları ve hata mesajları da bu dile döner).
   Future<void> setLanguage(String code) async {

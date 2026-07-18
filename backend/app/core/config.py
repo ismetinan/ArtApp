@@ -33,6 +33,10 @@ class Settings(BaseSettings):
 
     sentry_dsn: str = ""
 
+    # FCM push: Firebase service account JSON'unun TAM içeriği (env'de string).
+    # Boşsa push servisi sessiz no-op — dev/test Firebase'siz çalışır.
+    firebase_service_account_json: str = ""
+
     mentor_market_enabled: bool = False  # Faz 2'de açılacak
 
 

@@ -23,6 +23,8 @@ class User(Base):
     is_guest: Mapped[bool] = mapped_column(Boolean, default=True)
     # UI + AI çıktı dili (tr/en) — cihaz locale'inden gelir, profilden değiştirilebilir
     language: Mapped[str] = mapped_column(String(5), default="tr")
+    # FCM cihaz token'ı — tek-cihaz oturum modeliyle tutarlı tek token
+    fcm_token: Mapped[str | None] = mapped_column(String(256), nullable=True)
     level: Mapped[int] = mapped_column(Integer, default=1)
     xp: Mapped[int] = mapped_column(Integer, default=0)
     # Faz 2: mentor istekleri jetonla; beta'da satın alma yok, hoşgeldin jetonu var

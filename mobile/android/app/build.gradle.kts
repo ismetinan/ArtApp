@@ -7,6 +7,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// FCM: google-services.json Firebase konsolundan indirilip bu klasöre konunca
+// devreye girer; dosya yokken build kırılmasın diye koşullu uygulanır.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 // Release imzası: android/key.properties (git dışında) varsa kullanılır
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")

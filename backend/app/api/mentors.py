@@ -25,6 +25,7 @@ from ..models.tables import (
     User,
 )
 from ..services import jetons
+from ..services.push import send_push
 
 REQUEST_TIMEOUT = timedelta(hours=48)
 
@@ -55,6 +56,11 @@ def _expire_stale(db: Session, requests: list[MentorshipRequest]) -> None:
             student = db.get(User, r.student_id)
             if student is not None:
                 jetons.refund(db, student, r)
+                send_push(
+                    student,
+                    msg("push_request_refunded_title", student.language),
+                    msg("push_request_refunded_body", student.language),
+                )
 
 
 def _mentor_stats(db: Session, user_ids: list[int]) -> dict[int, tuple[float | None, int]]:
@@ -183,6 +189,12 @@ def create_mentor_request(
     db.commit()
 
     mentor_user = db.get(User, mentor_profile.user_id)
+    if mentor_user is not None:
+        send_push(
+            mentor_user,
+            msg("push_new_request_title", mentor_user.language),
+            msg("push_new_request_body", mentor_user.language, student=user.display_name),
+        )
     return {
         "request_id": request.id,
         "mentor_display_name": mentor_user.display_name if mentor_user else "",
@@ -396,6 +408,13 @@ def give_feedback(
     r.status = "answered"
     r.answered_at = datetime.now(timezone.utc)
     db.commit()
+    student = db.get(User, r.student_id)
+    if student is not None:
+        send_push(
+            student,
+            msg("push_feedback_ready_title", student.language),
+            msg("push_feedback_ready_body", student.language, mentor=user.display_name),
+        )
     return {"request_id": r.id, "status": r.status}
 
 

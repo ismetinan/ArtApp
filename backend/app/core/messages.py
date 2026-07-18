@@ -152,6 +152,31 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Başvuru bulunamadı",
         "en": "Application not found",
     },
+    # --- push bildirimleri (title|body çiftleri) ---
+    "push_new_request_title": {
+        "tr": "Yeni mentor isteği 🎨",
+        "en": "New mentor request 🎨",
+    },
+    "push_new_request_body": {
+        "tr": "{student} ödevine geri bildirim bekliyor — panelden inceleyebilirsin.",
+        "en": "{student} is waiting for feedback on their assignment — check your panel.",
+    },
+    "push_feedback_ready_title": {
+        "tr": "Ödevine mentor cevabı geldi!",
+        "en": "Your mentor replied!",
+    },
+    "push_feedback_ready_body": {
+        "tr": "{mentor} çizimini inceledi — geri bildirimi profilinden okuyabilirsin.",
+        "en": "{mentor} reviewed your drawing — read the feedback in your profile.",
+    },
+    "push_request_refunded_title": {
+        "tr": "Jetonun iade edildi",
+        "en": "Your jeton was refunded",
+    },
+    "push_request_refunded_body": {
+        "tr": "Mentor isteğin zamanında cevaplanamadı — 1 jeton hesabına geri yattı.",
+        "en": "Your mentor request wasn't answered in time — 1 jeton was returned to you.",
+    },
 }
 
 

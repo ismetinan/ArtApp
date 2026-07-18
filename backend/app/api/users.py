@@ -273,6 +273,22 @@ def upgrade_guest(
     return _auth_response(user)
 
 
+class DeviceUpdate(BaseModel):
+    fcm_token: str
+
+
+@router.put("/me/device")
+def register_device(
+    body: DeviceUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """FCM cihaz token'ını kaydeder (tek cihaz — girişte üzerine yazılır)."""
+    user.fcm_token = body.fcm_token.strip() or None
+    db.commit()
+    return {"ok": True}
+
+
 class LanguageUpdate(BaseModel):
     language: str
 

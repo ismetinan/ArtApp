@@ -126,3 +126,19 @@ Bu ayrım Faz 2 planlanırken masada olmalı.
    ödevin redline ekranından "Mentora sor — 1 jeton" ile istek atar; mentor
    panelinden cevap yazılır; öğrenci puanlar. 48 saat cevapsız istek otomatik
    iade edilir.
+
+## 8. Firebase / Push bildirimleri (FCM)
+
+1. https://console.firebase.google.com → **Proje oluştur: Artora** (Google
+   Analytics kapatılabilir).
+2. Projeye **Android uygulaması ekle**: paket adı `com.ismetinan.artapp`
+   (SHA gerekmez) → **google-services.json** dosyasını indir →
+   `mobile/android/app/google-services.json` olarak koy (gizli değildir,
+   commit edilir; dosya gelene kadar build FCM'siz çalışır).
+3. Firebase → Proje ayarları → **Service accounts** → *Generate new private
+   key* → inen JSON dosyasının TAM içeriğini kopyala → Railway → Variables →
+   `FIREBASE_SERVICE_ACCOUNT_JSON` değişkenine yapıştır (GİZLİ — asla commit
+   etme). Lokal test için aynı değer `backend/.env`'e de konabilir.
+4. Yeni AAB build + dahili test. Doğrulama: bayrak açıkken öğrenci mentor
+   isteği atınca mentorun telefonuna, mentor cevap yazınca öğrenciye bildirim
+   düşmeli (uygulama öndeyken SnackBar, kapalıyken sistem bildirimi).

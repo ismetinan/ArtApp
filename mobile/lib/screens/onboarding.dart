@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../api.dart';
 import '../google_auth.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../push.dart';
 import 'auth_form.dart';
 import 'home_shell.dart';
 
@@ -122,6 +123,13 @@ class PickImagesScreen extends StatefulWidget {
 class _PickImagesScreenState extends State<PickImagesScreen> {
   final _picker = ImagePicker();
   final List<XFile> _images = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Misafir/kayıt akışı ana ekrana uğramadan buraya gelir — token kaydı burada
+    initPush();
+  }
 
   Future<void> _pick(ImageSource source) async {
     final file = await _picker.pickImage(source: source, maxWidth: 1600);
