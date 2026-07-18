@@ -53,7 +53,9 @@ Kapsam: Seçmeli mentorluk (3 jeton, doğrudan seçim), mentor arama/filtreleme,
 ### Faz 4 — Ölçekleme
 Kapsam: Çoklu dil desteği, bölgesel mentor havuzları, AI modelinin kendi veriyle ince ayarı, düzenli etik/önyargı denetimi.
 
-**Şu anki aktif faz: Faz 1 (Faz 0 doğrulama prototipi paralel yürüyor — `prototype/redline_test.py`, Gemini anahtarı gelince gerçek çizimlerle koşulacak)**
+**Şu anki aktif faz: Faz 2 (kod tamam, `MENTOR_MARKET_ENABLED` bayrağıyla açılacak).
+Faz 0 doğrulaması TAMAMLANDI (2026-07-18): 8 gerçek çizimle (manga/realist/karikatür)
+OpenRouter üzerinde koşuldu, stil tarafsızlığı GEÇTİ — bkz. `prototype/FAZ0_RAPOR.md`.**
 
 > AI sağlayıcı kararı (güncel 2026-07-15): Anthropic anahtarı henüz yok. Tüm AI
 > çağrıları `backend/app/ai/` içindeki sağlayıcı-bağımsız arayüz üzerinden gider
