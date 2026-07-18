@@ -18,11 +18,13 @@ Future<void> signInWithGoogleAndRoute(BuildContext context) async {
     await ApiClient.instance.googleLogin(idToken);
     final profile = await ApiClient.instance.getProfile();
     final hasChart = (profile['ability_chart'] as Map).isNotEmpty;
+    final skipped = ApiClient.instance.onboardingSkipped;
     if (context.mounted) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-            builder: (_) =>
-                hasChart ? const HomeShell() : const PickImagesScreen()),
+            builder: (_) => hasChart || skipped
+                ? const HomeShell()
+                : const PickImagesScreen()),
         (_) => false,
       );
     }
@@ -131,7 +133,24 @@ class _PickImagesScreenState extends State<PickImagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).pickTitle)),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).pickTitle),
+        actions: [
+          // Bilinçli atlama serbest; atlamayanlar açılışta buraya geri döner
+          TextButton(
+            onPressed: () async {
+              await ApiClient.instance.setOnboardingSkipped();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const HomeShell()),
+                  (_) => false,
+                );
+              }
+            },
+            child: Text(AppLocalizations.of(context).skip),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

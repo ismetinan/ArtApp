@@ -113,10 +113,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(t.abilityChartHint),
               const SizedBox(height: 8),
               if (chart.isEmpty)
+                // Atlayanlar için geri dönüş yolu: karta dokun → seviye belirleme
                 Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(t.chartEmpty),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 4),
+                    title: Text(t.chartEmpty),
+                    subtitle: Text(t.chartEmptyCta),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const PickImagesScreen())),
                   ),
                 )
               else

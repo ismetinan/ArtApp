@@ -36,8 +36,46 @@ class ArtApp extends StatelessWidget {
         ),
         home: ApiClient.instance.token == null
             ? const WelcomeScreen()
-            : const HomeShell(),
+            : const StartupGate(),
       ),
+    );
+  }
+}
+
+/// Açılış yönlendirmesi: oturum var ama seviye belirleme yapılmamışsa (ve
+/// kullanıcı bilerek atlamadıysa) 3-resim ekranına döner — uygulamayı kapatıp
+/// açmak onboarding'i atlatmaz. Profil çekilemezse (çevrimdışı) ana ekrana düşer.
+class StartupGate extends StatefulWidget {
+  const StartupGate({super.key});
+
+  @override
+  State<StartupGate> createState() => _StartupGateState();
+}
+
+class _StartupGateState extends State<StartupGate> {
+  late final Future<bool> _needsOnboarding = _check();
+
+  Future<bool> _check() async {
+    if (ApiClient.instance.onboardingSkipped) return false;
+    try {
+      final profile = await ApiClient.instance.getProfile();
+      return (profile['ability_chart'] as Map).isEmpty;
+    } catch (_) {
+      return false; // çevrimdışı/hata: kullanıcıyı kapıda bekletme
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _needsOnboarding,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+        return snapshot.data! ? const PickImagesScreen() : const HomeShell();
+      },
     );
   }
 }

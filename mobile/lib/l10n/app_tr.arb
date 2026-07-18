@@ -36,6 +36,9 @@
   "pickCamera": "Kamera ile çek",
   "pickGallery": "Cihazdan seç",
 
+  "skip": "Atla",
+  "chartEmptyCta": "Seviye belirlemeyi başlat",
+
   "analyzingTitle": "Resimlerin inceleniyor...",
   "analyzingSubtitle": "Bu birkaç saniye sürebilir.",
   "analyzeRetry": "{error} Birazdan tekrar denenecek.",

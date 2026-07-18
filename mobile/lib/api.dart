@@ -183,6 +183,10 @@ class ApiClient {
   /// Backend'deki mentor_market_enabled flag'i — mentor UI'ı buna göre görünür.
   bool mentorMarketEnabled = false;
 
+  /// Kullanıcı seviye belirleme ekranını bilerek atladı (cihaz-yerel tercih).
+  /// Atlamadıysa ve chart boşsa açılışta 3-resim ekranına geri yönlendirilir.
+  bool onboardingSkipped = false;
+
   /// Kullanıcının açıkça seçtiği dil (profildeki seçici). null = cihaz dili.
   String? savedLanguage;
 
@@ -205,6 +209,13 @@ class ApiClient {
     isGuest = prefs.getBool('is_guest') ?? true;
     savedLanguage = prefs.getString('language');
     mentorMarketEnabled = prefs.getBool('mentor_market') ?? false;
+    onboardingSkipped = prefs.getBool('onboarding_skipped') ?? false;
+  }
+
+  Future<void> setOnboardingSkipped() async {
+    onboardingSkipped = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_skipped', true);
   }
 
   /// Dil seçici: yerelde saklar, oturum varsa backend'e de yazar
@@ -299,9 +310,11 @@ class ApiClient {
   Future<void> clearSession() async {
     token = null;
     isGuest = true;
+    onboardingSkipped = false;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('is_guest');
+    await prefs.remove('onboarding_skipped');
   }
 
   Future<Assessment> assessLevel(List<({List<int> bytes, String name})> images) async {

@@ -248,6 +248,18 @@ abstract class AppLocalizations {
   /// **'Cihazdan seç'**
   String get pickGallery;
 
+  /// No description provided for @skip.
+  ///
+  /// In tr, this message translates to:
+  /// **'Atla'**
+  String get skip;
+
+  /// No description provided for @chartEmptyCta.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seviye belirlemeyi başlat'**
+  String get chartEmptyCta;
+
   /// No description provided for @analyzingTitle.
   ///
   /// In tr, this message translates to:

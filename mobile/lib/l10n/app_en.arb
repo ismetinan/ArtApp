@@ -31,6 +31,9 @@
   "pickCamera": "Take a photo",
   "pickGallery": "Choose from device",
 
+  "skip": "Skip",
+  "chartEmptyCta": "Start the level assessment",
+
   "analyzingTitle": "Reviewing your drawings...",
   "analyzingSubtitle": "This may take a few seconds.",
   "analyzeRetry": "{error} Retrying shortly.",

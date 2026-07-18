@@ -89,6 +89,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pickGallery => 'Cihazdan seç';
 
   @override
+  String get skip => 'Atla';
+
+  @override
+  String get chartEmptyCta => 'Seviye belirlemeyi başlat';
+
+  @override
   String get analyzingTitle => 'Resimlerin inceleniyor...';
 
   @override

@@ -89,6 +89,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickGallery => 'Choose from device';
 
   @override
+  String get skip => 'Skip';
+
+  @override
+  String get chartEmptyCta => 'Start the level assessment';
+
+  @override
   String get analyzingTitle => 'Reviewing your drawings...';
 
   @override
