@@ -21,11 +21,24 @@ class SkillTreeScreen extends StatefulWidget {
 
 class _SkillTreeScreenState extends State<SkillTreeScreen> {
   late Future<List<SkillNode>> _future;
+  Locale? _lastLocale;
 
   @override
   void initState() {
     super.initState();
     _future = ApiClient.instance.getTree();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ders başlıkları sunucudan seçili dilde gelir; uygulama içi dil seçici
+    // kullanılınca ağacı yeni dille yeniden çek (yoksa eski dil ekranda kalır).
+    final locale = Localizations.localeOf(context);
+    if (_lastLocale != null && _lastLocale != locale) {
+      _future = ApiClient.instance.getTree();
+    }
+    _lastLocale = locale;
   }
 
   void _reload() => setState(() => _future = ApiClient.instance.getTree());
