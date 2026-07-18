@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 
 from ..ai import get_ai_provider, guard_redline
 from ..api.deps import get_current_user
+from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import SkillNode, Submission, User, UserProgress
 from ..services.gamification import award_xp, bump_ability
 from ..services.quota import consume_ai_quota
-from ..services.storage import save_drawing
+from ..services.storage import UploadError, save_drawing
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,14 @@ def _node_status(node: SkillNode, completed: set[str]) -> str:
     return "locked"
 
 
+def _node_title(node: SkillNode, lang: str) -> str:
+    return node.title_en if lang == "en" and node.title_en else node.title
+
+
+def _node_description(node: SkillNode, lang: str) -> str:
+    return node.description_en if lang == "en" and node.description_en else node.description
+
+
 @router.get("")
 def get_tree(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     completed = _completed_ids(db, user)
@@ -38,8 +47,8 @@ def get_tree(user: User = Depends(get_current_user), db: Session = Depends(get_d
         "nodes": [
             {
                 "id": n.id,
-                "title": n.title,
-                "description": n.description,
+                "title": _node_title(n, user.language),
+                "description": _node_description(n, user.language),
                 "youtube_video_id": n.youtube_video_id,
                 "skill_axis": n.skill_axis,
                 "xp_reward": n.xp_reward,
@@ -62,29 +71,29 @@ async def submit_assignment(
     """Çekirdek döngü: ödev yükle → AI redline al → XP/ilerleme güncelle."""
     node = db.get(SkillNode, node_id)
     if node is None:
-        raise HTTPException(status_code=404, detail="Ders bulunamadı")
+        raise HTTPException(status_code=404, detail=msg("node_not_found", user.language))
 
     completed = _completed_ids(db, user)
     if _node_status(node, completed) == "locked":
-        raise HTTPException(status_code=403, detail="Bu dersin önkoşulları henüz tamamlanmadı")
+        raise HTTPException(status_code=403, detail=msg("node_locked", user.language))
     consume_ai_quota(db, user)
 
     content = await file.read()
     try:
         rel_path = save_drawing(content, file.filename or "odev.png")
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+    except UploadError as e:
+        raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))
 
     try:
         result = guard_redline(
-            await get_ai_provider().redline_analysis(content, node.title)
+            await get_ai_provider().redline_analysis(
+                content, _node_title(node, user.language), language=user.language
+            ),
+            language=user.language,
         )
     except Exception:
         logger.exception("AI redline analizi başarısız (node=%s)", node.id)
-        raise HTTPException(
-            status_code=503,
-            detail="AI şu an yanıt veremiyor, lütfen birazdan tekrar dene.",
-        )
+        raise HTTPException(status_code=503, detail=msg("ai_unavailable", user.language))
 
     submission = Submission(
         user_id=user.id,

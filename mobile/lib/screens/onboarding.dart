@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../api.dart';
 import '../google_auth.dart';
+import '../l10n/gen/app_localizations.dart';
 import 'auth_form.dart';
 import 'home_shell.dart';
 
@@ -28,7 +29,7 @@ Future<void> signInWithGoogleAndRoute(BuildContext context) async {
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+          .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
     }
   }
 }
@@ -54,7 +55,7 @@ class WelcomeScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 8),
               Text(
-                'Çizimde gelişim yolculuğun burada başlıyor.',
+                AppLocalizations.of(context).welcomeTagline,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
@@ -62,25 +63,25 @@ class WelcomeScreen extends StatelessWidget {
               // Faz 1: e-posta girişleri henüz yok; misafir akışı çekirdek döngü için yeterli
               FilledButton(
                 onPressed: () => _continueAsGuest(context),
-                child: const Text('Misafir Olarak Devam Et'),
+                child: Text(AppLocalizations.of(context).continueAsGuest),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.g_mobiledata, size: 28),
-                label: const Text('Google ile Devam Et'),
+                label: Text(AppLocalizations.of(context).continueWithGoogle),
                 onPressed: () => signInWithGoogleAndRoute(context),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => const AuthFormScreen(mode: AuthMode.login))),
-                child: const Text('Giriş Yap'),
+                child: Text(AppLocalizations.of(context).signIn),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => const AuthFormScreen(mode: AuthMode.register))),
-                child: const Text('Kayıt Ol'),
+                child: Text(AppLocalizations.of(context).signUp),
               ),
             ],
           ),
@@ -91,11 +92,12 @@ class WelcomeScreen extends StatelessWidget {
 
   Future<void> _continueAsGuest(BuildContext context) async {
     try {
-      await ApiClient.instance.createGuest('Misafir Çizer');
+      await ApiClient.instance
+          .createGuest(AppLocalizations.of(context).guestDefaultName);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
       return;
     }
@@ -129,14 +131,13 @@ class _PickImagesScreenState extends State<PickImagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Son 3 Çizimini Yükle')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).pickTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Text(
-              'Seviyeni belirlemek için son yaptığın 3 çizimi seç. '
-              'Mükemmel olmaları gerekmiyor — olduğun yerden başlıyoruz.',
+              AppLocalizations.of(context).pickIntro,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 16),
@@ -164,7 +165,7 @@ class _PickImagesScreenState extends State<PickImagesScreen> {
                   ? () => Navigator.of(context).pushReplacement(MaterialPageRoute(
                       builder: (_) => AnalyzingScreen(images: _images)))
                   : null,
-              child: Text('Devam Et (${_images.length}/3)'),
+              child: Text(AppLocalizations.of(context).pickContinue(_images.length)),
             ),
           ],
         ),
@@ -179,7 +180,7 @@ class _PickImagesScreenState extends State<PickImagesScreen> {
         child: Wrap(children: [
           ListTile(
             leading: const Icon(Icons.camera_alt),
-            title: const Text('Kamera ile çek'),
+            title: Text(AppLocalizations.of(context).pickCamera),
             onTap: () {
               Navigator.pop(context);
               _pick(ImageSource.camera);
@@ -187,7 +188,7 @@ class _PickImagesScreenState extends State<PickImagesScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.folder),
-            title: const Text('Cihazdan seç'),
+            title: Text(AppLocalizations.of(context).pickGallery),
             onTap: () {
               Navigator.pop(context);
               _pick(ImageSource.gallery);
@@ -230,7 +231,8 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('${friendlyError(e)} Birazdan tekrar denenecek.')));
+            content: Text(AppLocalizations.of(context)
+                .analyzeRetry(friendlyError(context, e)))));
         await Future.delayed(const Duration(seconds: 3));
         if (mounted) _analyze();
       }
@@ -246,10 +248,10 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 24),
-            Text('Resimlerin inceleniyor...',
+            Text(AppLocalizations.of(context).analyzingTitle,
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            const Text('Bu birkaç saniye sürebilir.'),
+            Text(AppLocalizations.of(context).analyzingSubtitle),
           ],
         ),
       ),
@@ -265,7 +267,7 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Değerlendirme Sonucu')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).resultTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -275,7 +277,7 @@ class ResultScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(children: [
-                  Text('${assessment.level}. Seviye',
+                  Text(AppLocalizations.of(context).levelHeading(assessment.level),
                       style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 8),
                   Text(assessment.summaryTr),
@@ -290,8 +292,10 @@ class ResultScreen extends StatelessWidget {
                     CheckboxListTile(
                       value: true,
                       onChanged: null,
-                      title: Text(axisLabels[e.key] ?? e.key),
-                      subtitle: Text('${e.value}/100 — belirlendi'),
+                      title: Text(
+                          axisLabels(AppLocalizations.of(context))[e.key] ?? e.key),
+                      subtitle: Text(
+                          AppLocalizations.of(context).scoreDetermined(e.value)),
                     ),
                 ],
               ),
@@ -301,7 +305,7 @@ class ResultScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const HomeShell()),
                 (_) => false,
               ),
-              child: const Text('Yetenek Ağacına Git'),
+              child: Text(AppLocalizations.of(context).goToTree),
             ),
           ],
         ),

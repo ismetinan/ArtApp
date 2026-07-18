@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from ..ai.schemas import SkillAxis
 from ..api.deps import get_current_user
+from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityScore, Submission, User
 from ..services.storage import load_drawing
@@ -24,11 +25,11 @@ def get_submission_image(
     """Çizim dosyasını döner. Sadece sahibi — veya herkese açıksa herkes — görebilir."""
     submission = db.get(Submission, submission_id)
     if submission is None or (submission.user_id != user.id and not submission.is_public):
-        raise HTTPException(status_code=404, detail="Gönderi bulunamadı")
+        raise HTTPException(status_code=404, detail=msg("submission_not_found", user.language))
     try:
         content = load_drawing(submission.file_path)
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Dosya bulunamadı")
+        raise HTTPException(status_code=404, detail=msg("file_not_found", user.language))
     media_type = mimetypes.guess_type(submission.file_path)[0] or "image/jpeg"
     return Response(content=content, media_type=media_type)
 
@@ -49,6 +50,7 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         "display_name": user.display_name,
         "level": user.level,
         "xp": user.xp,
+        "language": user.language,
         # Skor varsa 7 eksenin hepsi döner (eksikler 0) — radar chart hep tam çizilir.
         # Hiç skor yoksa boş kalır: onboarding yönlendirmesi buna bakıyor.
         "ability_chart": (
@@ -82,7 +84,7 @@ def update_privacy(
 ):
     submission = db.get(Submission, submission_id)
     if submission is None or submission.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Gönderi bulunamadı")
+        raise HTTPException(status_code=404, detail=msg("submission_not_found", user.language))
     submission.is_public = body.is_public
     db.commit()
     return {"submission_id": submission.id, "is_public": submission.is_public}

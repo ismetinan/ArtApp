@@ -8,7 +8,7 @@ from google import genai
 from google.genai import types
 
 from .base import AIProvider
-from .prompts import ASSESS_PROMPT, REDLINE_PROMPT
+from .prompts import assess_prompt, redline_prompt
 from .schemas import LevelAssessment, RedlineResult
 
 
@@ -35,10 +35,14 @@ class GeminiProvider(AIProvider):
         )
         return schema.model_validate_json(response.text)
 
-    async def assess_level(self, images: list[bytes]) -> LevelAssessment:
-        contents = [_image_part(img) for img in images] + [ASSESS_PROMPT]
+    async def assess_level(
+        self, images: list[bytes], language: str = "tr"
+    ) -> LevelAssessment:
+        contents = [_image_part(img) for img in images] + [assess_prompt(language)]
         return await self._generate(contents, LevelAssessment)
 
-    async def redline_analysis(self, image: bytes, lesson_context: str) -> RedlineResult:
-        prompt = REDLINE_PROMPT.format(lesson_context=lesson_context)
+    async def redline_analysis(
+        self, image: bytes, lesson_context: str, language: str = "tr"
+    ) -> RedlineResult:
+        prompt = redline_prompt(lesson_context, language)
         return await self._generate([_image_part(image), prompt], RedlineResult)

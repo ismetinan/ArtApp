@@ -14,6 +14,16 @@ MAX_UPLOAD_BYTES = 8 * 1024 * 1024  # 8 MB
 _ALLOWED_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
 
 
+class UploadError(ValueError):
+    """Tür/boyut hatası. `code` messages.py kataloğundaki anahtardır — endpoint
+    kullanıcının diline çevirir (bu katman dil bilmez)."""
+
+    def __init__(self, code: str, **params: object):
+        super().__init__(code)
+        self.code = code
+        self.params = params
+
+
 @lru_cache
 def _s3_client():
     import boto3  # lazy: local modda boto3 gerekmez
@@ -29,12 +39,12 @@ def _s3_client():
 
 
 def save_drawing(content: bytes, original_name: str) -> str:
-    """Çizimi kaydeder, göreli yolunu döner. Tür/boyut hatasında ValueError."""
+    """Çizimi kaydeder, göreli yolunu döner. Tür/boyut hatasında UploadError."""
     suffix = Path(original_name).suffix.lower() or ".png"
     if suffix not in _ALLOWED_SUFFIXES:
-        raise ValueError(f"Desteklenmeyen dosya türü: {suffix}")
+        raise UploadError("upload_unsupported_type", suffix=suffix)
     if len(content) > MAX_UPLOAD_BYTES:
-        raise ValueError("Dosya çok büyük — en fazla 8 MB yükleyebilirsin")
+        raise UploadError("upload_too_large")
     rel_path = f"drawings/{uuid.uuid4().hex}{suffix}"
 
     settings = get_settings()

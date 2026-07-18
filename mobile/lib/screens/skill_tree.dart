@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
+import '../l10n/gen/app_localizations.dart';
 import 'redline.dart';
 
 /// Dersler sekmesi: düğüm tabanlı yetenek ağacı (CLAUDE.md §7.4).
@@ -40,12 +41,14 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dersler')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).tabLessons)),
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Ağaç yüklenemedi: ${snapshot.error}'));
+            return Center(
+                child: Text(AppLocalizations.of(context)
+                    .treeLoadError('${snapshot.error}')));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -114,9 +117,8 @@ class _NodeCard extends StatelessWidget {
                     : null,
         child: InkWell(
           onTap: locked
-              ? () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content:
-                      Text('Bu ders için önce önceki dersleri tamamlaman gerekiyor.')))
+              ? () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(AppLocalizations.of(context).lockedSnack)))
               : () async {
                   final changed = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(builder: (_) => NodeDetailScreen(node: node)),
@@ -140,7 +142,11 @@ class _NodeCard extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: 4),
-                Text('${axisLabels[node.skillAxis]} • ${node.xpReward} XP',
+                Text(
+                    AppLocalizations.of(context).nodeMeta(
+                        axisLabels(AppLocalizations.of(context))[node.skillAxis] ??
+                            node.skillAxis,
+                        node.xpReward),
                     style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
@@ -184,7 +190,7 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -207,11 +213,11 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
             Text(node.description),
             const SizedBox(height: 12),
             if (node.resources.isEmpty)
-              const Card(
+              Card(
                 child: ListTile(
-                  leading: Icon(Icons.ondemand_video),
-                  title: Text('Video yakında'),
-                  subtitle: Text('Bu dersin içeriği henüz eklenmedi.'),
+                  leading: const Icon(Icons.ondemand_video),
+                  title: Text(AppLocalizations.of(context).videoSoon),
+                  subtitle: Text(AppLocalizations.of(context).videoSoonBody),
                 ),
               )
             else
@@ -221,32 +227,33 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
                     leading: Icon(
                         r.isPlaylist ? Icons.playlist_play : Icons.play_circle),
                     title: Text(r.title),
-                    subtitle: Text(
-                        '${r.author} • ${r.isPlaylist ? 'Oynatma listesi' : 'Video'}'),
+                    subtitle: Text(AppLocalizations.of(context).resourceMeta(
+                        r.author,
+                        r.isPlaylist
+                            ? AppLocalizations.of(context).resourceKindPlaylist
+                            : AppLocalizations.of(context).resourceKindVideo)),
                     trailing: const Icon(Icons.open_in_new, size: 18),
                     onTap: () => launchUrl(r.url),
                   ),
                 ),
             const SizedBox(height: 16),
-            Text('Ödevini yükle',
+            Text(AppLocalizations.of(context).uploadHomework,
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            const Text(
-                'Videoyu izledikten sonra çalışmanı yükle; saniyeler içinde '
-                'yapıcı bir redline analizi alacaksın.'),
+            Text(AppLocalizations.of(context).uploadHint),
             const SizedBox(height: 16),
             if (_submitting)
               const Center(child: CircularProgressIndicator())
             else ...[
               FilledButton.icon(
                 icon: const Icon(Icons.folder),
-                label: const Text('Cihazdan Seç ve Gönder'),
+                label: Text(AppLocalizations.of(context).submitFromDevice),
                 onPressed: () => _submit(ImageSource.gallery),
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 icon: const Icon(Icons.camera_alt),
-                label: const Text('Kamera ile Çek ve Gönder'),
+                label: Text(AppLocalizations.of(context).submitFromCamera),
                 onPressed: () => _submit(ImageSource.camera),
               ),
             ],

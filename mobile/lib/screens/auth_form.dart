@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../google_auth.dart';
+import '../l10n/gen/app_localizations.dart';
 import 'home_shell.dart';
 import 'onboarding.dart';
 
@@ -23,11 +24,14 @@ class _AuthFormScreenState extends State<AuthFormScreen> {
   final _name = TextEditingController();
   bool _busy = false;
 
-  String get _title => switch (widget.mode) {
-        AuthMode.login => 'Giriş Yap',
-        AuthMode.register => 'Kayıt Ol',
-        AuthMode.upgrade => 'Hesap Oluştur',
-      };
+  String _title(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return switch (widget.mode) {
+      AuthMode.login => t.signIn,
+      AuthMode.register => t.signUp,
+      AuthMode.upgrade => t.createAccount,
+    };
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -38,8 +42,12 @@ class _AuthFormScreenState extends State<AuthFormScreen> {
         case AuthMode.login:
           await api.login(_email.text.trim(), _password.text);
         case AuthMode.register:
-          await api.register(_email.text.trim(), _password.text,
-              _name.text.trim().isEmpty ? 'Çizer' : _name.text.trim());
+          await api.register(
+              _email.text.trim(),
+              _password.text,
+              _name.text.trim().isEmpty
+                  ? AppLocalizations.of(context).artistDefaultName
+                  : _name.text.trim());
         case AuthMode.upgrade:
           await api.upgradeGuest(_email.text.trim(), _password.text);
       }
@@ -59,7 +67,7 @@ class _AuthFormScreenState extends State<AuthFormScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -80,7 +88,7 @@ class _AuthFormScreenState extends State<AuthFormScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(e))));
+            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -90,7 +98,7 @@ class _AuthFormScreenState extends State<AuthFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_title)),
+      appBar: AppBar(title: Text(_title(context))),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -98,47 +106,51 @@ class _AuthFormScreenState extends State<AuthFormScreen> {
           child: Column(
             children: [
               if (widget.mode == AuthMode.upgrade)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: Text('İlerlemen aynen korunacak — sadece e-posta ve '
-                      'şifre ekliyoruz ki hesabın güvende olsun.'),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(AppLocalizations.of(context).upgradeNote),
                 ),
               if (widget.mode == AuthMode.register)
                 TextFormField(
                   controller: _name,
-                  decoration: const InputDecoration(labelText: 'Görünen ad'),
+                  decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context).labelDisplayName),
                 ),
               TextFormField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'E-posta'),
-                validator: (v) =>
-                    v != null && v.contains('@') ? null : 'Geçerli bir e-posta gir',
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).labelEmail),
+                validator: (v) => v != null && v.contains('@')
+                    ? null
+                    : AppLocalizations.of(context).validEmail,
               ),
               TextFormField(
                 controller: _password,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Şifre'),
-                validator: (v) =>
-                    v != null && v.length >= 8 ? null : 'En az 8 karakter',
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).labelPassword),
+                validator: (v) => v != null && v.length >= 8
+                    ? null
+                    : AppLocalizations.of(context).validPasswordMin,
               ),
               const SizedBox(height: 24),
               _busy
                   ? const CircularProgressIndicator()
-                  : FilledButton(onPressed: _submit, child: Text(_title)),
+                  : FilledButton(onPressed: _submit, child: Text(_title(context))),
               const SizedBox(height: 16),
-              const Row(children: [
-                Expanded(child: Divider()),
+              Row(children: [
+                const Expanded(child: Divider()),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text('veya'),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(AppLocalizations.of(context).orDivider),
                 ),
-                Expanded(child: Divider()),
+                const Expanded(child: Divider()),
               ]),
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 icon: const Icon(Icons.g_mobiledata, size: 28),
-                label: const Text('Google ile Devam Et'),
+                label: Text(AppLocalizations.of(context).continueWithGoogle),
                 onPressed: _busy ? null : _google,
               ),
             ],

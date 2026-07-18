@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/gen/app_localizations.dart';
 import 'mentors.dart';
 import 'profile.dart';
 import 'skill_tree.dart';
@@ -40,10 +41,16 @@ class _HomeShellState extends State<HomeShell> {
           _index = i;
           if (i != 1) _focusAxis = null;
         }),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.people), label: 'Mentorlar'),
-          NavigationDestination(icon: Icon(Icons.account_tree), label: 'Dersler'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Profil'),
+        destinations: [
+          NavigationDestination(
+              icon: const Icon(Icons.people),
+              label: AppLocalizations.of(context).tabMentors),
+          NavigationDestination(
+              icon: const Icon(Icons.account_tree),
+              label: AppLocalizations.of(context).tabLessons),
+          NavigationDestination(
+              icon: const Icon(Icons.person),
+              label: AppLocalizations.of(context).tabProfile),
         ],
       ),
     );

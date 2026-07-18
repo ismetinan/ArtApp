@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..core.config import get_settings
+from ..core.messages import msg
 from ..models.tables import AiUsage, User
 
 
@@ -25,10 +26,6 @@ def consume_ai_quota(db: Session, user: User) -> None:
         db.add(usage)
     if usage.count >= get_settings().ai_daily_limit:
         raise HTTPException(
-            status_code=429,
-            detail=(
-                "Bugünlük AI analiz hakkın doldu — yarın yeni haklarla devam "
-                "edebilirsin. Bu arada çizim pratiğine devam!"
-            ),
+            status_code=429, detail=msg("ai_quota_exhausted", user.language)
         )
     usage.count += 1

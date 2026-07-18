@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api.dart';
+import '../l10n/gen/app_localizations.dart';
 
 const _severityColors = {
   'dusuk': Color(0xFFF0C020),
@@ -24,7 +25,7 @@ class RedlineScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Analizi')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).aiAnalysisTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -36,7 +37,7 @@ class RedlineScreen extends StatelessWidget {
                 child: Row(children: [
                   const Icon(Icons.stars),
                   const SizedBox(width: 8),
-                  Text('+$xpAwarded XP kazandın!',
+                  Text(AppLocalizations.of(context).xpGained(xpAwarded),
                       style: Theme.of(context).textTheme.titleMedium),
                 ]),
               ),
@@ -60,7 +61,8 @@ class RedlineScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Güçlü yönlerin', style: Theme.of(context).textTheme.titleMedium),
+          Text(AppLocalizations.of(context).strengthsTitle,
+              style: Theme.of(context).textTheme.titleMedium),
           for (final s in analysis.strengthsTr)
             ListTile(
               dense: true,
@@ -68,7 +70,8 @@ class RedlineScreen extends StatelessWidget {
               title: Text(s),
             ),
           const SizedBox(height: 8),
-          Text('Gelişim noktaları', style: Theme.of(context).textTheme.titleMedium),
+          Text(AppLocalizations.of(context).findingsTitle,
+              style: Theme.of(context).textTheme.titleMedium),
           for (var i = 0; i < analysis.findings.length; i++)
             Card(
               child: ListTile(
@@ -80,7 +83,8 @@ class RedlineScreen extends StatelessWidget {
                       style: const TextStyle(color: Colors.white, fontSize: 12)),
                 ),
                 title: Text(analysis.findings[i].messageTr),
-                subtitle: Text('Öneri: ${analysis.findings[i].suggestionTr}'),
+                subtitle: Text(AppLocalizations.of(context)
+                    .suggestionPrefix(analysis.findings[i].suggestionTr)),
               ),
             ),
           const SizedBox(height: 8),

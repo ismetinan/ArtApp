@@ -5,7 +5,8 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from ..api.deps import get_current_user, get_optional_user
+from ..api.deps import get_current_user, get_optional_user, get_request_lang
+from ..core.messages import SUPPORTED_LANGUAGES, msg, normalize_lang
 from ..db import get_db
 from ..models.tables import AbilityScore, AiUsage, Submission, User, UserProgress
 from ..services.auth import (
@@ -23,12 +24,14 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 class GuestRequest(BaseModel):
     display_name: str = "Misafir Çizer"
+    language: str = ""  # boşsa Accept-Language'ten
 
 
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     display_name: str = "Çizer"
+    language: str = ""
 
 
 class LoginRequest(BaseModel):
@@ -50,6 +53,7 @@ class AuthResponse(BaseModel):
     is_guest: bool
     level: int
     xp: int
+    language: str
 
 
 def _auth_response(user: User) -> AuthResponse:
@@ -60,34 +64,50 @@ def _auth_response(user: User) -> AuthResponse:
         is_guest=user.is_guest,
         level=user.level,
         xp=user.xp,
+        language=user.language,
     )
 
 
-def _validate_password(password: str) -> None:
+def _validate_password(password: str, lang: str) -> None:
     if len(password) < 8:
-        raise HTTPException(status_code=422, detail="Şifre en az 8 karakter olmalı")
+        raise HTTPException(status_code=422, detail=msg("password_min", lang))
 
 
 @router.post("/guest", response_model=AuthResponse)
-def create_guest(body: GuestRequest, db: Session = Depends(get_db)):
-    user = User(display_name=body.display_name, is_guest=True, api_token=generate_token())
+def create_guest(
+    body: GuestRequest,
+    db: Session = Depends(get_db),
+    lang: str = Depends(get_request_lang),
+):
+    user = User(
+        display_name=body.display_name,
+        is_guest=True,
+        api_token=generate_token(),
+        language=normalize_lang(body.language or lang),
+    )
     db.add(user)
     db.commit()
     return _auth_response(user)
 
 
 @router.post("/register", response_model=AuthResponse)
-def register(body: RegisterRequest, db: Session = Depends(get_db)):
-    _validate_password(body.password)
+def register(
+    body: RegisterRequest,
+    db: Session = Depends(get_db),
+    lang: str = Depends(get_request_lang),
+):
+    lang = normalize_lang(body.language or lang)
+    _validate_password(body.password, lang)
     exists = db.execute(select(User).where(User.email == body.email)).scalar_one_or_none()
     if exists:
-        raise HTTPException(status_code=409, detail="Bu e-posta zaten kayıtlı")
+        raise HTTPException(status_code=409, detail=msg("email_taken", lang))
     user = User(
         email=body.email,
         password_hash=hash_password(body.password),
         display_name=body.display_name,
         is_guest=False,
         api_token=generate_token(),
+        language=lang,
     )
     db.add(user)
     db.commit()
@@ -95,12 +115,16 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=AuthResponse)
-def login(body: LoginRequest, db: Session = Depends(get_db)):
+def login(
+    body: LoginRequest,
+    db: Session = Depends(get_db),
+    lang: str = Depends(get_request_lang),
+):
     user = db.execute(select(User).where(User.email == body.email)).scalar_one_or_none()
     if user is None or user.password_hash is None or not verify_password(
         body.password, user.password_hash
     ):
-        raise HTTPException(status_code=401, detail="E-posta veya şifre hatalı")
+        raise HTTPException(status_code=401, detail=msg("login_failed", lang))
     # Her girişte token yenilenir (eski cihaz oturumu düşer — tek aktif token)
     user.api_token = generate_token()
     db.commit()
@@ -109,6 +133,7 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 
 class GoogleRequest(BaseModel):
     id_token: str
+    language: str = ""
 
 
 @router.post("/google", response_model=AuthResponse)
@@ -116,14 +141,16 @@ def google_sign_in(
     body: GoogleRequest,
     current: User | None = Depends(get_optional_user),
     db: Session = Depends(get_db),
+    lang: str = Depends(get_request_lang),
 ):
     """Google ile giriş/kayıt. Misafir token'ıyla çağrılırsa misafiri yükseltir
     (ilerleme korunur); yoksa google_sub/e-posta üzerinden bulur ya da oluşturur."""
+    lang = normalize_lang(body.language or lang)
     try:
         info = verify_google_token(body.id_token)
     except ValueError:
         logger.exception("Google token doğrulaması başarısız")
-        raise HTTPException(status_code=401, detail="Google girişi doğrulanamadı")
+        raise HTTPException(status_code=401, detail=msg("google_failed", lang))
 
     user = db.execute(
         select(User).where(User.google_sub == info["sub"])
@@ -150,6 +177,7 @@ def google_sign_in(
             display_name=info["name"],
             is_guest=False,
             api_token=generate_token(),
+            language=lang,
         )
         db.add(user)
 
@@ -183,13 +211,32 @@ def upgrade_guest(
     db: Session = Depends(get_db),
 ):
     if not user.is_guest:
-        raise HTTPException(status_code=409, detail="Hesap zaten kayıtlı")
-    _validate_password(body.password)
+        raise HTTPException(status_code=409, detail=msg("already_registered", user.language))
+    _validate_password(body.password, user.language)
     exists = db.execute(select(User).where(User.email == body.email)).scalar_one_or_none()
     if exists:
-        raise HTTPException(status_code=409, detail="Bu e-posta zaten kayıtlı")
+        raise HTTPException(status_code=409, detail=msg("email_taken", user.language))
     user.email = body.email
     user.password_hash = hash_password(body.password)
     user.is_guest = False
+    db.commit()
+    return _auth_response(user)
+
+
+class LanguageUpdate(BaseModel):
+    language: str
+
+
+@router.patch("/me/language", response_model=AuthResponse)
+def update_language(
+    body: LanguageUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Profildeki dil seçici: UI + AI çıktı dilini kalıcı değiştirir."""
+    code = body.language.strip().lower()
+    if code not in SUPPORTED_LANGUAGES:
+        raise HTTPException(status_code=422, detail=msg("language_unsupported", user.language))
+    user.language = code
     db.commit()
     return _auth_response(user)

@@ -33,14 +33,19 @@ class RedlineFinding(BaseModel):
     x: float = Field(ge=0, le=1, description="Bulgunun yatay konumu (0-1 normalize)")
     y: float = Field(ge=0, le=1, description="Bulgunun dikey konumu (0-1 normalize)")
     severity: Severity
-    message_tr: str = Field(description="Yapıcı, somut gözlem (Türkçe)")
-    suggestion_tr: str = Field(description="Uygulanabilir öneri / egzersiz (Türkçe)")
+    # _tr son eki geriye dönük uyumluluk — içerik kullanıcının dilinde üretilir
+    message_tr: str = Field(description="Constructive, concrete observation (in the user's language)")
+    suggestion_tr: str = Field(description="Actionable suggestion / exercise (in the user's language)")
 
 
 class RedlineResult(BaseModel):
-    strengths_tr: list[str] = Field(description="Çizimin güçlü yönleri — her analizde en az bir tane")
+    strengths_tr: list[str] = Field(
+        description="Strengths of the drawing, in the user's language — at least one per analysis"
+    )
     findings: list[RedlineFinding]
-    overall_comment_tr: str = Field(description="Genel değerlendirme, cesaretlendirici kapanış")
+    overall_comment_tr: str = Field(
+        description="Overall assessment with an encouraging closing, in the user's language"
+    )
 
 
 class LevelAssessment(BaseModel):
@@ -48,7 +53,7 @@ class LevelAssessment(BaseModel):
     ability_scores: dict[SkillAxis, int] = Field(
         description="Eksen başına 0-100 skor (Ability Chart verisi)"
     )
-    summary_tr: str = Field(description="Kullanıcıya gösterilecek yapıcı özet")
+    summary_tr: str = Field(description="Constructive summary shown to the user (in the user's language)")
     focus_axes: list[SkillAxis] = Field(
         description="Yetenek ağacında öncelikle yönlendirilecek zayıf alanlar"
     )

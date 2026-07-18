@@ -21,6 +21,8 @@ class User(Base):
     api_token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     display_name: Mapped[str] = mapped_column(String(100), default="Misafir Çizer")
     is_guest: Mapped[bool] = mapped_column(Boolean, default=True)
+    # UI + AI çıktı dili (tr/en) — cihaz locale'inden gelir, profilden değiştirilebilir
+    language: Mapped[str] = mapped_column(String(5), default="tr")
     level: Mapped[int] = mapped_column(Integer, default=1)
     xp: Mapped[int] = mapped_column(Integer, default=0)
     # Faz 1'de altyapı var ama harcama akışı yok (CLAUDE.md Faz 1 kapsamı)
@@ -40,6 +42,9 @@ class SkillNode(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)  # slug
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str] = mapped_column(Text, default="")
+    # EN çeviriler (i18n) — boşsa TR'ye düşülür
+    title_en: Mapped[str] = mapped_column(String(200), default="")
+    description_en: Mapped[str] = mapped_column(Text, default="")
     youtube_video_id: Mapped[str] = mapped_column(String(20), default="")
     skill_axis: Mapped[str] = mapped_column(String(32))  # ai.schemas.SkillAxis değeri
     xp_reward: Mapped[int] = mapped_column(Integer, default=50)

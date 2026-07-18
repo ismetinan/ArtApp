@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/gen/app_localizations.dart';
+
 /// Faz 2'de gerçek mentor pazarı gelecek — Faz 1'de bilinçli placeholder
 /// (CLAUDE.md: mentor pazarı Faz 1 kapsam DIŞI, feature flag kapalı).
 class MentorsScreen extends StatelessWidget {
@@ -7,8 +9,9 @@ class MentorsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Mentorlar')),
+      appBar: AppBar(title: Text(t.tabMentors)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -17,14 +20,10 @@ class MentorsScreen extends StatelessWidget {
             children: [
               const Icon(Icons.people_outline, size: 64),
               const SizedBox(height: 16),
-              Text('Mentor pazarı çok yakında!',
+              Text(t.mentorsComingTitle,
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              const Text(
-                'Şimdilik her ödevine anında ücretsiz AI analizi alabilirsin. '
-                'Gerçek mentorlar bir sonraki sürümde burada olacak.',
-                textAlign: TextAlign.center,
-              ),
+              Text(t.mentorsComingBody, textAlign: TextAlign.center),
             ],
           ),
         ),

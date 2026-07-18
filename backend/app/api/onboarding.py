@@ -5,11 +5,12 @@ from sqlalchemy.orm import Session
 
 from ..ai import get_ai_provider, guard_assessment
 from ..api.deps import get_current_user
+from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityScore, Submission, User
 from ..services.gamification import XP_PER_LEVEL
 from ..services.quota import consume_ai_quota
-from ..services.storage import save_drawing
+from ..services.storage import UploadError, save_drawing
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ async def assess_level(
 ):
     """Onboarding 2-4. ekranlar: 3 çizim yükle → başlangıç seviyesi belirle."""
     if len(files) != 3:
-        raise HTTPException(status_code=422, detail="Tam olarak 3 çizim yüklenmeli")
+        raise HTTPException(status_code=422, detail=msg("need_three_drawings", user.language))
     consume_ai_quota(db, user)
 
     images: list[bytes] = []
@@ -32,19 +33,21 @@ async def assess_level(
         content = await f.read()
         try:
             rel_path = save_drawing(content, f.filename or "cizim.png")
-        except ValueError as e:
-            raise HTTPException(status_code=422, detail=str(e))
+        except UploadError as e:
+            raise HTTPException(
+                status_code=422, detail=msg(e.code, user.language, **e.params)
+            )
         images.append(content)
         db.add(Submission(user_id=user.id, kind="onboarding", file_path=rel_path))
 
     try:
-        assessment = guard_assessment(await get_ai_provider().assess_level(images))
+        assessment = guard_assessment(
+            await get_ai_provider().assess_level(images, language=user.language),
+            language=user.language,
+        )
     except Exception:
         logger.exception("Seviye belirleme analizi başarısız (user=%s)", user.id)
-        raise HTTPException(
-            status_code=503,
-            detail="AI şu an yanıt veremiyor, lütfen birazdan tekrar dene.",
-        )
+        raise HTTPException(status_code=503, detail=msg("ai_unavailable", user.language))
 
     # XP tabanını belirlenen seviyeye çek — yoksa ilk ödevden sonra
     # level_for_xp(xp) seviyeyi geri düşürür

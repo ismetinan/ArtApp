@@ -95,10 +95,10 @@ def test_ai_failure_returns_503(client, monkeypatch):
     """Sağlayıcı çökerse kullanıcı 500 değil, anlaşılır 503 mesajı almalı."""
 
     class FailingProvider:
-        async def redline_analysis(self, image, lesson_context):
+        async def redline_analysis(self, image, lesson_context, language="tr"):
             raise RuntimeError("simüle edilmiş sağlayıcı hatası")
 
-        async def assess_level(self, images):
+        async def assess_level(self, images, language="tr"):
             raise RuntimeError("simüle edilmiş sağlayıcı hatası")
 
     import app.api.onboarding as onboarding_module

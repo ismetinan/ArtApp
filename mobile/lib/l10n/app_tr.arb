@@ -1,0 +1,163 @@
+{
+  "@@locale": "tr",
+
+  "tabMentors": "Mentorlar",
+  "tabLessons": "Dersler",
+  "tabProfile": "Profil",
+
+  "welcomeTagline": "Çizimde gelişim yolculuğun burada başlıyor.",
+  "continueAsGuest": "Misafir Olarak Devam Et",
+  "continueWithGoogle": "Google ile Devam Et",
+  "signIn": "Giriş Yap",
+  "signUp": "Kayıt Ol",
+  "createAccount": "Hesap Oluştur",
+  "guestDefaultName": "Misafir Çizer",
+  "artistDefaultName": "Çizer",
+
+  "errorNetwork": "Sunucuya ulaşılamadı. İnternet bağlantını ve backend'i kontrol et.",
+  "errorUnexpected": "Beklenmeyen bir sorun oluştu.",
+
+  "upgradeNote": "İlerlemen aynen korunacak — sadece e-posta ve şifre ekliyoruz ki hesabın güvende olsun.",
+  "labelDisplayName": "Görünen ad",
+  "labelEmail": "E-posta",
+  "labelPassword": "Şifre",
+  "validEmail": "Geçerli bir e-posta gir",
+  "validPasswordMin": "En az 8 karakter",
+  "orDivider": "veya",
+
+  "pickTitle": "Son 3 Çizimini Yükle",
+  "pickIntro": "Seviyeni belirlemek için son yaptığın 3 çizimi seç. Mükemmel olmaları gerekmiyor — olduğun yerden başlıyoruz.",
+  "pickContinue": "Devam Et ({count}/3)",
+  "@pickContinue": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "pickCamera": "Kamera ile çek",
+  "pickGallery": "Cihazdan seç",
+
+  "analyzingTitle": "Resimlerin inceleniyor...",
+  "analyzingSubtitle": "Bu birkaç saniye sürebilir.",
+  "analyzeRetry": "{error} Birazdan tekrar denenecek.",
+  "@analyzeRetry": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+
+  "resultTitle": "Değerlendirme Sonucu",
+  "levelHeading": "{level}. Seviye",
+  "@levelHeading": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "scoreDetermined": "{score}/100 — belirlendi",
+  "@scoreDetermined": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "goToTree": "Yetenek Ağacına Git",
+
+  "mentorsComingTitle": "Mentor pazarı çok yakında!",
+  "mentorsComingBody": "Şimdilik her ödevine anında ücretsiz AI analizi alabilirsin. Gerçek mentorlar bir sonraki sürümde burada olacak.",
+
+  "treeLoadError": "Ağaç yüklenemedi: {error}",
+  "@treeLoadError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "lockedSnack": "Bu ders için önce önceki dersleri tamamlaman gerekiyor.",
+  "nodeMeta": "{axis} • {xp} XP",
+  "@nodeMeta": {
+    "placeholders": {
+      "axis": {"type": "String"},
+      "xp": {"type": "int"}
+    }
+  },
+  "videoSoon": "Video yakında",
+  "videoSoonBody": "Bu dersin içeriği henüz eklenmedi.",
+  "resourceKindPlaylist": "Oynatma listesi",
+  "resourceKindVideo": "Video",
+  "resourceMeta": "{author} • {kind}",
+  "@resourceMeta": {
+    "placeholders": {
+      "author": {"type": "String"},
+      "kind": {"type": "String"}
+    }
+  },
+  "uploadHomework": "Ödevini yükle",
+  "uploadHint": "Videoyu izledikten sonra çalışmanı yükle; saniyeler içinde yapıcı bir redline analizi alacaksın.",
+  "submitFromDevice": "Cihazdan Seç ve Gönder",
+  "submitFromCamera": "Kamera ile Çek ve Gönder",
+
+  "aiAnalysisTitle": "AI Analizi",
+  "xpGained": "+{xp} XP kazandın!",
+  "@xpGained": {
+    "placeholders": {
+      "xp": {"type": "int"}
+    }
+  },
+  "strengthsTitle": "Güçlü yönlerin",
+  "findingsTitle": "Gelişim noktaları",
+  "suggestionPrefix": "Öneri: {text}",
+  "@suggestionPrefix": {
+    "placeholders": {
+      "text": {"type": "String"}
+    }
+  },
+
+  "profileLoadError": "Profil yüklenemedi: {error}",
+  "@profileLoadError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "createAccountCard": "Hesap oluştur",
+  "createAccountCardBody": "İlerlemen cihaz silinse bile güvende kalsın.",
+  "levelBadge": "{level}. Seviye • {xp} XP",
+  "@levelBadge": {
+    "placeholders": {
+      "level": {"type": "int"},
+      "xp": {"type": "int"}
+    }
+  },
+  "abilityChartTitle": "Ability Chart",
+  "abilityChartHint": "Bir eksene dokunarak ilgili derslere gidebilirsin.",
+  "chartEmpty": "Seviye belirleme tamamlanınca chart burada görünecek.",
+  "scoreOutOf": "{score}/100",
+  "@scoreOutOf": {
+    "placeholders": {
+      "score": {"type": "int"}
+    }
+  },
+  "journeyTitle": "Gelişim Macerası",
+  "journeyHint": "Yüklediğin ödevler ve AI notların, kronolojik.",
+  "journeyEmpty": "İlk ödevini yüklediğinde maceran burada başlayacak!",
+  "homeworkFallback": "Ödev",
+  "privacyKeyHint": "Anahtar: açık = herkese görünür, kapalı = sadece sen (varsayılan).",
+
+  "languageTitle": "Dil / Language",
+  "languageTurkish": "Türkçe",
+  "languageEnglish": "English",
+
+  "deleteAccount": "Hesabı Sil",
+  "deleteAccountBody": "Hesabın ve tüm çizimlerin kalıcı silinir.",
+  "deleteConfirmTitle": "Hesabı sil?",
+  "deleteConfirmBody": "Hesabın, ilerlemen ve yüklediğin tüm çizimler kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+  "cancel": "Vazgeç",
+  "continueButton": "Devam Et",
+  "deleteConfirm2Title": "Emin misin?",
+  "deleteConfirm2Body": "Son onay: tüm verilerin şimdi silinecek.",
+  "deleteFinalButton": "Hesabımı Kalıcı Olarak Sil",
+
+  "axisAnatomi": "Anatomi",
+  "axisPerspektif": "Perspektif",
+  "axisIsikGolge": "Işık-Gölge",
+  "axisOran": "Oran",
+  "axisCizgiKalitesi": "Çizgi Kalitesi",
+  "axisKompozisyon": "Kompozisyon",
+  "axisRenk": "Renk"
+}

@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'l10n/gen/app_localizations.dart';
 
 /// Backend adresi. Telefonda: `flutter run --dart-define=API_BASE=http://BILGISAYAR-LAN-IP:8000`
 const apiBase = String.fromEnvironment('API_BASE', defaultValue: 'http://localhost:8000');
 
 /// Backend'den dönen hata (detail mesajıyla). SocketException = sunucuya ulaşılamadı.
+/// detail zaten kullanıcının dilinde gelir (backend mesaj kataloğu).
 class ApiException implements Exception {
   final int statusCode;
   final String message;
@@ -17,20 +22,22 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-/// Kullanıcıya gösterilecek hata metni üretir.
-String friendlyError(Object e) {
+/// Kullanıcıya gösterilecek hata metni üretir (seçili UI dilinde).
+String friendlyError(BuildContext context, Object e) {
+  final t = AppLocalizations.of(context);
   if (e is SocketException || (e is http.ClientException)) {
-    return 'Sunucuya ulaşılamadı. İnternet bağlantını ve backend\'i kontrol et.';
+    return t.errorNetwork;
   }
   if (e is ApiException) return e.message;
-  return 'Beklenmeyen bir sorun oluştu.';
+  return t.errorUnexpected;
 }
 
 Map<String, dynamic> _decode(http.Response r) {
   final body = jsonDecode(utf8.decode(r.bodyBytes));
   if (r.statusCode >= 400) {
+    // detail yoksa dil-bağımsız kısa bir kod göster
     throw ApiException(
-        r.statusCode, (body is Map ? body['detail'] : null) ?? 'Sunucu hatası');
+        r.statusCode, (body is Map ? body['detail'] : null) ?? 'HTTP ${r.statusCode}');
   }
   return body as Map<String, dynamic>;
 }
@@ -117,7 +124,17 @@ class ApiClient {
   String? token;
   bool isGuest = true;
 
-  Map<String, String> get authHeaders => {'Authorization': 'Bearer $token'};
+  /// Kullanıcının açıkça seçtiği dil (profildeki seçici). null = cihaz dili.
+  String? savedLanguage;
+
+  /// Backend'e gönderilen etkin dil: açık seçim > cihaz dili (tr dışı = en).
+  String get language {
+    if (savedLanguage != null) return savedLanguage!;
+    return ui.PlatformDispatcher.instance.locale.languageCode == 'tr' ? 'tr' : 'en';
+  }
+
+  Map<String, String> get authHeaders =>
+      {'Authorization': 'Bearer $token', 'Accept-Language': language};
   Map<String, String> get _jsonHeaders =>
       {...authHeaders, 'Content-Type': 'application/json'};
 
@@ -127,6 +144,23 @@ class ApiClient {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
     isGuest = prefs.getBool('is_guest') ?? true;
+    savedLanguage = prefs.getString('language');
+  }
+
+  /// Dil seçici: yerelde saklar, oturum varsa backend'e de yazar
+  /// (AI çıktıları ve hata mesajları da bu dile döner).
+  Future<void> setLanguage(String code) async {
+    savedLanguage = code;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language', code);
+    if (token != null) {
+      final r = await http.patch(
+        Uri.parse('$apiBase/users/me/language'),
+        headers: _jsonHeaders,
+        body: jsonEncode({'language': code}),
+      );
+      _decode(r);
+    }
   }
 
   Future<void> _saveSession(Map<String, dynamic> auth) async {
@@ -140,8 +174,8 @@ class ApiClient {
   Future<void> createGuest(String displayName) async {
     final r = await http.post(
       Uri.parse('$apiBase/users/guest'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'display_name': displayName}),
+      headers: {'Content-Type': 'application/json', 'Accept-Language': language},
+      body: jsonEncode({'display_name': displayName, 'language': language}),
     );
     await _saveSession(_decode(r));
   }
@@ -149,9 +183,13 @@ class ApiClient {
   Future<void> register(String email, String password, String displayName) async {
     final r = await http.post(
       Uri.parse('$apiBase/users/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(
-          {'email': email, 'password': password, 'display_name': displayName}),
+      headers: {'Content-Type': 'application/json', 'Accept-Language': language},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+        'display_name': displayName,
+        'language': language,
+      }),
     );
     await _saveSession(_decode(r));
   }
@@ -159,7 +197,7 @@ class ApiClient {
   Future<void> login(String email, String password) async {
     final r = await http.post(
       Uri.parse('$apiBase/users/login'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'Accept-Language': language},
       body: jsonEncode({'email': email, 'password': password}),
     );
     await _saveSession(_decode(r));
@@ -181,9 +219,10 @@ class ApiClient {
       Uri.parse('$apiBase/users/google'),
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': language,
         if (token != null) ...authHeaders,
       },
-      body: jsonEncode({'id_token': idToken}),
+      body: jsonEncode({'id_token': idToken, 'language': language}),
     );
     await _saveSession(_decode(r));
   }
@@ -248,13 +287,14 @@ class ApiClient {
   }
 }
 
-/// Eksen adlarının kullanıcıya görünen halleri
-const axisLabels = {
-  'anatomi': 'Anatomi',
-  'perspektif': 'Perspektif',
-  'isik_golge': 'Işık-Gölge',
-  'oran': 'Oran',
-  'cizgi_kalitesi': 'Çizgi Kalitesi',
-  'kompozisyon': 'Kompozisyon',
-  'renk': 'Renk',
-};
+/// Eksen adlarının kullanıcıya görünen halleri (seçili UI dilinde).
+/// Sıra sabit — radar chart eksen dizilimi buna dayanır.
+Map<String, String> axisLabels(AppLocalizations t) => {
+      'anatomi': t.axisAnatomi,
+      'perspektif': t.axisPerspektif,
+      'isik_golge': t.axisIsikGolge,
+      'oran': t.axisOran,
+      'cizgi_kalitesi': t.axisCizgiKalitesi,
+      'kompozisyon': t.axisKompozisyon,
+      'renk': t.axisRenk,
+    };

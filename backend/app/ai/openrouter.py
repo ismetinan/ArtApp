@@ -13,7 +13,7 @@ import httpx
 from pydantic import BaseModel
 
 from .base import AIProvider
-from .prompts import ASSESS_PROMPT, REDLINE_PROMPT
+from .prompts import assess_prompt, redline_prompt
 from .schemas import LevelAssessment, RedlineResult
 
 _API_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -94,14 +94,18 @@ class OpenRouterProvider(AIProvider):
         text = body["choices"][0]["message"]["content"]
         return schema.model_validate_json(_strip_fences(text))
 
-    async def assess_level(self, images: list[bytes]) -> LevelAssessment:
+    async def assess_level(
+        self, images: list[bytes], language: str = "tr"
+    ) -> LevelAssessment:
         content = [_image_part(img) for img in images]
-        content.append({"type": "text", "text": ASSESS_PROMPT})
+        content.append({"type": "text", "text": assess_prompt(language)})
         return await self._generate(content, LevelAssessment)
 
-    async def redline_analysis(self, image: bytes, lesson_context: str) -> RedlineResult:
+    async def redline_analysis(
+        self, image: bytes, lesson_context: str, language: str = "tr"
+    ) -> RedlineResult:
         content = [
             _image_part(image),
-            {"type": "text", "text": REDLINE_PROMPT.format(lesson_context=lesson_context)},
+            {"type": "text", "text": redline_prompt(lesson_context, language)},
         ]
         return await self._generate(content, RedlineResult)
