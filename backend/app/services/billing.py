@@ -36,6 +36,11 @@ class PlayVerifyError(Exception):
     """Play API token'ı geçersiz/iptal saydı ya da satın alma tamamlanmamış."""
 
 
+class BillingConfigError(Exception):
+    """PLAY_SERVICE_ACCOUNT_JSON eksik/bozuk ya da Play API'ye ulaşılamıyor —
+    kullanıcı hatası değil, operatör yapılandırması. Uçlar 503'e çevirir."""
+
+
 def is_premium(user: User) -> bool:
     until = user.premium_until
     if until is None:
@@ -48,15 +53,18 @@ def is_premium(user: User) -> bool:
 def _access_token() -> str:
     sa_json = get_settings().play_service_account_json
     if not sa_json:
-        raise HTTPException(status_code=503, detail="billing yapılandırılmadı")
+        raise BillingConfigError("PLAY_SERVICE_ACCOUNT_JSON boş")
     from google.auth.transport.requests import Request
     from google.oauth2 import service_account
 
-    creds = service_account.Credentials.from_service_account_info(
-        json.loads(sa_json),
-        scopes=["https://www.googleapis.com/auth/androidpublisher"],
-    )
-    creds.refresh(Request())
+    try:
+        creds = service_account.Credentials.from_service_account_info(
+            json.loads(sa_json),
+            scopes=["https://www.googleapis.com/auth/androidpublisher"],
+        )
+        creds.refresh(Request())
+    except Exception as e:  # bozuk JSON, geçersiz anahtar, ağ hatası...
+        raise BillingConfigError(f"service account yüklenemedi: {e}") from e
     return creds.token
 
 
@@ -175,6 +183,13 @@ def process_purchase(db: Session, user: User, product_id: str, token: str) -> Pu
         raise HTTPException(
             status_code=400, detail=msg("purchase_invalid", user.language)
         ) from e
+    except (BillingConfigError, httpx.HTTPError) as e:
+        # Yapılandırma/Play API sorunu — kullanıcının suçu değil; hak verilmedi,
+        # istemci "geri yükle" ile daha sonra tekrar dener.
+        log.error("Billing yapılandırma/Play API hatası: %s", e)
+        raise HTTPException(
+            status_code=503, detail=msg("billing_unavailable", user.language)
+        ) from e
     acknowledge_with_play(kind, product_id, token)
     return purchase
 
@@ -194,5 +209,5 @@ def refresh_subscription(db: Session, user: User) -> None:
     try:
         data = verify_subscription_with_play(purchase.purchase_token)
         _apply_subscription(db, user, purchase, data)
-    except (PlayVerifyError, HTTPException):
+    except (PlayVerifyError, BillingConfigError, HTTPException, httpx.HTTPError):
         return

@@ -170,6 +170,25 @@ def test_premium_raises_ai_quota(client, monkeypatch):
         s.commit()
 
 
+def test_broken_service_account_json_returns_503(client, monkeypatch):
+    """Bozuk PLAY_SERVICE_ACCOUNT_JSON: verify 503 + yerelleştirilmiş mesaj döner
+    (500/'beklenmeyen sorun' değil); status sessizce çalışmaya devam eder."""
+    _enable_billing(monkeypatch)
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "play_service_account_json", "bozuk{json")
+    h, _ = _user(client, "Talihsiz")
+    r = client.post(
+        "/billing/verify",
+        json={"product_id": "jeton_5", "purchase_token": "tok-x"},
+        headers=h,
+    )
+    assert r.status_code == 503
+    assert "kullanılamıyor" in r.json()["detail"]
+    assert client.get("/profile", headers=h).json()["jeton_balance"] == 3
+    assert client.get("/billing/status", headers=h).status_code == 200
+
+
 def test_profile_exposes_billing_fields(client, monkeypatch):
     _enable_billing(monkeypatch)
     h, _ = _user(client, "Profilci")
