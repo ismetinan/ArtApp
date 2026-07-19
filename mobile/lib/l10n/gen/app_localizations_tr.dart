@@ -15,7 +15,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tabLessons => 'Dersler';
 
   @override
+  String get tabGallery => 'Topluluk';
+
+  @override
   String get tabProfile => 'Profil';
+
+  @override
+  String get galleryEmpty =>
+      'Henüz paylaşılan çizim yok. Gelişim Macerası\'ndaki anahtarla kendi çizimini herkese açabilirsin!';
 
   @override
   String get welcomeTagline => 'Çizimde gelişim yolculuğun burada başlıyor.';

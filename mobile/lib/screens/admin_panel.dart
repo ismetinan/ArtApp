@@ -110,6 +110,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.network(
                                   ApiClient.instance.imageUrl(portfolio[j]),
+                                  headers: ApiClient.instance.authHeaders,
                                   width: 96,
                                   height: 96,
                                   fit: BoxFit.cover,

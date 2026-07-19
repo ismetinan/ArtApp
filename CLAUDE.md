@@ -60,8 +60,9 @@ Müşteri geri bildirimi paketi eklendi (2026-07-19): skora göre ders atlama
 (`SKIP_UNLOCK_SCORE=60`), tavsiye edilen ders + "kendi kursunla ilerle" notu, AI ödev
 üretimi (obje/farklı açılar), teknik AI dili, serbest çizim analizi (ücretsiz 1/hafta,
 Premium sınırsız), waitlist sayfası (`/join`), seviye yol haritası.
-Kalan Faz 3 işleri: topluluk galerisi (dinamik ağaç yönlendirmesinin ilk hali skor
-atlama + öneriyle karşılandı; derinleştirme sonra değerlendirilir).
+Topluluk galerisi eklendi (2026-07-19, 4. sekme "Topluluk": herkese açık paylaşılan
+çizimler) — **Faz 3 kapsamı tamamlandı**; dinamik ağaç yönlendirmesinin ilk hali skor
+atlama + öneriyle karşılandı, derinleştirme Faz 4'le birlikte değerlendirilir.
 Faz 0 doğrulaması TAMAMLANDI (2026-07-18): 8 gerçek çizimle (manga/realist/karikatür)
 OpenRouter üzerinde koşuldu, stil tarafsızlığı GEÇTİ — bkz. `prototype/FAZ0_RAPOR.md`.**
 

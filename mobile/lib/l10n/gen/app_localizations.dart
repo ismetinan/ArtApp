@@ -110,11 +110,23 @@ abstract class AppLocalizations {
   /// **'Dersler'**
   String get tabLessons;
 
+  /// No description provided for @tabGallery.
+  ///
+  /// In tr, this message translates to:
+  /// **'Topluluk'**
+  String get tabGallery;
+
   /// No description provided for @tabProfile.
   ///
   /// In tr, this message translates to:
   /// **'Profil'**
   String get tabProfile;
+
+  /// No description provided for @galleryEmpty.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz paylaşılan çizim yok. Gelişim Macerası\'ndaki anahtarla kendi çizimini herkese açabilirsin!'**
+  String get galleryEmpty;
 
   /// No description provided for @welcomeTagline.
   ///

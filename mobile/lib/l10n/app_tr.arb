@@ -3,7 +3,9 @@
 
   "tabMentors": "Mentorlar",
   "tabLessons": "Dersler",
+  "tabGallery": "Topluluk",
   "tabProfile": "Profil",
+  "galleryEmpty": "Henüz paylaşılan çizim yok. Gelişim Macerası'ndaki anahtarla kendi çizimini herkese açabilirsin!",
 
   "welcomeTagline": "Çizimde gelişim yolculuğun burada başlıyor.",
   "continueAsGuest": "Misafir Olarak Devam Et",

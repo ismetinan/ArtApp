@@ -81,6 +81,20 @@ class SkillNode {
         unlockedByScore = j['unlocked_by_score'] == true;
 }
 
+class GalleryItem {
+  final int submissionId;
+  final String displayName, createdAt;
+  final String? nodeTitle;
+  final bool isMine;
+
+  GalleryItem.fromJson(Map<String, dynamic> j)
+      : submissionId = j['submission_id'],
+        displayName = j['display_name'],
+        nodeTitle = j['node_title'],
+        isMine = j['is_mine'] == true,
+        createdAt = j['created_at'];
+}
+
 class RedlineFinding {
   final String skillAxis, severity, messageTr, suggestionTr;
   final double x, y;
@@ -406,6 +420,16 @@ class ApiClient {
       level: j['level'] as int,
       submissionId: j['submission_id'] as int,
     );
+  }
+
+  /// Topluluk galerisi: herkese açık paylaşılan çizimler (en yeni önce).
+  Future<List<GalleryItem>> getGallery({int offset = 0, int limit = 30}) async {
+    final uri = Uri.parse('$apiBase/gallery')
+        .replace(queryParameters: {'offset': '$offset', 'limit': '$limit'});
+    final r = await http.get(uri, headers: authHeaders);
+    return (_decode(r)['items'] as List)
+        .map((m) => GalleryItem.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
   }
 
   Future<Map<String, dynamic>> getProfile() async {

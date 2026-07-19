@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../l10n/gen/app_localizations.dart';
 import '../push.dart';
+import 'gallery.dart';
 import 'mentors.dart';
 import 'profile.dart';
 import 'skill_tree.dart';
 
-/// Ana navigasyon: Mentorlar | Dersler | Profil (CLAUDE.md §7.1)
+/// Ana navigasyon: Mentorlar | Dersler | Topluluk | Profil
+/// (CLAUDE.md §7.1 + Faz 3 topluluk galerisi)
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -39,6 +41,7 @@ class _HomeShellState extends State<HomeShell> {
     final screens = [
       const MentorsScreen(),
       SkillTreeScreen(focusAxis: _focusAxis, key: ValueKey(_focusAxis)),
+      const GalleryScreen(),
       ProfileScreen(onAxisTap: goToLessons),
     ];
     return Scaffold(
@@ -56,6 +59,9 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDestination(
               icon: const Icon(Icons.account_tree),
               label: AppLocalizations.of(context).tabLessons),
+          NavigationDestination(
+              icon: const Icon(Icons.photo_library),
+              label: AppLocalizations.of(context).tabGallery),
           NavigationDestination(
               icon: const Icon(Icons.person),
               label: AppLocalizations.of(context).tabProfile),

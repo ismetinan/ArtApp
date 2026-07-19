@@ -15,7 +15,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabLessons => 'Lessons';
 
   @override
+  String get tabGallery => 'Community';
+
+  @override
   String get tabProfile => 'Profile';
+
+  @override
+  String get galleryEmpty =>
+      'No shared drawings yet. Use the switch in your Progress Journey to share your own!';
 
   @override
   String get welcomeTagline => 'Your journey of growth in drawing starts here.';
