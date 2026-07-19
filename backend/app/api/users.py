@@ -11,6 +11,7 @@ from ..db import get_db
 from ..models.tables import (
     AbilityScore,
     AiUsage,
+    ContentReport,
     JetonTransaction,
     MentorProfile,
     MentorshipRequest,
@@ -248,6 +249,13 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
     db.execute(delete(MentorshipRequest).where(MentorshipRequest.student_id == user.id))
     db.execute(delete(MentorProfile).where(MentorProfile.user_id == user.id))
 
+    # Moderasyon kayıtları: kullanıcının yaptığı şikayetler + kendi gönderilerine
+    # gelenler (FK sırası: submissions'tan önce silinmeli)
+    own_submission_ids = select(Submission.id).where(Submission.user_id == user.id)
+    db.execute(delete(ContentReport).where(ContentReport.reporter_id == user.id))
+    db.execute(
+        delete(ContentReport).where(ContentReport.submission_id.in_(own_submission_ids))
+    )
     for table in (Submission, UserProgress, AbilityScore, AiUsage, Purchase):
         db.execute(delete(table).where(table.user_id == user.id))
     db.delete(user)

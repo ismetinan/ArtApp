@@ -60,6 +60,7 @@ def _expire_stale(db: Session, requests: list[MentorshipRequest]) -> None:
                     student,
                     msg("push_request_refunded_title", student.language),
                     msg("push_request_refunded_body", student.language, count=r.jeton_cost),
+                    data={"route": "my_requests"},
                 )
 
 
@@ -233,6 +234,7 @@ def create_mentor_request(
             mentor_user,
             msg("push_new_request_title", mentor_user.language),
             msg("push_new_request_body", mentor_user.language, student=user.display_name),
+            data={"route": "mentor_panel"},
         )
     return {
         "request_id": request.id,
@@ -453,6 +455,7 @@ def give_feedback(
             student,
             msg("push_feedback_ready_title", student.language),
             msg("push_feedback_ready_body", student.language, mentor=user.display_name),
+            data={"route": "my_requests"},
         )
     return {"request_id": r.id, "status": r.status}
 
@@ -511,5 +514,6 @@ def decide_application(
             applicant,
             msg(f"push_{key}_title", applicant.language),
             msg(f"push_{key}_body", applicant.language),
+            data={"route": "profile"},
         )
     return {"id": profile.id, "status": profile.status}

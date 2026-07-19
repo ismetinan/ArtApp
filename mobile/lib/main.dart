@@ -46,6 +46,7 @@ class ArtApp extends StatelessWidget {
       builder: (context, locale, _) => MaterialApp(
         title: 'Artora', // marka adı — çevrilmez
         scaffoldMessengerKey: messengerKey, // öndeyken push → SnackBar
+        navigatorKey: navigatorKey, // bildirim derin bağlantıları
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         // en listede önce: desteklenmeyen cihaz dillerinde İngilizce'ye düşülür

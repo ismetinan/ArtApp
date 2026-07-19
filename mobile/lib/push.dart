@@ -5,11 +5,31 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'api.dart';
+import 'screens/mentor_panel.dart';
+import 'screens/profile.dart';
 
 /// Uygulama öndeyken gelen bildirimleri SnackBar olarak göstermek için
 /// MaterialApp'e verilen global messenger anahtarı.
 final GlobalKey<ScaffoldMessengerState> messengerKey =
     GlobalKey<ScaffoldMessengerState>();
+
+/// Bildirim derin bağlantıları için MaterialApp'e verilen navigator anahtarı.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+bool _initialMessageHandled = false;
+
+/// Bildirime dokununca ilgili ekranı açar (data.route sunucudan gelir).
+void _openRoute(RemoteMessage message) {
+  final nav = navigatorKey.currentState;
+  if (nav == null) return;
+  switch (message.data['route']) {
+    case 'mentor_panel':
+      nav.push(MaterialPageRoute(builder: (_) => const MentorPanelScreen()));
+    case 'my_requests':
+      nav.push(MaterialPageRoute(builder: (_) => const MyRequestsScreen()));
+    // 'profile' ve bilinmeyen rotalar: uygulamayı açmak yeterli
+  }
+}
 
 bool _firebaseReady = false;
 bool _listenersBound = false;
@@ -50,6 +70,16 @@ Future<void> initPush() async {
       FirebaseMessaging.instance.onTokenRefresh.listen((token) {
         ApiClient.instance.registerDevice(token).catchError((_) {});
       });
+
+      // Derin bağlantı: arka plandayken bildirime dokunuldu
+      FirebaseMessaging.onMessageOpenedApp.listen(_openRoute);
+    }
+
+    // Derin bağlantı: uygulama bildirimle SOĞUK açıldıysa (bir kez işlenir)
+    if (!_initialMessageHandled) {
+      _initialMessageHandled = true;
+      final initial = await FirebaseMessaging.instance.getInitialMessage();
+      if (initial != null) _openRoute(initial);
     }
 
     await FirebaseMessaging.instance.requestPermission();

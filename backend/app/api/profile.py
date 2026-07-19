@@ -104,6 +104,11 @@ def update_privacy(
     submission = db.get(Submission, submission_id)
     if submission is None or submission.user_id != user.id:
         raise HTTPException(status_code=404, detail=msg("submission_not_found", user.language))
+    # Moderasyonla gizlenen içerik sahibi tarafından yeniden açılamaz (UGC politikası)
+    if body.is_public and submission.moderation_hidden:
+        raise HTTPException(
+            status_code=403, detail=msg("moderation_blocked", user.language)
+        )
     submission.is_public = body.is_public
     db.commit()
     return {"submission_id": submission.id, "is_public": submission.is_public}

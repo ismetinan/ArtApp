@@ -25,6 +25,47 @@ class AppLocalizationsTr extends AppLocalizations {
       'Henüz paylaşılan çizim yok. Gelişim Macerası\'ndaki anahtarla kendi çizimini herkese açabilirsin!';
 
   @override
+  String get reportButton => 'Bildir';
+
+  @override
+  String get reportSheetTitle => 'Bu çizimi neden bildiriyorsun?';
+
+  @override
+  String get reportReasonUygunsuz => 'Uygunsuz içerik';
+
+  @override
+  String get reportReasonSpam => 'Spam / alakasız';
+
+  @override
+  String get reportReasonTelif => 'Telif ihlali';
+
+  @override
+  String get reportReasonDiger => 'Diğer';
+
+  @override
+  String get reportThanks => 'Bildirimin alındı, inceleyeceğiz. Teşekkürler!';
+
+  @override
+  String get adminTabApplications => 'Başvurular';
+
+  @override
+  String get adminTabReports => 'Şikayetler';
+
+  @override
+  String get adminNoReports => 'Bekleyen şikayet yok.';
+
+  @override
+  String adminReportCount(int count, String reasons) {
+    return '$count şikayet: $reasons';
+  }
+
+  @override
+  String get adminHide => 'Kaldır';
+
+  @override
+  String get adminDismiss => 'Sorun Yok';
+
+  @override
   String get welcomeTagline => 'Çizimde gelişim yolculuğun burada başlıyor.';
 
   @override

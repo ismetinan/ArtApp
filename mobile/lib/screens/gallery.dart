@@ -122,11 +122,65 @@ class _GalleryDetailScreen extends StatelessWidget {
   final GalleryItem item;
   const _GalleryDetailScreen({required this.item});
 
+  /// UGC moderasyonu (Play politikası): sebep seç → şikayet gönder.
+  Future<void> _report(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    final reasons = {
+      'uygunsuz': t.reportReasonUygunsuz,
+      'spam': t.reportReasonSpam,
+      'telif': t.reportReasonTelif,
+      'diger': t.reportReasonDiger,
+    };
+    final reason = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(t.reportSheetTitle,
+                  style: Theme.of(ctx).textTheme.titleMedium),
+            ),
+            for (final e in reasons.entries)
+              ListTile(
+                title: Text(e.value),
+                onTap: () => Navigator.pop(ctx, e.key),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (reason == null || !context.mounted) return;
+    try {
+      await ApiClient.instance.reportSubmission(item.submissionId, reason);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.reportThanks)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(item.displayName)),
+      appBar: AppBar(
+        title: Text(item.displayName),
+        actions: [
+          if (!item.isMine)
+            IconButton(
+              icon: const Icon(Icons.flag_outlined),
+              tooltip: t.reportButton,
+              onPressed: () => _report(context),
+            ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

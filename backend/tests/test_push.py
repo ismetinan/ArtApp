@@ -21,7 +21,9 @@ def _capture_pushes(monkeypatch):
 
     sent = []
     monkeypatch.setattr(
-        mentors_module, "send_push", lambda user, title, body: sent.append((user.id, title, body))
+        mentors_module,
+        "send_push",
+        lambda user, title, body, data=None: sent.append((user.id, title, body)),
     )
     return sent
 

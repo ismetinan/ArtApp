@@ -128,6 +128,84 @@ abstract class AppLocalizations {
   /// **'Henüz paylaşılan çizim yok. Gelişim Macerası\'ndaki anahtarla kendi çizimini herkese açabilirsin!'**
   String get galleryEmpty;
 
+  /// No description provided for @reportButton.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildir'**
+  String get reportButton;
+
+  /// No description provided for @reportSheetTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu çizimi neden bildiriyorsun?'**
+  String get reportSheetTitle;
+
+  /// No description provided for @reportReasonUygunsuz.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygunsuz içerik'**
+  String get reportReasonUygunsuz;
+
+  /// No description provided for @reportReasonSpam.
+  ///
+  /// In tr, this message translates to:
+  /// **'Spam / alakasız'**
+  String get reportReasonSpam;
+
+  /// No description provided for @reportReasonTelif.
+  ///
+  /// In tr, this message translates to:
+  /// **'Telif ihlali'**
+  String get reportReasonTelif;
+
+  /// No description provided for @reportReasonDiger.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer'**
+  String get reportReasonDiger;
+
+  /// No description provided for @reportThanks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimin alındı, inceleyeceğiz. Teşekkürler!'**
+  String get reportThanks;
+
+  /// No description provided for @adminTabApplications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başvurular'**
+  String get adminTabApplications;
+
+  /// No description provided for @adminTabReports.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şikayetler'**
+  String get adminTabReports;
+
+  /// No description provided for @adminNoReports.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen şikayet yok.'**
+  String get adminNoReports;
+
+  /// No description provided for @adminReportCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} şikayet: {reasons}'**
+  String adminReportCount(int count, String reasons);
+
+  /// No description provided for @adminHide.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaldır'**
+  String get adminHide;
+
+  /// No description provided for @adminDismiss.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sorun Yok'**
+  String get adminDismiss;
+
   /// No description provided for @welcomeTagline.
   ///
   /// In tr, this message translates to:

@@ -37,8 +37,13 @@ def _get_app():
     return _app
 
 
-def send_push(user: User, title: str, body: str) -> None:
-    """Kullanıcının cihazına bildirim gönderir. Token yoksa / init yoksa no-op."""
+def send_push(
+    user: User, title: str, body: str, data: dict[str, str] | None = None
+) -> None:
+    """Kullanıcının cihazına bildirim gönderir. Token yoksa / init yoksa no-op.
+
+    data: derin bağlantı yükü (örn. {"route": "mentor_panel"}) — Flutter,
+    bildirime dokunulunca ilgili ekranı açar."""
     if user.fcm_token is None:
         return
     app = _get_app()
@@ -50,6 +55,7 @@ def send_push(user: User, title: str, body: str) -> None:
         messaging.send(
             messaging.Message(
                 notification=messaging.Notification(title=title, body=body),
+                data=data or {},
                 token=user.fcm_token,
             ),
             app=app,

@@ -6,6 +6,25 @@
   "tabGallery": "Topluluk",
   "tabProfile": "Profil",
   "galleryEmpty": "Henüz paylaşılan çizim yok. Gelişim Macerası'ndaki anahtarla kendi çizimini herkese açabilirsin!",
+  "reportButton": "Bildir",
+  "reportSheetTitle": "Bu çizimi neden bildiriyorsun?",
+  "reportReasonUygunsuz": "Uygunsuz içerik",
+  "reportReasonSpam": "Spam / alakasız",
+  "reportReasonTelif": "Telif ihlali",
+  "reportReasonDiger": "Diğer",
+  "reportThanks": "Bildirimin alındı, inceleyeceğiz. Teşekkürler!",
+  "adminTabApplications": "Başvurular",
+  "adminTabReports": "Şikayetler",
+  "adminNoReports": "Bekleyen şikayet yok.",
+  "adminReportCount": "{count} şikayet: {reasons}",
+  "@adminReportCount": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "reasons": {"type": "String"}
+    }
+  },
+  "adminHide": "Kaldır",
+  "adminDismiss": "Sorun Yok",
 
   "welcomeTagline": "Çizimde gelişim yolculuğun burada başlıyor.",
   "continueAsGuest": "Misafir Olarak Devam Et",

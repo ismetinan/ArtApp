@@ -7,8 +7,9 @@ import 'redline.dart';
 /// Faz 2: onaylı mentorun paneli — müsaitlik anahtarı + atanmış istek kuyruğu.
 /// İstek detayında öğrencinin çizimi + AI analizi görülür, metin geri bildirim yazılır.
 class MentorPanelScreen extends StatefulWidget {
-  final bool initialAvailable;
-  const MentorPanelScreen({super.key, required this.initialAvailable});
+  /// null = bilinmiyor (bildirim derin bağlantısından açıldı) — profilden çekilir.
+  final bool? initialAvailable;
+  const MentorPanelScreen({super.key, this.initialAvailable});
 
   @override
   State<MentorPanelScreen> createState() => _MentorPanelScreenState();
@@ -21,7 +22,16 @@ class _MentorPanelScreenState extends State<MentorPanelScreen> {
   @override
   void initState() {
     super.initState();
-    _available = widget.initialAvailable;
+    _available = widget.initialAvailable ?? true;
+    if (widget.initialAvailable == null) {
+      // Derin bağlantıyla gelindi: gerçek müsaitlik profilden okunur
+      ApiClient.instance.getProfile().then((p) {
+        final mentor = p['mentor'] as Map<String, dynamic>?;
+        if (mounted && mentor != null) {
+          setState(() => _available = mentor['is_available'] == true);
+        }
+      }).catchError((_) {});
+    }
     _future = ApiClient.instance.getMentorQueue();
   }
 

@@ -432,6 +432,35 @@ class ApiClient {
         .toList();
   }
 
+  /// Topluluk gönderisini şikayet eder (UGC moderasyonu).
+  Future<void> reportSubmission(int submissionId, String reason) async {
+    final r = await http.post(
+      Uri.parse('$apiBase/submissions/$submissionId/report'),
+      headers: _jsonHeaders,
+      body: jsonEncode({'reason': reason}),
+    );
+    _decode(r);
+  }
+
+  /// Admin: bekleyen içerik şikayetleri.
+  Future<List<Map<String, dynamic>>> getContentReports() async {
+    final r =
+        await http.get(Uri.parse('$apiBase/admin/reports'), headers: authHeaders);
+    return (_decode(r)['reports'] as List)
+        .map((m) => Map<String, dynamic>.from(m))
+        .toList();
+  }
+
+  /// Admin: şikayet kararı — hide (kaldır) | dismiss (içerik kalır).
+  Future<void> decideContentReport(int submissionId, bool hide) async {
+    final decision = hide ? 'hide' : 'dismiss';
+    final r = await http.post(
+      Uri.parse('$apiBase/admin/reports/$submissionId/$decision'),
+      headers: authHeaders,
+    );
+    _decode(r);
+  }
+
   Future<Map<String, dynamic>> getProfile() async {
     final r = await http.get(Uri.parse('$apiBase/profile'), headers: authHeaders);
     final j = _decode(r);

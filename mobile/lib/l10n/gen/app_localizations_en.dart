@@ -25,6 +25,47 @@ class AppLocalizationsEn extends AppLocalizations {
       'No shared drawings yet. Use the switch in your Progress Journey to share your own!';
 
   @override
+  String get reportButton => 'Report';
+
+  @override
+  String get reportSheetTitle => 'Why are you reporting this drawing?';
+
+  @override
+  String get reportReasonUygunsuz => 'Inappropriate content';
+
+  @override
+  String get reportReasonSpam => 'Spam / irrelevant';
+
+  @override
+  String get reportReasonTelif => 'Copyright violation';
+
+  @override
+  String get reportReasonDiger => 'Other';
+
+  @override
+  String get reportThanks => 'Report received, we\'ll review it. Thank you!';
+
+  @override
+  String get adminTabApplications => 'Applications';
+
+  @override
+  String get adminTabReports => 'Reports';
+
+  @override
+  String get adminNoReports => 'No pending reports.';
+
+  @override
+  String adminReportCount(int count, String reasons) {
+    return '$count report(s): $reasons';
+  }
+
+  @override
+  String get adminHide => 'Remove';
+
+  @override
+  String get adminDismiss => 'Looks Fine';
+
+  @override
   String get welcomeTagline => 'Your journey of growth in drawing starts here.';
 
   @override

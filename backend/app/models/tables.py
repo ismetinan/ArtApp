@@ -87,6 +87,8 @@ class Submission(Base):
     ai_result: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     # Varsayılan: özel (CLAUDE.md §8 açık soruydu — güvenli taraf seçildi)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Moderasyon: admin gizlediyse sahibi yeniden herkese açık YAPAMAZ (UGC politikası)
+    moderation_hidden: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     user: Mapped[User] = relationship(back_populates="submissions")
@@ -182,6 +184,20 @@ class WaitlistSignup(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(255), unique=True)
     language: Mapped[str] = mapped_column(String(5), default="tr")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ContentReport(Base):
+    """Topluluk galerisi şikayeti (Play UGC politikası: bildir + kaldır akışı).
+    Kullanıcı başına gönderi başına tek şikayet — spam engeli."""
+
+    __tablename__ = "content_reports"
+    __table_args__ = (UniqueConstraint("submission_id", "reporter_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    submission_id: Mapped[int] = mapped_column(ForeignKey("submissions.id"))
+    reporter_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    reason: Mapped[str] = mapped_column(String(32))  # uygunsuz | spam | telif | diger
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

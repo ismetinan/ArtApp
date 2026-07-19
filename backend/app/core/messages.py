@@ -156,6 +156,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Başvuru bulunamadı",
         "en": "Application not found",
     },
+    "moderation_blocked": {
+        "tr": "Bu çizim topluluk kuralları gereği kaldırıldı ve yeniden paylaşılamaz. Bir hata olduğunu düşünüyorsan bize yaz.",
+        "en": "This drawing was removed under the community guidelines and can't be shared again. If you think this is a mistake, contact us.",
+    },
     "free_analysis_limit": {
         "tr": "Bu haftaki serbest analiz hakkını kullandın — haftaya yenilenir. Premium'da serbest analiz sınırsız.",
         "en": "You've used this week's free analysis — it renews next week. Free analysis is unlimited with Premium.",

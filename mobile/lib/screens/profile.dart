@@ -469,6 +469,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+/// Bildirim derin bağlantısı hedefi: "Mentor İsteklerim" tek başına ekran
+/// (cevap geldi / iade bildirimine dokununca açılır).
+class MyRequestsScreen extends StatelessWidget {
+  const MyRequestsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(AppLocalizations.of(context).myRequestsTitle)),
+      body: const SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: _MyRequestsSection(),
+      ),
+    );
+  }
+}
+
 /// Faz 2: profildeki mentor bölümü — başvuru / bekleme / panel girişi.
 class _MentorSection extends StatelessWidget {
   final Map<String, dynamic>? mentor;
