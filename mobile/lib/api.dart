@@ -317,6 +317,16 @@ class ApiClient {
     await clearSession();
   }
 
+  /// Oturumu kapatır (hesap sunucuda kalır). Önce bu cihazın FCM token'ını
+  /// hesaptan ayırmayı dener ki eski hesabın bildirimleri bu telefona düşmesin;
+  /// başarısız olsa da çıkış devam eder.
+  Future<void> logout() async {
+    try {
+      await registerDevice('');
+    } catch (_) {}
+    await clearSession();
+  }
+
   Future<void> clearSession() async {
     token = null;
     isGuest = true;
@@ -450,6 +460,27 @@ class ApiClient {
       Uri.parse('$apiBase/mentor-requests/$requestId/feedback'),
       headers: _jsonHeaders,
       body: jsonEncode({'feedback_text': text}),
+    );
+    _decode(r);
+  }
+
+  /// Admin: bekleyen mentor başvuruları (is_admin olmayan hesapta 403 alır).
+  Future<List<Map<String, dynamic>>> getMentorApplications() async {
+    final r = await http.get(
+      Uri.parse('$apiBase/admin/mentor-applications'),
+      headers: authHeaders,
+    );
+    return (_decode(r)['applications'] as List)
+        .map((m) => Map<String, dynamic>.from(m))
+        .toList();
+  }
+
+  /// Admin: başvuruyu onaylar/reddeder.
+  Future<void> decideMentorApplication(int profileId, bool approve) async {
+    final decision = approve ? 'approve' : 'reject';
+    final r = await http.post(
+      Uri.parse('$apiBase/admin/mentor-applications/$profileId/$decision'),
+      headers: authHeaders,
     );
     _decode(r);
   }

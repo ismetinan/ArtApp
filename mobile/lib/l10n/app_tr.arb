@@ -146,6 +146,11 @@
   "languageTurkish": "Türkçe",
   "languageEnglish": "English",
 
+  "signOut": "Çıkış Yap",
+  "signOutConfirmTitle": "Çıkış yapılsın mı?",
+  "signOutConfirmBody": "Aynı hesapla tekrar giriş yapabilirsin; ilerlemen sunucuda güvende.",
+  "signOutGuestBody": "Misafir hesabına tekrar GİRİLEMEZ — ilerlemen kaybolur. Kaybetmemek için önce profilden hesap oluştur.",
+
   "deleteAccount": "Hesabı Sil",
   "deleteAccountBody": "Hesabın ve tüm çizimlerin kalıcı silinir.",
   "deleteConfirmTitle": "Hesabı sil?",
@@ -204,6 +209,22 @@
   "mentorAskDirect": "Soru sor — 3 jeton",
   "mentorPickDrawing": "Hangi çizimini göndereceksin?",
   "mentorNoDrawings": "Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.",
+
+  "adminPanelTitle": "Admin — Mentor Başvuruları",
+  "adminSectionTitle": "Admin Paneli",
+  "adminSectionBody": "Bekleyen mentor başvurularını incele ve onayla.",
+  "adminNoApplications": "Bekleyen başvuru yok.",
+  "adminApprove": "Onayla",
+  "adminReject": "Reddet",
+  "adminDecided": "{name}: {decision}",
+  "@adminDecided": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "decision": {"type": "String"}
+    }
+  },
+  "adminDecisionApproved": "onaylandı",
+  "adminDecisionRejected": "reddedildi",
 
   "styleManga": "Manga",
   "styleRealist": "Realist",

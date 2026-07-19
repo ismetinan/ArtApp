@@ -59,7 +59,7 @@ def _expire_stale(db: Session, requests: list[MentorshipRequest]) -> None:
                 send_push(
                     student,
                     msg("push_request_refunded_title", student.language),
-                    msg("push_request_refunded_body", student.language),
+                    msg("push_request_refunded_body", student.language, count=r.jeton_cost),
                 )
 
 
@@ -504,4 +504,12 @@ def decide_application(
         )
     profile.status = "approved" if decision == "approve" else "rejected"
     db.commit()
+    applicant = db.get(User, profile.user_id)
+    if applicant is not None:
+        key = "application_approved" if decision == "approve" else "application_rejected"
+        send_push(
+            applicant,
+            msg(f"push_{key}_title", applicant.language),
+            msg(f"push_{key}_body", applicant.language),
+        )
     return {"id": profile.id, "status": profile.status}

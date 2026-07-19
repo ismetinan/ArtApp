@@ -46,6 +46,9 @@ def test_push_events_new_request_and_feedback(client, monkeypatch):
     _enable_market(monkeypatch)
     sent = _capture_pushes(monkeypatch)
     mentor_h = _approved_mentor(client, monkeypatch)  # display_name "Mentor", dil tr
+    # 0) admin onayı başvurana "onaylandın" bildirimi gönderir
+    assert len(sent) == 1 and "onayland" in sent[0][1]
+    sent.clear()
     student_h, student = _user(client, "Öğrenci")
     sid = _submit(client, student_h)
 

@@ -83,6 +83,11 @@
   "languageTurkish": "Türkçe",
   "languageEnglish": "English",
 
+  "signOut": "Sign Out",
+  "signOutConfirmTitle": "Sign out?",
+  "signOutConfirmBody": "You can sign back in with the same account; your progress is safe on the server.",
+  "signOutGuestBody": "A guest account CANNOT be recovered — your progress will be lost. Create an account from your profile first to keep it.",
+
   "deleteAccount": "Delete Account",
   "deleteAccountBody": "Your account and all your drawings are permanently deleted.",
   "deleteConfirmTitle": "Delete account?",
@@ -126,6 +131,16 @@
   "mentorAskDirect": "Ask this mentor — 3 jetons",
   "mentorPickDrawing": "Which drawing do you want to send?",
   "mentorNoDrawings": "Upload a lesson assignment first — after the analysis you can send it to a mentor from here.",
+
+  "adminPanelTitle": "Admin — Mentor Applications",
+  "adminSectionTitle": "Admin Panel",
+  "adminSectionBody": "Review and approve pending mentor applications.",
+  "adminNoApplications": "No pending applications.",
+  "adminApprove": "Approve",
+  "adminReject": "Reject",
+  "adminDecided": "{name}: {decision}",
+  "adminDecisionApproved": "approved",
+  "adminDecisionRejected": "rejected",
 
   "styleManga": "Manga",
   "styleRealist": "Realistic",

@@ -57,6 +57,8 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         "language": user.language,
         "jeton_balance": user.jeton_balance,
         "mentor_market_enabled": get_settings().mentor_market_enabled,
+        # Beta admini: Flutter buna bakarak başvuru onay panelini gösterir
+        "is_admin": user.is_admin,
         # Faz 2: mentor rolü — Flutter buna bakarak paneli gösterir
         "mentor": None
         if mentor is None

@@ -512,6 +512,30 @@ abstract class AppLocalizations {
   /// **'English'**
   String get languageEnglish;
 
+  /// No description provided for @signOut.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış Yap'**
+  String get signOut;
+
+  /// No description provided for @signOutConfirmTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış yapılsın mı?'**
+  String get signOutConfirmTitle;
+
+  /// No description provided for @signOutConfirmBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aynı hesapla tekrar giriş yapabilirsin; ilerlemen sunucuda güvende.'**
+  String get signOutConfirmBody;
+
+  /// No description provided for @signOutGuestBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Misafir hesabına tekrar GİRİLEMEZ — ilerlemen kaybolur. Kaybetmemek için önce profilden hesap oluştur.'**
+  String get signOutGuestBody;
+
   /// No description provided for @deleteAccount.
   ///
   /// In tr, this message translates to:
@@ -763,6 +787,60 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.'**
   String get mentorNoDrawings;
+
+  /// No description provided for @adminPanelTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin — Mentor Başvuruları'**
+  String get adminPanelTitle;
+
+  /// No description provided for @adminSectionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Admin Paneli'**
+  String get adminSectionTitle;
+
+  /// No description provided for @adminSectionBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen mentor başvurularını incele ve onayla.'**
+  String get adminSectionBody;
+
+  /// No description provided for @adminNoApplications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen başvuru yok.'**
+  String get adminNoApplications;
+
+  /// No description provided for @adminApprove.
+  ///
+  /// In tr, this message translates to:
+  /// **'Onayla'**
+  String get adminApprove;
+
+  /// No description provided for @adminReject.
+  ///
+  /// In tr, this message translates to:
+  /// **'Reddet'**
+  String get adminReject;
+
+  /// No description provided for @adminDecided.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name}: {decision}'**
+  String adminDecided(String name, String decision);
+
+  /// No description provided for @adminDecisionApproved.
+  ///
+  /// In tr, this message translates to:
+  /// **'onaylandı'**
+  String get adminDecisionApproved;
+
+  /// No description provided for @adminDecisionRejected.
+  ///
+  /// In tr, this message translates to:
+  /// **'reddedildi'**
+  String get adminDecisionRejected;
 
   /// No description provided for @styleManga.
   ///

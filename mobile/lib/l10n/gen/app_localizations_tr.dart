@@ -251,6 +251,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get signOut => 'Çıkış Yap';
+
+  @override
+  String get signOutConfirmTitle => 'Çıkış yapılsın mı?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Aynı hesapla tekrar giriş yapabilirsin; ilerlemen sunucuda güvende.';
+
+  @override
+  String get signOutGuestBody =>
+      'Misafir hesabına tekrar GİRİLEMEZ — ilerlemen kaybolur. Kaybetmemek için önce profilden hesap oluştur.';
+
+  @override
   String get deleteAccount => 'Hesabı Sil';
 
   @override
@@ -389,6 +403,36 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get mentorNoDrawings =>
       'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.';
+
+  @override
+  String get adminPanelTitle => 'Admin — Mentor Başvuruları';
+
+  @override
+  String get adminSectionTitle => 'Admin Paneli';
+
+  @override
+  String get adminSectionBody =>
+      'Bekleyen mentor başvurularını incele ve onayla.';
+
+  @override
+  String get adminNoApplications => 'Bekleyen başvuru yok.';
+
+  @override
+  String get adminApprove => 'Onayla';
+
+  @override
+  String get adminReject => 'Reddet';
+
+  @override
+  String adminDecided(String name, String decision) {
+    return '$name: $decision';
+  }
+
+  @override
+  String get adminDecisionApproved => 'onaylandı';
+
+  @override
+  String get adminDecisionRejected => 'reddedildi';
 
   @override
   String get styleManga => 'Manga';

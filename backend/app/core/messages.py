@@ -178,8 +178,24 @@ _CATALOG: dict[str, dict[str, str]] = {
         "en": "Your jeton was refunded",
     },
     "push_request_refunded_body": {
-        "tr": "Mentor isteğin zamanında cevaplanamadı — 1 jeton hesabına geri yattı.",
-        "en": "Your mentor request wasn't answered in time — 1 jeton was returned to you.",
+        "tr": "Mentor isteğin zamanında cevaplanamadı — {count} jeton hesabına geri yattı.",
+        "en": "Your mentor request wasn't answered in time — {count} jeton(s) were returned to you.",
+    },
+    "push_application_approved_title": {
+        "tr": "Mentor başvurun onaylandı 🎉",
+        "en": "Your mentor application was approved 🎉",
+    },
+    "push_application_approved_body": {
+        "tr": "Artık mentorsun! Profilindeki Mentor Paneli'nden istekleri alabilirsin.",
+        "en": "You're a mentor now! You can receive requests from the Mentor Panel in your profile.",
+    },
+    "push_application_rejected_title": {
+        "tr": "Mentor başvurun hakkında",
+        "en": "About your mentor application",
+    },
+    "push_application_rejected_body": {
+        "tr": "Bu seferlik onaylayamadık — profilini güncelleyip yeniden başvurabilirsin.",
+        "en": "We couldn't approve it this time — you can update your profile and apply again.",
     },
 }
 

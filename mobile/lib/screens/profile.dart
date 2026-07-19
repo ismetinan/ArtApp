@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../main.dart';
+import 'admin_panel.dart';
 import 'auth_form.dart';
 import 'mentor_panel.dart';
 import 'onboarding.dart';
@@ -226,6 +227,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 const _MyRequestsSection(),
+                if (p['is_admin'] == true) ...[
+                  const SizedBox(height: 16),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.admin_panel_settings_outlined),
+                      title: Text(t.adminSectionTitle),
+                      subtitle: Text(t.adminSectionBody),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const AdminPanelScreen()),
+                      ),
+                    ),
+                  ),
+                ],
               ],
               const SizedBox(height: 24),
               // Dil seçici: UI + backend hata mesajları + AI çıktı dili
@@ -253,6 +269,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
               const SizedBox(height: 32),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: Text(t.signOut),
+                onTap: () => _confirmSignOut(context),
+              ),
               // Play Store şartı: hesap silme uygulama içinden erişilebilir olmalı
               ListTile(
                 leading: Icon(Icons.delete_forever,
@@ -268,6 +289,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    // Misafir hesaba tekrar girilemez (şifresi yok) — çıkış = kalıcı kayıp
+    final body = ApiClient.instance.isGuest
+        ? t.signOutGuestBody
+        : t.signOutConfirmBody;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.signOutConfirmTitle),
+        content: Text(body),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(t.signOut)),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    await ApiClient.instance.logout();
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+        (_) => false,
+      );
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context) async {

@@ -249,6 +249,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get signOutConfirmTitle => 'Sign out?';
+
+  @override
+  String get signOutConfirmBody =>
+      'You can sign back in with the same account; your progress is safe on the server.';
+
+  @override
+  String get signOutGuestBody =>
+      'A guest account CANNOT be recovered — your progress will be lost. Create an account from your profile first to keep it.';
+
+  @override
   String get deleteAccount => 'Delete Account';
 
   @override
@@ -389,6 +403,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mentorNoDrawings =>
       'Upload a lesson assignment first — after the analysis you can send it to a mentor from here.';
+
+  @override
+  String get adminPanelTitle => 'Admin — Mentor Applications';
+
+  @override
+  String get adminSectionTitle => 'Admin Panel';
+
+  @override
+  String get adminSectionBody =>
+      'Review and approve pending mentor applications.';
+
+  @override
+  String get adminNoApplications => 'No pending applications.';
+
+  @override
+  String get adminApprove => 'Approve';
+
+  @override
+  String get adminReject => 'Reject';
+
+  @override
+  String adminDecided(String name, String decision) {
+    return '$name: $decision';
+  }
+
+  @override
+  String get adminDecisionApproved => 'approved';
+
+  @override
+  String get adminDecisionRejected => 'rejected';
 
   @override
   String get styleManga => 'Manga';
