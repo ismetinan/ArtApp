@@ -160,6 +160,31 @@ class JetonTransaction(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class Assignment(Base):
+    """AI'ın kullanıcıya özel ürettiği ödev görevi — düğüm başına bir kez üretilir,
+    sonraki okumalar kota harcamaz."""
+
+    __tablename__ = "assignments"
+    __table_args__ = (UniqueConstraint("user_id", "node_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    node_id: Mapped[str] = mapped_column(ForeignKey("skill_nodes.id"))
+    text: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class WaitlistSignup(Base):
+    """Pazara çıkış bekleme listesi (/join sayfasından, auth'suz)."""
+
+    __tablename__ = "waitlist_signups"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    language: Mapped[str] = mapped_column(String(5), default="tr")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class Purchase(Base):
     """Play Billing satın alma kaydı. purchase_token unique — aynı satın almanın
     ikinci kez hak vermesini engeller (para/güven akışı, CLAUDE.md §6)."""

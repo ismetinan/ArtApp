@@ -6,7 +6,7 @@ arayüz üzerinden gider. Yeni sağlayıcı = bu sınıfı uygulayan tek yeni do
 
 from abc import ABC, abstractmethod
 
-from .schemas import LevelAssessment, RedlineResult
+from .schemas import AssignmentBrief, LevelAssessment, RedlineResult
 
 
 class AIProvider(ABC):
@@ -28,4 +28,14 @@ class AIProvider(ABC):
         lesson_context: ödevin bağlı olduğu dersin başlığı/konusu (ör. "temel kafa
         oranları") — model geri bildirimi derse odaklar.
         language: çıktı metinlerinin dili (tr/en).
+        """
+
+    @abstractmethod
+    async def assignment_brief(
+        self, node_title: str, node_description: str, language: str = "tr"
+    ) -> AssignmentBrief:
+        """Ders için somut, adım adım bir ödev görevi üretir (görsel girdisi yok).
+
+        Uygunsa öğrenciden internetten basit bir referans obje/foto seçip onu
+        farklı açılardan çizmesini ister (müşteri isteği, 2026-07-19).
         """

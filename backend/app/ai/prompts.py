@@ -16,6 +16,10 @@ Kurallar:
 - Her gözlem somut ve uygulanabilir bir öneriyle gelmeli (soyut eleştiri yok).
 - Hiçbir stili (manga, karikatür, realist...) diğerinden "doğru" kabul etme;
   geri bildirimi çizerin kendi stili İÇİNDE tutarlılık üzerinden ver.
+- TEKNİK konuş: çizgi ağırlığı, kaçış noktası, değer geçişi, negatif alan,
+  oran ilişkisi gibi somut terimler kullan. "Atmosferi güzel" gibi belirsiz
+  izlenim cümleleri yerine gözlemlenebilir teknik tespit yaz.
+- Kısa ve öz tut; her cümle bilgi taşısın.
 - Tüm metinleri Türkçe yaz ("_tr" ile biten alanlar dahil).
 """,
     "en": """\
@@ -25,6 +29,10 @@ Rules:
 - Every observation must come with a concrete, actionable suggestion (no abstract criticism).
 - Never treat any style (manga, cartoon, realism...) as more "correct" than another;
   give feedback in terms of consistency WITHIN the artist's own style.
+- Be TECHNICAL: use concrete terms like line weight, vanishing point, value
+  transition, negative space, proportional relationships. Replace vague
+  impressions ("nice atmosphere") with observable technical statements.
+- Keep it concise; every sentence should carry information.
 - Write all text in English (including the fields whose names end in "_tr" —
   that suffix is a legacy field name, not a language requirement).
 """,
@@ -73,6 +81,32 @@ Be honest but generous with scores; the goal is placement, not grading.
 }
 
 
+_ASSIGNMENT_BODY = {
+    "tr": """
+"{node_title}" dersi için tek oturumda bitirilebilecek SOMUT bir ödev görevi üret.
+Ders açıklaması: {node_description}
+Kurallar:
+- assignment_tr: 2-4 numaralı adımdan oluşan net bir görev metni.
+- Konuya uygunsa öğrenciden internetten BASİT bir referans obje/foto seçmesini
+  ve onu FARKLI AÇILARDAN çizmesini iste (örn. perspektif için bir kupa:
+  önden, üstten ve 3/4 açıdan).
+- Görev dersin becerisini doğrudan çalıştırmalı; süslü değil, uygulanabilir olmalı.
+- Malzeme varsayma: kâğıt-kalemle yapılabilir olsun.
+""",
+    "en": """
+Produce a CONCRETE homework brief for the lesson "{node_title}" that can be
+finished in a single sitting. Lesson description: {node_description}
+Rules:
+- assignment_tr: a clear task with 2-4 numbered steps.
+- If it fits the topic, ask the student to pick a SIMPLE reference object/photo
+  from the internet and draw it from DIFFERENT ANGLES (e.g. a mug for
+  perspective: front, top and 3/4 view).
+- The task must directly exercise the lesson's skill; practical, not fancy.
+- Assume nothing but paper and pencil.
+""",
+}
+
+
 def _lang(language: str) -> str:
     return language if language in _TONE_RULES else "tr"
 
@@ -85,3 +119,10 @@ def redline_prompt(lesson_context: str, language: str = "tr") -> str:
 def assess_prompt(language: str = "tr") -> str:
     lang = _lang(language)
     return _TONE_RULES[lang] + _ASSESS_BODY[lang]
+
+
+def assignment_prompt(node_title: str, node_description: str, language: str = "tr") -> str:
+    lang = _lang(language)
+    return _TONE_RULES[lang] + _ASSIGNMENT_BODY[lang].format(
+        node_title=node_title, node_description=node_description
+    )

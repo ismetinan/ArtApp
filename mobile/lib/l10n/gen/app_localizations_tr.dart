@@ -160,6 +160,40 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get recommendedBadge => 'Önerilen';
+
+  @override
+  String get unlockedByScoreBadge => 'Skorunla açıldı';
+
+  @override
+  String get ownCourseNote =>
+      'Bu sıra bir öneri — kendi kursun veya kaynağın varsa aynı konuyu oradan çalışıp ödevini yine buraya yükleyebilirsin.';
+
+  @override
+  String get assignmentSection => 'Ödevin';
+
+  @override
+  String get assignmentGenerate => 'AI\'dan ödev al';
+
+  @override
+  String get freeAnalysisTitle => 'Serbest Analiz';
+
+  @override
+  String get freeAnalysisHint =>
+      'Ders dışı bitmiş bir çizimini yükle, AI teknik analiz yapsın (haftada 1 ücretsiz).';
+
+  @override
+  String get levelRoadmapTitle => 'Seviye Yol Haritası';
+
+  @override
+  String levelRoadmapEntry(int level, int xp) {
+    return '$level. Seviye — $xp XP';
+  }
+
+  @override
+  String get levelRoadmapCurrent => 'Buradasın';
+
+  @override
   String get uploadHomework => 'Ödevini yükle';
 
   @override

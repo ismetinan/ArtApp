@@ -8,12 +8,30 @@ import hashlib
 
 from .base import AIProvider
 from .schemas import (
+    AssignmentBrief,
     LevelAssessment,
     RedlineFinding,
     RedlineResult,
     Severity,
     SkillAxis,
 )
+
+_ASSIGNMENT_TEXTS = {
+    "tr": (
+        "'{node_title}' ödevi:\n"
+        "1. İnternetten basit bir referans obje seç (örn. bir kupa fotoğrafı).\n"
+        "2. Objeyi önden, üstten ve 3/4 açıdan üç ayrı kez çiz.\n"
+        "3. Her çizimde yapı çizgilerini silmeden bırak — analiz bunlara bakacak.\n"
+        "Bitince tek fotoğrafta yükle."
+    ),
+    "en": (
+        "Assignment for '{node_title}':\n"
+        "1. Pick a simple reference object from the internet (e.g. a photo of a mug).\n"
+        "2. Draw the object three times: front, top and 3/4 view.\n"
+        "3. Leave your construction lines visible — the analysis will look at them.\n"
+        "Upload a single photo when done."
+    ),
+}
 
 _ASSESS_SUMMARY = {
     "tr": (
@@ -96,6 +114,13 @@ class MockAIProvider(AIProvider):
                 weakest=weakest[0].value.replace("_", " ")
             ),
             focus_axes=weakest,
+        )
+
+    async def assignment_brief(
+        self, node_title: str, node_description: str, language: str = "tr"
+    ) -> AssignmentBrief:
+        return AssignmentBrief(
+            assignment_tr=_ASSIGNMENT_TEXTS[_lang(language)].format(node_title=node_title)
         )
 
     async def redline_analysis(

@@ -13,6 +13,7 @@ from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityScore, MentorProfile, Submission, User
 from ..services import billing as billing_service
+from ..services.gamification import XP_PER_LEVEL
 from ..services.storage import load_drawing
 
 router = APIRouter(tags=["profile"])
@@ -43,7 +44,7 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
     ).scalars().all()
     submissions = db.execute(
         select(Submission)
-        .where(Submission.user_id == user.id, Submission.kind == "assignment")
+        .where(Submission.user_id == user.id, Submission.kind.in_(("assignment", "free")))
         .order_by(Submission.created_at)
     ).scalars().all()
     score_map = {s.axis: s.score for s in scores}
@@ -55,6 +56,8 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         "display_name": user.display_name,
         "level": user.level,
         "xp": user.xp,
+        # Seviye yol haritası (Flutter bottom sheet) bu sabitle eşikleri çizer
+        "xp_per_level": XP_PER_LEVEL,
         "language": user.language,
         "jeton_balance": user.jeton_balance,
         "mentor_market_enabled": get_settings().mentor_market_enabled,

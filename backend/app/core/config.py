@@ -30,6 +30,9 @@ class Settings(BaseSettings):
 
     # Beta koruması: kullanıcı başına günlük AI çağrı limiti
     ai_daily_limit: int = 10
+    # Skora göre ders atlama eşiği: önkoşulun eksenindeki AbilityScore bu değerin
+    # üstündeyse önkoşul tamamlanmadan düğüm açılır (müşteri isteği, 2026-07-19)
+    skip_unlock_score: int = 60
 
     sentry_dsn: str = ""
 

@@ -56,7 +56,12 @@ Kapsam: Çoklu dil desteği, bölgesel mentor havuzları, AI modelinin kendi ver
 **Şu anki aktif faz: Faz 3. Faz 2 canlıda test edildi (mentor akışı uçtan uca çalışıyor).
 Faz 3'ten tamamlananlar: seçmeli mentorluk (3 jeton) + mentor arama + uygulama içi admin
 paneli + Play Billing kodu (`BILLING_ENABLED` bayrağıyla açılacak — bkz. DEPLOY.md §9).
-Kalan Faz 3 işleri: dinamik/kişiselleştirilmiş ağaç yönlendirmesi, topluluk galerisi.
+Müşteri geri bildirimi paketi eklendi (2026-07-19): skora göre ders atlama
+(`SKIP_UNLOCK_SCORE=60`), tavsiye edilen ders + "kendi kursunla ilerle" notu, AI ödev
+üretimi (obje/farklı açılar), teknik AI dili, serbest çizim analizi (ücretsiz 1/hafta,
+Premium sınırsız), waitlist sayfası (`/join`), seviye yol haritası.
+Kalan Faz 3 işleri: topluluk galerisi (dinamik ağaç yönlendirmesinin ilk hali skor
+atlama + öneriyle karşılandı; derinleştirme sonra değerlendirilir).
 Faz 0 doğrulaması TAMAMLANDI (2026-07-18): 8 gerçek çizimle (manga/realist/karikatür)
 OpenRouter üzerinde koşuldu, stil tarafsızlığı GEÇTİ — bkz. `prototype/FAZ0_RAPOR.md`.**
 

@@ -362,6 +362,66 @@ abstract class AppLocalizations {
   /// **'{author} • {kind}'**
   String resourceMeta(String author, String kind);
 
+  /// No description provided for @recommendedBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önerilen'**
+  String get recommendedBadge;
+
+  /// No description provided for @unlockedByScoreBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Skorunla açıldı'**
+  String get unlockedByScoreBadge;
+
+  /// No description provided for @ownCourseNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sıra bir öneri — kendi kursun veya kaynağın varsa aynı konuyu oradan çalışıp ödevini yine buraya yükleyebilirsin.'**
+  String get ownCourseNote;
+
+  /// No description provided for @assignmentSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödevin'**
+  String get assignmentSection;
+
+  /// No description provided for @assignmentGenerate.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI\'dan ödev al'**
+  String get assignmentGenerate;
+
+  /// No description provided for @freeAnalysisTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Serbest Analiz'**
+  String get freeAnalysisTitle;
+
+  /// No description provided for @freeAnalysisHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ders dışı bitmiş bir çizimini yükle, AI teknik analiz yapsın (haftada 1 ücretsiz).'**
+  String get freeAnalysisHint;
+
+  /// No description provided for @levelRoadmapTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seviye Yol Haritası'**
+  String get levelRoadmapTitle;
+
+  /// No description provided for @levelRoadmapEntry.
+  ///
+  /// In tr, this message translates to:
+  /// **'{level}. Seviye — {xp} XP'**
+  String levelRoadmapEntry(int level, int xp);
+
+  /// No description provided for @levelRoadmapCurrent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Buradasın'**
+  String get levelRoadmapCurrent;
+
   /// No description provided for @uploadHomework.
   ///
   /// In tr, this message translates to:

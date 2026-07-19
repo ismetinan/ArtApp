@@ -156,6 +156,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Başvuru bulunamadı",
         "en": "Application not found",
     },
+    "free_analysis_limit": {
+        "tr": "Bu haftaki serbest analiz hakkını kullandın — haftaya yenilenir. Premium'da serbest analiz sınırsız.",
+        "en": "You've used this week's free analysis — it renews next week. Free analysis is unlimited with Premium.",
+    },
     # --- Play Billing ---
     "purchase_invalid": {
         "tr": "Satın alma doğrulanamadı. Ödeme gerçekleştiyse endişelenme — 'Satın alımları geri yükle' ile tekrar deneyebilirsin.",

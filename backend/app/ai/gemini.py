@@ -8,8 +8,8 @@ from google import genai
 from google.genai import types
 
 from .base import AIProvider
-from .prompts import assess_prompt, redline_prompt
-from .schemas import LevelAssessment, RedlineResult
+from .prompts import assess_prompt, assignment_prompt, redline_prompt
+from .schemas import AssignmentBrief, LevelAssessment, RedlineResult
 
 
 def _image_part(image: bytes) -> types.Part:
@@ -46,3 +46,9 @@ class GeminiProvider(AIProvider):
     ) -> RedlineResult:
         prompt = redline_prompt(lesson_context, language)
         return await self._generate([_image_part(image), prompt], RedlineResult)
+
+    async def assignment_brief(
+        self, node_title: str, node_description: str, language: str = "tr"
+    ) -> AssignmentBrief:
+        prompt = assignment_prompt(node_title, node_description, language)
+        return await self._generate([prompt], AssignmentBrief)

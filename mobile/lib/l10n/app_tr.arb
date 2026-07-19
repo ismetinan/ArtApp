@@ -91,6 +91,23 @@
       "kind": {"type": "String"}
     }
   },
+  "recommendedBadge": "Önerilen",
+  "unlockedByScoreBadge": "Skorunla açıldı",
+  "ownCourseNote": "Bu sıra bir öneri — kendi kursun veya kaynağın varsa aynı konuyu oradan çalışıp ödevini yine buraya yükleyebilirsin.",
+  "assignmentSection": "Ödevin",
+  "assignmentGenerate": "AI'dan ödev al",
+  "freeAnalysisTitle": "Serbest Analiz",
+  "freeAnalysisHint": "Ders dışı bitmiş bir çizimini yükle, AI teknik analiz yapsın (haftada 1 ücretsiz).",
+  "levelRoadmapTitle": "Seviye Yol Haritası",
+  "levelRoadmapEntry": "{level}. Seviye — {xp} XP",
+  "@levelRoadmapEntry": {
+    "placeholders": {
+      "level": {"type": "int"},
+      "xp": {"type": "int"}
+    }
+  },
+  "levelRoadmapCurrent": "Buradasın",
+
   "uploadHomework": "Ödevini yükle",
   "uploadHint": "Videoyu izledikten sonra çalışmanı yükle; saniyeler içinde yapıcı bir redline analizi alacaksın.",
   "submitFromDevice": "Cihazdan Seç ve Gönder",

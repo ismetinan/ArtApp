@@ -64,6 +64,7 @@ class SkillNode {
   final int xpReward;
   final List<String> prerequisites;
   final List<NodeResource> resources;
+  final bool unlockedByScore;
 
   SkillNode.fromJson(Map<String, dynamic> j)
       : id = j['id'],
@@ -76,7 +77,8 @@ class SkillNode {
         prerequisites = List<String>.from(j['prerequisites']),
         resources = ((j['resources'] ?? []) as List)
             .map((r) => NodeResource.fromJson(Map<String, dynamic>.from(r)))
-            .toList();
+            .toList(),
+        unlockedByScore = j['unlocked_by_score'] == true;
 }
 
 class RedlineFinding {
@@ -351,9 +353,43 @@ class ApiClient {
     return Assessment.fromJson(_decode(r));
   }
 
-  Future<List<SkillNode>> getTree() async {
+  Future<({List<SkillNode> nodes, String? recommendedNodeId})> getTree() async {
     final r = await http.get(Uri.parse('$apiBase/skill-tree'), headers: authHeaders);
-    return (_decode(r)['nodes'] as List).map((n) => SkillNode.fromJson(n)).toList();
+    final j = _decode(r);
+    return (
+      nodes: (j['nodes'] as List).map((n) => SkillNode.fromJson(n)).toList(),
+      recommendedNodeId: j['recommended_node_id'] as String?,
+    );
+  }
+
+  /// Kayıtlı AI ödevini getirir (yoksa null; kota harcamaz).
+  Future<String?> getAssignment(String nodeId) async {
+    final r = await http.get(
+        Uri.parse('$apiBase/skill-tree/$nodeId/assignment'), headers: authHeaders);
+    return _decode(r)['assignment'] as String?;
+  }
+
+  /// AI'a kişisel ödev görevi ürettirir (düğüm başına bir kez kota harcar).
+  Future<String> generateAssignment(String nodeId) async {
+    final r = await http.post(
+        Uri.parse('$apiBase/skill-tree/$nodeId/assignment'), headers: authHeaders);
+    return _decode(r)['assignment'] as String;
+  }
+
+  /// Serbest çizim analizi (ders dışı; ücretsizde haftada 1, 429 döner).
+  Future<({RedlineResult analysis, int xpAwarded, int level, int submissionId})>
+      submitFreeAnalysis(List<int> bytes, String name) async {
+    final req = http.MultipartRequest('POST', Uri.parse('$apiBase/free-analysis'))
+      ..headers.addAll(authHeaders)
+      ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: name));
+    final r = await http.Response.fromStream(await req.send());
+    final j = _decode(r);
+    return (
+      analysis: RedlineResult.fromJson(j['analysis']),
+      xpAwarded: j['xp_awarded'] as int,
+      level: j['level'] as int,
+      submissionId: j['submission_id'] as int,
+    );
   }
 
   Future<({RedlineResult analysis, int xpAwarded, int level, int submissionId})>

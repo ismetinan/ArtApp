@@ -48,6 +48,15 @@ class RedlineResult(BaseModel):
     )
 
 
+class AssignmentBrief(BaseModel):
+    """AI'ın ürettiği kişisel ödev görevi (düğüm başına bir kez üretilir, saklanır)."""
+
+    # _tr son eki geriye dönük uyumluluk — içerik kullanıcının dilinde üretilir
+    assignment_tr: str = Field(
+        description="Concrete, numbered-steps homework brief (in the user's language)"
+    )
+
+
 class LevelAssessment(BaseModel):
     level: int = Field(ge=1, le=10, description="Başlangıç seviyesi")
     ability_scores: dict[SkillAxis, int] = Field(

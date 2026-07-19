@@ -97,9 +97,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(p['display_name'],
                       style: Theme.of(context).textTheme.titleLarge),
-                  Chip(
+                  // Dokununca ileri seviyelerin yol haritası açılır (müşteri isteği)
+                  ActionChip(
                     label: Text(t.levelBadge(p['level'] as int, p['xp'] as int)),
                     avatar: const Icon(Icons.military_tech, size: 18),
+                    onPressed: () => _showLevelRoadmap(context, p),
                   ),
                   Wrap(spacing: 8, children: [
                     if (ApiClient.instance.mentorMarketEnabled)
@@ -299,6 +301,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  void _showLevelRoadmap(BuildContext context, Map<String, dynamic> p) {
+    final t = AppLocalizations.of(context);
+    final current = p['level'] as int;
+    final perLevel = (p['xp_per_level'] ?? 100) as int;
+    // Mevcut seviyenin birkaç üstüne kadar göster — "ileri seviyeler" hissi
+    final maxLevel = current + 5;
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(t.levelRoadmapTitle, style: Theme.of(ctx).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (var lvl = 1; lvl <= maxLevel; lvl++)
+              ListTile(
+                dense: true,
+                leading: Icon(
+                  lvl < current
+                      ? Icons.check_circle
+                      : lvl == current
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                  color: lvl <= current ? Theme.of(ctx).colorScheme.primary : null,
+                ),
+                title: Text(t.levelRoadmapEntry(lvl, (lvl - 1) * perLevel)),
+                trailing: lvl == current
+                    ? Chip(
+                        label: Text(t.levelRoadmapCurrent),
+                        visualDensity: VisualDensity.compact,
+                      )
+                    : null,
+              ),
+          ],
+        ),
       ),
     );
   }

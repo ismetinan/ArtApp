@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from sqlalchemy import select
 
 from . import db as database
-from .api import billing, legal, mentors, onboarding, profile, tree, users
+from .api import billing, legal, mentors, onboarding, profile, tree, users, waitlist
 from .core.config import get_settings
 
 if get_settings().sentry_dsn:
@@ -58,6 +58,7 @@ app.include_router(tree.router)
 app.include_router(profile.router)
 app.include_router(mentors.router)
 app.include_router(billing.router)
+app.include_router(waitlist.router)
 app.include_router(legal.router)
 
 

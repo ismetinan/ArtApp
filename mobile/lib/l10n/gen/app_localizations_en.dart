@@ -159,6 +159,40 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get recommendedBadge => 'Recommended';
+
+  @override
+  String get unlockedByScoreBadge => 'Unlocked by your score';
+
+  @override
+  String get ownCourseNote =>
+      'This order is a suggestion — if you follow your own course or resource, study the topic there and upload your assignment here.';
+
+  @override
+  String get assignmentSection => 'Your assignment';
+
+  @override
+  String get assignmentGenerate => 'Get an assignment from AI';
+
+  @override
+  String get freeAnalysisTitle => 'Free Analysis';
+
+  @override
+  String get freeAnalysisHint =>
+      'Upload a finished drawing outside the lessons and get a technical AI analysis (1 free per week).';
+
+  @override
+  String get levelRoadmapTitle => 'Level Roadmap';
+
+  @override
+  String levelRoadmapEntry(int level, int xp) {
+    return 'Level $level — $xp XP';
+  }
+
+  @override
+  String get levelRoadmapCurrent => 'You are here';
+
+  @override
   String get uploadHomework => 'Upload your assignment';
 
   @override
