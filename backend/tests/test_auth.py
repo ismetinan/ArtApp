@@ -55,8 +55,10 @@ def test_guest_upgrade_keeps_progress(client):
     )
     assert r.status_code == 200
     assert r.json()["is_guest"] is False
+    # Yükseltme token'ı döndürür (güvenlik: rotasyon) — istemci yenisini kaydeder
+    headers = {"Authorization": f"Bearer {r.json()['token']}"}
 
-    # Aynı token ile ilerleme duruyor
+    # Yeni token ile ilerleme duruyor
     profile = client.get("/profile", headers=headers).json()
     assert len(profile["gelisim_macerasi"]) == 1
 

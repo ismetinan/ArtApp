@@ -1,8 +1,9 @@
 """Ortak API bağımlılıkları.
 
-Kimlik doğrulama: Authorization: Bearer <token>. Token, kullanıcı başına tek
-aktif olacak şekilde DB'de saklanır (users.api_token). Tüm endpoint'ler bu
-dependency'den geçer — auth şeması değişirse tek nokta burası.
+Kimlik doğrulama: Authorization: Bearer <token>. Kullanıcı başına tek aktif
+token; DB'de SHA-256 hash'i saklanır (users.api_token), gelen ham token
+hash'lenip aranır. Tüm endpoint'ler bu dependency'den geçer — auth şeması
+değişirse tek nokta burası.
 """
 
 from fastapi import Depends, Header, HTTPException
@@ -13,6 +14,7 @@ from sqlalchemy.orm import Session
 from ..core.messages import msg, negotiate_lang
 from ..db import get_db
 from ..models.tables import User
+from ..services.auth import hash_token
 
 _bearer = HTTPBearer(auto_error=False)
 
@@ -30,7 +32,7 @@ def get_current_user(
     if credentials is None:
         raise HTTPException(status_code=401, detail=msg("session_missing", lang))
     user = db.execute(
-        select(User).where(User.api_token == credentials.credentials)
+        select(User).where(User.api_token == hash_token(credentials.credentials))
     ).scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=401, detail=msg("session_invalid", lang))
@@ -46,5 +48,5 @@ def get_optional_user(
     if credentials is None:
         return None
     return db.execute(
-        select(User).where(User.api_token == credentials.credentials)
+        select(User).where(User.api_token == hash_token(credentials.credentials))
     ).scalar_one_or_none()

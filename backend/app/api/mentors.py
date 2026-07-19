@@ -9,7 +9,7 @@ mentorlardan rastgele atanır; müsait mentor yoksa jeton harcanmadan 409.
 import random
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -103,8 +103,8 @@ def _profile_json(p: MentorProfile, display_name: str, stats: tuple[float | None
 
 @router.get("/mentors", dependencies=[Depends(require_mentor_market)])
 def list_mentors(
-    style: str | None = None,
-    q: str | None = None,
+    style: str | None = Query(None, max_length=40),
+    q: str | None = Query(None, max_length=100),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -304,9 +304,9 @@ def rate_request(
 
 
 class ApplyBody(BaseModel):
-    bio: str = ""
-    styles: list[str] = []
-    portfolio_submission_ids: list[int] = []
+    bio: str = Field("", max_length=2000)
+    styles: list[str] = Field(default_factory=list, max_length=10)
+    portfolio_submission_ids: list[int] = Field(default_factory=list, max_length=12)
 
 
 @router.post("/mentors/apply", dependencies=[Depends(require_mentor_market)])
@@ -423,7 +423,7 @@ def mentor_queue(user: User = Depends(get_current_user), db: Session = Depends(g
 
 
 class FeedbackBody(BaseModel):
-    feedback_text: str
+    feedback_text: str = Field(max_length=10_000)
 
 
 @router.post(

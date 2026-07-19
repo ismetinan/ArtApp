@@ -38,6 +38,25 @@ def _s3_client():
     )
 
 
+def _is_allowed_image(content: bytes) -> bool:
+    """İçeriğin gerçekten PNG/JPEG/WebP olduğunu magic byte'larla doğrular —
+    uzantısı .png yapılmış rastgele dosya (HTML, script...) depoya giremez."""
+    return (
+        content.startswith(b"\x89PNG\r\n\x1a\n")
+        or content.startswith(b"\xff\xd8\xff")
+        or (content[:4] == b"RIFF" and content[8:12] == b"WEBP")
+    )
+
+
+async def read_upload(file) -> bytes:
+    """UploadFile içeriğini boyut sınırıyla okur — sınırsız read() ile devasa
+    gövdenin RAM'e alınmasını (bellek DoS) engeller."""
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise UploadError("upload_too_large")
+    return content
+
+
 def save_drawing(content: bytes, original_name: str) -> str:
     """Çizimi kaydeder, göreli yolunu döner. Tür/boyut hatasında UploadError."""
     suffix = Path(original_name).suffix.lower() or ".png"
@@ -45,6 +64,8 @@ def save_drawing(content: bytes, original_name: str) -> str:
         raise UploadError("upload_unsupported_type", suffix=suffix)
     if len(content) > MAX_UPLOAD_BYTES:
         raise UploadError("upload_too_large")
+    if not _is_allowed_image(content):
+        raise UploadError("upload_not_image")
     rel_path = f"drawings/{uuid.uuid4().hex}{suffix}"
 
     settings = get_settings()

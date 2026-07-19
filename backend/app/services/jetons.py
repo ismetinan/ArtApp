@@ -9,6 +9,7 @@ kalsın diye.
 
 from fastapi import HTTPException
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from ..core.messages import msg
@@ -17,10 +18,26 @@ from ..models.tables import JetonTransaction, MentorshipRequest, User
 WELCOME_JETONS = 3
 
 
+def _adjust_balance(db: Session, user: User, delta: int) -> bool:
+    """Bakiyeyi DB seviyesinde atomik değiştirir (read-modify-write yarışı yok).
+    Negatif delta'da 'bakiye yeterli' koşulu UPDATE'in içindedir — eşzamanlı iki
+    harcama bakiyeyi asla negatife düşüremez. Başarısızsa False döner."""
+    stmt = (
+        update(User)
+        .where(User.id == user.id)
+        .values(jeton_balance=User.jeton_balance + delta)
+    )
+    if delta < 0:
+        stmt = stmt.where(User.jeton_balance >= -delta)
+    changed = db.execute(stmt).rowcount == 1
+    db.expire(user, ["jeton_balance"])  # sonraki okuma güncel değeri çeksin
+    return changed
+
+
 def grant(db: Session, user: User, amount: int, reason: str) -> None:
     if amount <= 0:
         raise ValueError("grant miktarı pozitif olmalı")
-    user.jeton_balance += amount
+    _adjust_balance(db, user, amount)
     db.add(JetonTransaction(user_id=user.id, delta=amount, reason=reason))
 
 
@@ -32,11 +49,10 @@ def spend(db: Session, user: User, amount: int, request: MentorshipRequest) -> N
     """Bakiye düşer; yetersizse yerelleştirilmiş 402 (hiçbir şey değişmez)."""
     if amount <= 0:
         raise ValueError("spend miktarı pozitif olmalı")
-    if user.jeton_balance < amount:
+    if not _adjust_balance(db, user, -amount):
         raise HTTPException(
             status_code=402, detail=msg("jeton_insufficient", user.language, cost=amount)
         )
-    user.jeton_balance -= amount
     db.add(
         JetonTransaction(
             user_id=user.id, delta=-amount, reason="mentor_request", request_id=request.id
@@ -47,7 +63,7 @@ def spend(db: Session, user: User, amount: int, request: MentorshipRequest) -> N
 def refund(db: Session, student: User, request: MentorshipRequest) -> None:
     """Zaman aşımına uğrayan isteğin jetonunu iade eder (idempotent değil —
     çağıran, isteği expired'a çevirdiği tek noktada kullanmalı)."""
-    student.jeton_balance += request.jeton_cost
+    _adjust_balance(db, student, request.jeton_cost)
     db.add(
         JetonTransaction(
             user_id=student.id,

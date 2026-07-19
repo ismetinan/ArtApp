@@ -1,12 +1,13 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from ..api.deps import get_current_user, get_optional_user, get_request_lang
 from ..core.messages import SUPPORTED_LANGUAGES, msg, normalize_lang
+from ..core.ratelimit import rate_limit
 from ..db import get_db
 from ..models.tables import (
     AbilityScore,
@@ -24,6 +25,7 @@ from ..services import jetons
 from ..services.auth import (
     generate_token,
     hash_password,
+    hash_token,
     verify_google_token,
     verify_password,
 )
@@ -35,27 +37,27 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 class GuestRequest(BaseModel):
-    display_name: str = "Misafir Çizer"
-    language: str = ""  # boşsa Accept-Language'ten
+    display_name: str = Field("Misafir Çizer", max_length=60)
+    language: str = Field("", max_length=10)  # boşsa Accept-Language'ten
 
 
 class RegisterRequest(BaseModel):
     email: EmailStr
-    password: str
-    display_name: str = "Çizer"
-    language: str = ""
+    password: str = Field(max_length=128)
+    display_name: str = Field("Çizer", max_length=60)
+    language: str = Field("", max_length=10)
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(max_length=128)
 
 
 class UpgradeRequest(BaseModel):
     """Misafir hesabını gerçek hesaba çevirir — ilerleme korunur."""
 
     email: EmailStr
-    password: str
+    password: str = Field(max_length=128)
 
 
 class AuthResponse(BaseModel):
@@ -69,11 +71,22 @@ class AuthResponse(BaseModel):
     mentor_market_enabled: bool  # istemci mentor UI'ını buna göre gösterir
 
 
-def _auth_response(user: User) -> AuthResponse:
+def _issue_token(user: User) -> str:
+    """Yeni ham token üretir, hash'ini kullanıcıya yazar, hamı döndürür.
+    Ham token yalnız bu yanıtta görünür — DB'de sadece hash durur."""
+    raw = generate_token()
+    user.api_token = hash_token(raw)
+    return raw
+
+
+def _auth_response(user: User, token: str = "") -> AuthResponse:
+    """token: az önce üretilen HAM token. Token döndürmeyen akışlarda
+    (dil değişikliği gibi) boş kalır — istemci bu alanı yalnız auth
+    akışlarında kaydeder."""
     from ..core.config import get_settings
 
     return AuthResponse(
-        token=user.api_token,
+        token=token,
         id=user.id,
         display_name=user.display_name,
         is_guest=user.is_guest,
@@ -89,7 +102,11 @@ def _validate_password(password: str, lang: str) -> None:
         raise HTTPException(status_code=422, detail=msg("password_min", lang))
 
 
-@router.post("/guest", response_model=AuthResponse)
+@router.post(
+    "/guest",
+    response_model=AuthResponse,
+    dependencies=[Depends(rate_limit("auth_create", 20, 3600))],
+)
 def create_guest(
     body: GuestRequest,
     db: Session = Depends(get_db),
@@ -98,17 +115,21 @@ def create_guest(
     user = User(
         display_name=body.display_name,
         is_guest=True,
-        api_token=generate_token(),
         language=normalize_lang(body.language or lang),
     )
+    raw_token = _issue_token(user)
     db.add(user)
     db.flush()
     jetons.grant_welcome(db, user)
     db.commit()
-    return _auth_response(user)
+    return _auth_response(user, raw_token)
 
 
-@router.post("/register", response_model=AuthResponse)
+@router.post(
+    "/register",
+    response_model=AuthResponse,
+    dependencies=[Depends(rate_limit("auth_create", 20, 3600))],
+)
 def register(
     body: RegisterRequest,
     db: Session = Depends(get_db),
@@ -124,17 +145,21 @@ def register(
         password_hash=hash_password(body.password),
         display_name=body.display_name,
         is_guest=False,
-        api_token=generate_token(),
         language=lang,
     )
+    raw_token = _issue_token(user)
     db.add(user)
     db.flush()
     jetons.grant_welcome(db, user)
     db.commit()
-    return _auth_response(user)
+    return _auth_response(user, raw_token)
 
 
-@router.post("/login", response_model=AuthResponse)
+@router.post(
+    "/login",
+    response_model=AuthResponse,
+    dependencies=[Depends(rate_limit("login", 10, 900))],
+)
 def login(
     body: LoginRequest,
     db: Session = Depends(get_db),
@@ -146,17 +171,21 @@ def login(
     ):
         raise HTTPException(status_code=401, detail=msg("login_failed", lang))
     # Her girişte token yenilenir (eski cihaz oturumu düşer — tek aktif token)
-    user.api_token = generate_token()
+    raw_token = _issue_token(user)
     db.commit()
-    return _auth_response(user)
+    return _auth_response(user, raw_token)
 
 
 class GoogleRequest(BaseModel):
-    id_token: str
-    language: str = ""
+    id_token: str = Field(max_length=4096)
+    language: str = Field("", max_length=10)
 
 
-@router.post("/google", response_model=AuthResponse)
+@router.post(
+    "/google",
+    response_model=AuthResponse,
+    dependencies=[Depends(rate_limit("google", 20, 900))],
+)
 def google_sign_in(
     body: GoogleRequest,
     current: User | None = Depends(get_optional_user),
@@ -176,7 +205,9 @@ def google_sign_in(
         select(User).where(User.google_sub == info["sub"])
     ).scalar_one_or_none()
     if user is None and info["email"]:
-        # Aynı e-postayla kayıtlı hesabı Google'a bağla
+        # Aynı e-postayla kayıtlı hesabı Google'a bağla. info["email"] yalnız
+        # Google e-postayı DOĞRULADIYSA doludur (auth.verify_google_token) —
+        # doğrulanmamış e-postayla başkasının hesabı ele geçirilemez.
         user = db.execute(
             select(User).where(User.email == info["email"])
         ).scalar_one_or_none()
@@ -196,16 +227,17 @@ def google_sign_in(
             google_sub=info["sub"],
             display_name=info["name"],
             is_guest=False,
-            api_token=generate_token(),
+            # Geçici değer (NOT NULL) — aşağıdaki _issue_token commit'ten önce yazar
+            api_token=hash_token(generate_token()),
             language=lang,
         )
         db.add(user)
         db.flush()
         jetons.grant_welcome(db, user)
 
-    user.api_token = generate_token()  # her girişte tek aktif token
+    raw_token = _issue_token(user)  # her girişte tek aktif token
     db.commit()
-    return _auth_response(user)
+    return _auth_response(user, raw_token)
 
 
 @router.delete("/me")
@@ -278,12 +310,14 @@ def upgrade_guest(
     user.email = body.email
     user.password_hash = hash_password(body.password)
     user.is_guest = False
+    # Token rotasyonu: istemci auth yanıtındaki yeni token'ı kaydeder
+    raw_token = _issue_token(user)
     db.commit()
-    return _auth_response(user)
+    return _auth_response(user, raw_token)
 
 
 class DeviceUpdate(BaseModel):
-    fcm_token: str
+    fcm_token: str = Field(max_length=256)  # kolon sınırıyla aynı — 500 yerine 422
 
 
 @router.put("/me/device")

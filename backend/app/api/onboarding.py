@@ -10,7 +10,7 @@ from ..db import get_db
 from ..models.tables import AbilityScore, Submission, User
 from ..services.gamification import XP_PER_LEVEL
 from ..services.quota import consume_ai_quota
-from ..services.storage import UploadError, save_drawing
+from ..services.storage import UploadError, read_upload, save_drawing
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +30,8 @@ async def assess_level(
 
     images: list[bytes] = []
     for f in files:
-        content = await f.read()
         try:
+            content = await read_upload(f)
             rel_path = save_drawing(content, f.filename or "cizim.png")
         except UploadError as e:
             raise HTTPException(

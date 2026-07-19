@@ -21,7 +21,7 @@ from ..models.tables import (
 from ..services.billing import is_premium
 from ..services.gamification import award_xp, bump_ability
 from ..services.quota import consume_ai_quota
-from ..services.storage import UploadError, save_drawing
+from ..services.storage import UploadError, read_upload, save_drawing
 
 logger = logging.getLogger(__name__)
 
@@ -187,8 +187,8 @@ async def submit_assignment(
         raise HTTPException(status_code=403, detail=msg("node_locked", user.language))
     consume_ai_quota(db, user)
 
-    content = await file.read()
     try:
+        content = await read_upload(file)
         rel_path = save_drawing(content, file.filename or "odev.png")
     except UploadError as e:
         raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))
@@ -258,8 +258,8 @@ async def free_analysis(
             )
     consume_ai_quota(db, user)
 
-    content = await file.read()
     try:
+        content = await read_upload(file)
         rel_path = save_drawing(content, file.filename or "serbest.png")
     except UploadError as e:
         raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))

@@ -4,6 +4,9 @@ import pytest
 
 # Ayarlar import edilmeden ÖNCE test ortamını kur
 os.environ["AI_PROVIDER"] = "mock"
+# Hız limiti testlerde kapalı (test başına yüzlerce istek atılır);
+# test_security.py kendi testinde bilinçli olarak açar
+os.environ["RATE_LIMIT_ENABLED"] = "false"
 
 
 @pytest.fixture()

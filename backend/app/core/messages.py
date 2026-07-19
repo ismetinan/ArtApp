@@ -79,6 +79,18 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Dosya çok büyük — en fazla 8 MB yükleyebilirsin",
         "en": "File is too large — the maximum is 8 MB",
     },
+    "upload_not_image": {
+        "tr": "Dosya geçerli bir görsel değil — PNG, JPG veya WebP yükleyebilirsin",
+        "en": "The file isn't a valid image — you can upload PNG, JPG or WebP",
+    },
+    "request_too_large": {
+        "tr": "İstek çok büyük",
+        "en": "Request is too large",
+    },
+    "rate_limited": {
+        "tr": "Çok fazla deneme yapıldı — lütfen biraz bekleyip tekrar dene.",
+        "en": "Too many attempts — please wait a bit and try again.",
+    },
     "submission_not_found": {
         "tr": "Gönderi bulunamadı",
         "en": "Submission not found",

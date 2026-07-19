@@ -8,12 +8,13 @@ import logging
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..api.deps import get_current_user
 from ..core.messages import normalize_lang
+from ..core.ratelimit import rate_limit
 from ..db import get_db
 from ..models.tables import User, WaitlistSignup
 from .mentors import require_admin
@@ -25,10 +26,10 @@ router = APIRouter(tags=["waitlist"])
 
 class SignupBody(BaseModel):
     email: EmailStr
-    language: str = "tr"
+    language: str = Field("tr", max_length=10)
 
 
-@router.post("/waitlist")
+@router.post("/waitlist", dependencies=[Depends(rate_limit("waitlist", 15, 3600))])
 def join_waitlist(body: SignupBody, db: Session = Depends(get_db)):
     """Auth'suz kayıt. Aynı e-posta ikinci kez gelirse sessizce 200 —
     sayfadan çifte tıklama hata göstermesin."""

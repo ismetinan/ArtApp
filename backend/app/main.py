@@ -3,7 +3,8 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config as AlembicConfig
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
 from . import db as database
@@ -20,6 +21,7 @@ from .api import (
     waitlist,
 )
 from .core.config import get_settings
+from .core.messages import msg, negotiate_lang
 
 if get_settings().sentry_dsn:
     import sentry_sdk
@@ -62,6 +64,27 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Artora API", lifespan=lifespan)
+
+# Onboarding 3×8 MB çizim + multipart ek yükü rahat sığar; daha büyüğü
+# gövde okunmadan reddedilir (bellek/disk DoS koruması).
+MAX_REQUEST_BYTES = 32 * 1024 * 1024
+
+
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    length = request.headers.get("content-length")
+    if length and length.isdigit() and int(length) > MAX_REQUEST_BYTES:
+        lang = negotiate_lang(request.headers.get("accept-language"))
+        return JSONResponse(
+            status_code=413, content={"detail": msg("request_too_large", lang)}
+        )
+    response = await call_next(request)
+    # Tarayıcıda açılan sayfalar (/join, /privacy) ve görsel uçları için
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    return response
+
 
 app.include_router(users.router)
 app.include_router(onboarding.router)

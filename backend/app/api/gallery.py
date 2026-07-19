@@ -6,7 +6,7 @@ ucundan servis edilir (is_public kontrolü orada zaten var).
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
@@ -67,7 +67,7 @@ def get_gallery(
 
 
 class ReportBody(BaseModel):
-    reason: str = "uygunsuz"
+    reason: str = Field("uygunsuz", max_length=32)
 
 
 @router.post("/submissions/{submission_id}/report")
