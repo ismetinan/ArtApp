@@ -10,6 +10,7 @@ import 'auth_form.dart';
 import 'mentor_panel.dart';
 import 'onboarding.dart';
 import 'redline.dart';
+import 'store.dart';
 
 /// Profil sekmesi: seviye rozeti + tıklanabilir Ability Chart + Gelişim Macerası
 /// (CLAUDE.md §7.3 — chart hem görselleştirme hem navigasyon).
@@ -100,12 +101,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     label: Text(t.levelBadge(p['level'] as int, p['xp'] as int)),
                     avatar: const Icon(Icons.military_tech, size: 18),
                   ),
-                  if (ApiClient.instance.mentorMarketEnabled)
-                    Chip(
-                      label: Text(
-                          t.jetonBalance((p['jeton_balance'] ?? 0) as int)),
-                      avatar: const Icon(Icons.toll, size: 18),
-                    ),
+                  Wrap(spacing: 8, children: [
+                    if (ApiClient.instance.mentorMarketEnabled)
+                      // Billing açıkken jeton çipi mağazaya götürür
+                      ActionChip(
+                        label: Text(
+                            t.jetonBalance((p['jeton_balance'] ?? 0) as int)),
+                        avatar: const Icon(Icons.toll, size: 18),
+                        onPressed: ApiClient.instance.billingEnabled
+                            ? () => _openStore(context, p)
+                            : null,
+                      ),
+                    if (p['is_premium'] == true)
+                      Chip(
+                        label: Text(t.premiumBadge),
+                        avatar: const Icon(Icons.workspace_premium, size: 18),
+                      ),
+                  ]),
                 ]),
               ]),
               const SizedBox(height: 16),
@@ -289,6 +301,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _openStore(BuildContext context, Map<String, dynamic> p) async {
+    final bought = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => StoreScreen(
+          isPremium: p['is_premium'] == true,
+          premiumUntil: p['premium_until'] as String?,
+        ),
+      ),
+    );
+    if (bought == true && mounted) {
+      setState(() => _future = ApiClient.instance.getProfile());
+    }
   }
 
   Future<void> _confirmSignOut(BuildContext context) async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'store.dart';
 
 /// Mentorlar sekmesi (CLAUDE.md §7.5): stil filtresi + mentor kartları.
 /// mentor_market_enabled kapalıysa Faz 1 placeholder'ı gösterilir.
@@ -296,10 +297,7 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
                 .mentorAskSent(result.mentorName))));
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
-      }
+      if (mounted) showErrorWithStoreAction(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

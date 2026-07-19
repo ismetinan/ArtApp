@@ -31,6 +31,10 @@ class User(Base):
     jeton_balance: Mapped[int] = mapped_column(Integer, default=0)
     # Mentor başvurularını onaylayan hesap (beta'da SQL ile bir kez atanır)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Premium abonelik bitişi (Play Billing) — None/geçmiş = ücretsiz katman
+    premium_until: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     ability_scores: Mapped[list["AbilityScore"]] = relationship(back_populates="user")
@@ -152,6 +156,25 @@ class JetonTransaction(Base):
     reason: Mapped[str] = mapped_column(String(24))  # welcome|mentor_request|refund
     request_id: Mapped[int | None] = mapped_column(
         ForeignKey("mentorship_requests.id"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Purchase(Base):
+    """Play Billing satın alma kaydı. purchase_token unique — aynı satın almanın
+    ikinci kez hak vermesini engeller (para/güven akışı, CLAUDE.md §6)."""
+
+    __tablename__ = "purchases"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    product_id: Mapped[str] = mapped_column(String(64))
+    purchase_token: Mapped[str] = mapped_column(String(512), unique=True)
+    kind: Mapped[str] = mapped_column(String(16))  # jeton | subscription
+    state: Mapped[str] = mapped_column(String(16), default="granted")
+    # Abonelikte: jetonu verilmiş son fatura döneminin bitişi (dönem başına tek hak)
+    granted_expiry: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 

@@ -39,6 +39,16 @@ class Settings(BaseSettings):
 
     mentor_market_enabled: bool = False  # Faz 2'de açılacak
 
+    # Play Billing (hibrit: jeton paketleri + Premium abonelik). Kapalıyken
+    # /billing uçları 404 — mentor pazarı bayrağıyla aynı desen.
+    billing_enabled: bool = False
+    # Play Developer API yetkili service account JSON'unun TAM içeriği (env'de
+    # string). Boşken doğrulama uçları 503 döner — dev/test mock'la çalışır.
+    play_service_account_json: str = ""
+    android_package_name: str = "com.ismetinan.artapp"
+    ai_daily_limit_premium: int = 50
+    premium_monthly_jetons: int = 10
+
 
 @lru_cache
 def get_settings() -> Settings:

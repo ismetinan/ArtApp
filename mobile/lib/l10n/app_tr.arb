@@ -210,6 +210,42 @@
   "mentorPickDrawing": "Hangi çizimini göndereceksin?",
   "mentorNoDrawings": "Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.",
 
+  "storeTitle": "Jeton Mağazası",
+  "storeJetonSection": "Jeton paketleri",
+  "storeJetonPack": "{count} jeton",
+  "@storeJetonPack": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "storePremiumTitle": "Artora Premium",
+  "storePremiumPerk1": "Her ay {count} hediye jeton",
+  "@storePremiumPerk1": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "storePremiumPerk2": "Günlük AI analiz limitin 5 katına çıkar",
+  "storePremiumPerk3": "Dersler zaten herkese ücretsiz — Premium sadece hız katar",
+  "storePremiumActive": "Premium aktif — {date} tarihine kadar",
+  "@storePremiumActive": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "storeSubscribe": "Abone Ol",
+  "storeBuy": "Satın Al",
+  "storeRestore": "Satın alımları geri yükle",
+  "storeUnavailable": "Mağaza şu an kullanılamıyor (Play Store bağlantısı yok).",
+  "storeSuccess": "Satın alma tamamlandı — yeni bakiyen: {count} jeton",
+  "@storeSuccess": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "storeBuyJetons": "Jeton Al",
+  "premiumBadge": "Premium",
+
   "adminPanelTitle": "Admin — Mentor Başvuruları",
   "adminSectionTitle": "Admin Paneli",
   "adminSectionBody": "Bekleyen mentor başvurularını incele ve onayla.",

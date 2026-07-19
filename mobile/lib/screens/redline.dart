@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'store.dart';
 
 const _severityColors = {
   'dusuk': Color(0xFFF0C020),
@@ -72,10 +73,7 @@ class _RedlineScreenState extends State<RedlineScreen> {
                 .mentorAskSent(result.mentorName))));
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
-      }
+      if (mounted) showErrorWithStoreAction(context, e);
     } finally {
       if (mounted) setState(() => _requestBusy = false);
     }

@@ -183,6 +183,9 @@ class ApiClient {
   /// Backend'deki mentor_market_enabled flag'i — mentor UI'ı buna göre görünür.
   bool mentorMarketEnabled = false;
 
+  /// Backend'deki billing_enabled flag'i — mağaza UI'ı buna göre görünür.
+  bool billingEnabled = false;
+
   /// Kullanıcı seviye belirleme ekranını bilerek atladı (cihaz-yerel tercih).
   /// Atlamadıysa ve chart boşsa açılışta 3-resim ekranına geri yönlendirilir.
   bool onboardingSkipped = false;
@@ -209,6 +212,7 @@ class ApiClient {
     isGuest = prefs.getBool('is_guest') ?? true;
     savedLanguage = prefs.getString('language');
     mentorMarketEnabled = prefs.getBool('mentor_market') ?? false;
+    billingEnabled = prefs.getBool('billing') ?? false;
     onboardingSkipped = prefs.getBool('onboarding_skipped') ?? false;
   }
 
@@ -372,7 +376,37 @@ class ApiClient {
     final r = await http.get(Uri.parse('$apiBase/profile'), headers: authHeaders);
     final j = _decode(r);
     mentorMarketEnabled = j['mentor_market_enabled'] ?? mentorMarketEnabled;
+    final billing = j['billing_enabled'];
+    if (billing is bool && billing != billingEnabled) {
+      billingEnabled = billing;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('billing', billing);
+    }
     return j;
+  }
+
+  // ---------- Play Billing ----------
+
+  /// Satın almayı backend'e doğrulatır; hak sunucuda verilir.
+  /// 200 dönmeden completePurchase ÇAĞRILMAMALI.
+  Future<Map<String, dynamic>> verifyPurchase(
+      String productId, String purchaseToken) async {
+    final r = await http.post(
+      Uri.parse('$apiBase/billing/verify'),
+      headers: _jsonHeaders,
+      body: jsonEncode({
+        'product_id': productId,
+        'purchase_token': purchaseToken,
+      }),
+    );
+    return _decode(r);
+  }
+
+  /// Açılışta abonelik durumunu tazeler (lazy yenileme).
+  Future<Map<String, dynamic>> getBillingStatus() async {
+    final r =
+        await http.get(Uri.parse('$apiBase/billing/status'), headers: authHeaders);
+    return _decode(r);
   }
 
   // ---------- Faz 2: mentor pazarı ----------

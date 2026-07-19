@@ -405,6 +405,61 @@ class AppLocalizationsEn extends AppLocalizations {
       'Upload a lesson assignment first — after the analysis you can send it to a mentor from here.';
 
   @override
+  String get storeTitle => 'Jeton Store';
+
+  @override
+  String get storeJetonSection => 'Jeton packs';
+
+  @override
+  String storeJetonPack(int count) {
+    return '$count jetons';
+  }
+
+  @override
+  String get storePremiumTitle => 'Artora Premium';
+
+  @override
+  String storePremiumPerk1(int count) {
+    return '$count bonus jetons every month';
+  }
+
+  @override
+  String get storePremiumPerk2 => '5x your daily AI analysis limit';
+
+  @override
+  String get storePremiumPerk3 =>
+      'Lessons are free for everyone — Premium just adds speed';
+
+  @override
+  String storePremiumActive(String date) {
+    return 'Premium active — until $date';
+  }
+
+  @override
+  String get storeSubscribe => 'Subscribe';
+
+  @override
+  String get storeBuy => 'Buy';
+
+  @override
+  String get storeRestore => 'Restore purchases';
+
+  @override
+  String get storeUnavailable =>
+      'The store is currently unavailable (no Play Store connection).';
+
+  @override
+  String storeSuccess(int count) {
+    return 'Purchase complete — new balance: $count jetons';
+  }
+
+  @override
+  String get storeBuyJetons => 'Buy Jetons';
+
+  @override
+  String get premiumBadge => 'Premium';
+
+  @override
   String get adminPanelTitle => 'Admin — Mentor Applications';
 
   @override

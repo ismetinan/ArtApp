@@ -405,6 +405,61 @@ class AppLocalizationsTr extends AppLocalizations {
       'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.';
 
   @override
+  String get storeTitle => 'Jeton Mağazası';
+
+  @override
+  String get storeJetonSection => 'Jeton paketleri';
+
+  @override
+  String storeJetonPack(int count) {
+    return '$count jeton';
+  }
+
+  @override
+  String get storePremiumTitle => 'Artora Premium';
+
+  @override
+  String storePremiumPerk1(int count) {
+    return 'Her ay $count hediye jeton';
+  }
+
+  @override
+  String get storePremiumPerk2 => 'Günlük AI analiz limitin 5 katına çıkar';
+
+  @override
+  String get storePremiumPerk3 =>
+      'Dersler zaten herkese ücretsiz — Premium sadece hız katar';
+
+  @override
+  String storePremiumActive(String date) {
+    return 'Premium aktif — $date tarihine kadar';
+  }
+
+  @override
+  String get storeSubscribe => 'Abone Ol';
+
+  @override
+  String get storeBuy => 'Satın Al';
+
+  @override
+  String get storeRestore => 'Satın alımları geri yükle';
+
+  @override
+  String get storeUnavailable =>
+      'Mağaza şu an kullanılamıyor (Play Store bağlantısı yok).';
+
+  @override
+  String storeSuccess(int count) {
+    return 'Satın alma tamamlandı — yeni bakiyen: $count jeton';
+  }
+
+  @override
+  String get storeBuyJetons => 'Jeton Al';
+
+  @override
+  String get premiumBadge => 'Premium';
+
+  @override
   String get adminPanelTitle => 'Admin — Mentor Başvuruları';
 
   @override

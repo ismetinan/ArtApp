@@ -24,7 +24,12 @@ def consume_ai_quota(db: Session, user: User) -> None:
     if usage is None:
         usage = AiUsage(user_id=user.id, day=today, count=0)
         db.add(usage)
-    if usage.count >= get_settings().ai_daily_limit:
+    settings = get_settings()
+    # Premium: yüksek günlük limit (dersler herkese açık, konfor paralı)
+    from .billing import is_premium
+
+    limit = settings.ai_daily_limit_premium if is_premium(user) else settings.ai_daily_limit
+    if usage.count >= limit:
         raise HTTPException(
             status_code=429, detail=msg("ai_quota_exhausted", user.language)
         )

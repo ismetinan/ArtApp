@@ -142,3 +142,39 @@ Bu ayrım Faz 2 planlanırken masada olmalı.
 4. Yeni AAB build + dahili test. Doğrulama: bayrak açıkken öğrenci mentor
    isteği atınca mentorun telefonuna, mentor cevap yazınca öğrenciye bildirim
    düşmeli (uygulama öndeyken SnackBar, kapalıyken sistem bildirimi).
+
+## 9. Play Billing (jeton paketleri + Premium abonelik)
+
+Hibrit model: dersler herkese ücretsiz; jeton paketleri (tüketilebilir) +
+`premium_monthly` aboneliği (ayda 10 hediye jeton + günlük AI limiti 10→50).
+Kod `BILLING_ENABLED` bayrağı arkasında — kapalıyken uçlar 404, UI gizli.
+
+**Sıra önemli: önce billing izinli AAB (0.5.0+7) Play'e yüklenmeli** — ürün
+tanımlama menüleri ancak billing izni içeren bir sürüm yüklendikten sonra açılır.
+
+1. **AAB yükle**: 0.5.0+7'yi dahili test kanalına yükle (in_app_purchase
+   eklentisi `com.android.vending.BILLING` iznini kendisi ekler).
+2. **Ürünleri tanımla**: Play Console → Para kazanma (Monetize) →
+   - Uygulama içi ürünler → Ürün oluştur: kimlikler **`jeton_5`**, **`jeton_15`**,
+     **`jeton_40`** (kimlikler birebir böyle olmalı — backend kataloğuyla eşleşir).
+     Ad/açıklama serbest, fiyatı sen belirle, hepsini **Etkinleştir**.
+   - Abonelikler → Abonelik oluştur: kimlik **`premium_monthly`**, temel plan:
+     aylık, otomatik yenilenen. Fiyatı belirle, etkinleştir.
+3. **API erişimi (sunucu doğrulaması)**: Google Cloud Console'da (Play'e bağlı
+   projede) **Google Play Android Developer API**'yi etkinleştir → bir service
+   account oluştur → JSON anahtar indir. Play Console → Kullanıcılar ve
+   izinler → Kullanıcı davet et → service account e-postasına **Finansal
+   veriler + Sipariş yönetimi** izni ver. JSON'un TAM içeriğini Railway →
+   `PLAY_SERVICE_ACCOUNT_JSON` değişkenine yapıştır (GİZLİ — asla commit etme).
+4. **Bayrağı aç**: Railway → `BILLING_ENABLED=true` → redeploy.
+5. **Lisans testçileri** (gerçek para gitmesin): Play Console → Ayarlar →
+   Lisans testi → test hesaplarının e-postalarını ekle. Bu hesaplar test
+   kartıyla "satın alır", ücret çekilmez.
+6. **Telefon testi**: Profil → jeton çipine dokun → mağaza açılır →
+   jeton paketi al → bakiye artmalı (profilde ve `jeton_transactions`'ta
+   `purchase` satırı) → mentor isteğinde harca. Premium al → profil rozetinde
+   "Premium" görünmeli, günlük AI limiti artmalı. Jeton yetersizken mentor
+   isteği → SnackBar'da "Jeton Al" aksiyonu çıkmalı.
+
+Not: abonelik yenilemeleri Pub/Sub'sız, uygulama açılışında lazy doğrulanır;
+iptal edilen abonelik dönem sonunda kendiliğinden düşer.

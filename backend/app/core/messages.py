@@ -156,6 +156,15 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Başvuru bulunamadı",
         "en": "Application not found",
     },
+    # --- Play Billing ---
+    "purchase_invalid": {
+        "tr": "Satın alma doğrulanamadı. Ödeme gerçekleştiyse endişelenme — 'Satın alımları geri yükle' ile tekrar deneyebilirsin.",
+        "en": "The purchase couldn't be verified. If you were charged, don't worry — try again with 'Restore purchases'.",
+    },
+    "billing_unavailable": {
+        "tr": "Mağaza şu an kullanılamıyor, lütfen daha sonra tekrar dene.",
+        "en": "The store is currently unavailable, please try again later.",
+    },
     # --- push bildirimleri (title|body çiftleri) ---
     "push_new_request_title": {
         "tr": "Yeni mentor isteği 🎨",

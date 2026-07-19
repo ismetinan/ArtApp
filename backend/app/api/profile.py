@@ -12,6 +12,7 @@ from ..core.config import get_settings
 from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityScore, MentorProfile, Submission, User
+from ..services import billing as billing_service
 from ..services.storage import load_drawing
 
 router = APIRouter(tags=["profile"])
@@ -59,6 +60,9 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         "mentor_market_enabled": get_settings().mentor_market_enabled,
         # Beta admini: Flutter buna bakarak başvuru onay panelini gösterir
         "is_admin": user.is_admin,
+        "billing_enabled": get_settings().billing_enabled,
+        "is_premium": billing_service.is_premium(user),
+        "premium_until": user.premium_until.isoformat() if user.premium_until else None,
         # Faz 2: mentor rolü — Flutter buna bakarak paneli gösterir
         "mentor": None
         if mentor is None

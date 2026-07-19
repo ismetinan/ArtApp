@@ -788,6 +788,96 @@ abstract class AppLocalizations {
   /// **'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.'**
   String get mentorNoDrawings;
 
+  /// No description provided for @storeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Jeton Mağazası'**
+  String get storeTitle;
+
+  /// No description provided for @storeJetonSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Jeton paketleri'**
+  String get storeJetonSection;
+
+  /// No description provided for @storeJetonPack.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} jeton'**
+  String storeJetonPack(int count);
+
+  /// No description provided for @storePremiumTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Artora Premium'**
+  String get storePremiumTitle;
+
+  /// No description provided for @storePremiumPerk1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her ay {count} hediye jeton'**
+  String storePremiumPerk1(int count);
+
+  /// No description provided for @storePremiumPerk2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük AI analiz limitin 5 katına çıkar'**
+  String get storePremiumPerk2;
+
+  /// No description provided for @storePremiumPerk3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dersler zaten herkese ücretsiz — Premium sadece hız katar'**
+  String get storePremiumPerk3;
+
+  /// No description provided for @storePremiumActive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium aktif — {date} tarihine kadar'**
+  String storePremiumActive(String date);
+
+  /// No description provided for @storeSubscribe.
+  ///
+  /// In tr, this message translates to:
+  /// **'Abone Ol'**
+  String get storeSubscribe;
+
+  /// No description provided for @storeBuy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın Al'**
+  String get storeBuy;
+
+  /// No description provided for @storeRestore.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın alımları geri yükle'**
+  String get storeRestore;
+
+  /// No description provided for @storeUnavailable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mağaza şu an kullanılamıyor (Play Store bağlantısı yok).'**
+  String get storeUnavailable;
+
+  /// No description provided for @storeSuccess.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın alma tamamlandı — yeni bakiyen: {count} jeton'**
+  String storeSuccess(int count);
+
+  /// No description provided for @storeBuyJetons.
+  ///
+  /// In tr, this message translates to:
+  /// **'Jeton Al'**
+  String get storeBuyJetons;
+
+  /// No description provided for @premiumBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium'**
+  String get premiumBadge;
+
   /// No description provided for @adminPanelTitle.
   ///
   /// In tr, this message translates to:

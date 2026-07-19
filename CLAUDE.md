@@ -53,9 +53,18 @@ Kapsam: Seçmeli mentorluk (3 jeton, doğrudan seçim), mentor arama/filtreleme,
 ### Faz 4 — Ölçekleme
 Kapsam: Çoklu dil desteği, bölgesel mentor havuzları, AI modelinin kendi veriyle ince ayarı, düzenli etik/önyargı denetimi.
 
-**Şu anki aktif faz: Faz 2 (kod tamam, `MENTOR_MARKET_ENABLED` bayrağıyla açılacak).
+**Şu anki aktif faz: Faz 3. Faz 2 canlıda test edildi (mentor akışı uçtan uca çalışıyor).
+Faz 3'ten tamamlananlar: seçmeli mentorluk (3 jeton) + mentor arama + uygulama içi admin
+paneli + Play Billing kodu (`BILLING_ENABLED` bayrağıyla açılacak — bkz. DEPLOY.md §9).
+Kalan Faz 3 işleri: dinamik/kişiselleştirilmiş ağaç yönlendirmesi, topluluk galerisi.
 Faz 0 doğrulaması TAMAMLANDI (2026-07-18): 8 gerçek çizimle (manga/realist/karikatür)
 OpenRouter üzerinde koşuldu, stil tarafsızlığı GEÇTİ — bkz. `prototype/FAZ0_RAPOR.md`.**
+
+> Ücretlendirme kararı (2026-07-19): **hibrit model** — dersler her katmanda ücretsiz
+> (içerik YouTube; ders paywall'u bilinçli reddedildi). Gelir: jeton paketleri
+> (`jeton_5/15/40`, tüketilebilir IAP) + `premium_monthly` aboneliği (ayda 10 hediye
+> jeton + günlük AI kotası 10→50). Doğrulama sunucuda (`services/billing.py`,
+> Play Developer API); mentor gelir paylaşımı hâlâ açık konu.
 
 > AI sağlayıcı kararı (güncel 2026-07-15): Anthropic anahtarı henüz yok. Tüm AI
 > çağrıları `backend/app/ai/` içindeki sağlayıcı-bağımsız arayüz üzerinden gider

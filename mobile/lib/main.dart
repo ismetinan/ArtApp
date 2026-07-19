@@ -18,6 +18,10 @@ Future<void> main() async {
   final saved = ApiClient.instance.savedLanguage;
   if (saved != null) appLocale.value = Locale(saved);
   unawaited(initPush()); // açılışı bloklamaz; oturum yoksa kendisi atlar
+  // Abonelik lazy yenileme (Pub/Sub'sız v1): açılışta sessizce tazelenir
+  if (ApiClient.instance.token != null && ApiClient.instance.billingEnabled) {
+    unawaited(ApiClient.instance.getBillingStatus().catchError((_) => <String, dynamic>{}));
+  }
   runApp(const ArtApp());
 }
 

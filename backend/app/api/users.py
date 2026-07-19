@@ -14,6 +14,7 @@ from ..models.tables import (
     JetonTransaction,
     MentorProfile,
     MentorshipRequest,
+    Purchase,
     Submission,
     User,
     UserProgress,
@@ -247,7 +248,7 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
     db.execute(delete(MentorshipRequest).where(MentorshipRequest.student_id == user.id))
     db.execute(delete(MentorProfile).where(MentorProfile.user_id == user.id))
 
-    for table in (Submission, UserProgress, AbilityScore, AiUsage):
+    for table in (Submission, UserProgress, AbilityScore, AiUsage, Purchase):
         db.execute(delete(table).where(table.user_id == user.id))
     db.delete(user)
     db.commit()
