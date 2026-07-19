@@ -12,16 +12,30 @@ final GlobalKey<ScaffoldMessengerState> messengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
 bool _firebaseReady = false;
+bool _listenersBound = false;
+
+/// Firebase'i bir kez başlatır; yapılandırma yoksa false döner, asla fırlatmaz.
+/// main() (Crashlytics için) ve initPush ortak kullanır.
+Future<bool> ensureFirebase() async {
+  if (_firebaseReady) return true;
+  try {
+    await Firebase.initializeApp();
+    _firebaseReady = true;
+  } catch (e) {
+    dev.log('Firebase başlatılamadı: $e');
+  }
+  return _firebaseReady;
+}
 
 /// FCM kurulumu: izin iste → token al → backend'e kaydet → dinleyicileri bağla.
 /// Oturum yoksa veya Firebase yapılandırması eksikse (google-services.json)
 /// sessizce atlanır — push, ana akışı hiçbir koşulda bozmaz.
 Future<void> initPush() async {
   if (ApiClient.instance.token == null) return;
+  if (!await ensureFirebase()) return;
   try {
-    if (!_firebaseReady) {
-      await Firebase.initializeApp();
-      _firebaseReady = true;
+    if (!_listenersBound) {
+      _listenersBound = true;
 
       // Uygulama öndeyken sistem bildirimi görünmez — SnackBar ile gösteririz
       FirebaseMessaging.onMessage.listen((message) {

@@ -584,6 +584,30 @@ abstract class AppLocalizations {
   /// **'English'**
   String get languageEnglish;
 
+  /// No description provided for @feedbackButton.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri bildirim gönder'**
+  String get feedbackButton;
+
+  /// No description provided for @sendFeedbackBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beta\'da bir sorun mu gördün, fikrin mi var? Bize yaz!'**
+  String get sendFeedbackBody;
+
+  /// No description provided for @feedbackMailSubject.
+  ///
+  /// In tr, this message translates to:
+  /// **'Artora Beta geri bildirimi'**
+  String get feedbackMailSubject;
+
+  /// No description provided for @feedbackMailBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Merhaba! Artora hakkında geri bildirimim:\n\n\n---\nSürüm: {version}'**
+  String feedbackMailBody(String version);
+
   /// No description provided for @signOut.
   ///
   /// In tr, this message translates to:

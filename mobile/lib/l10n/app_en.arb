@@ -96,6 +96,11 @@
   "languageTurkish": "Türkçe",
   "languageEnglish": "English",
 
+  "feedbackButton": "Send feedback",
+  "sendFeedbackBody": "Found a problem in the beta or have an idea? Tell us!",
+  "feedbackMailSubject": "Artora Beta feedback",
+  "feedbackMailBody": "Hi! My feedback about Artora:\n\n\n---\nVersion: {version}",
+
   "signOut": "Sign Out",
   "signOutConfirmTitle": "Sign out?",
   "signOutConfirmBody": "You can sign back in with the same account; your progress is safe on the server.",

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 
 import 'api.dart';
@@ -14,6 +16,15 @@ final ValueNotifier<Locale?> appLocale = ValueNotifier(null);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Crashlytics: beta'da çökme görünürlüğü. Firebase yapılandırması yoksa
+  // ensureFirebase false döner ve uygulama raporlamasız devam eder.
+  if (await ensureFirebase()) {
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
   await ApiClient.instance.loadSession();
   final saved = ApiClient.instance.savedLanguage;
   if (saved != null) appLocale.value = Locale(saved);

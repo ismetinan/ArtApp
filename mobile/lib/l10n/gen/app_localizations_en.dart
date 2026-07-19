@@ -290,6 +290,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get feedbackButton => 'Send feedback';
+
+  @override
+  String get sendFeedbackBody =>
+      'Found a problem in the beta or have an idea? Tell us!';
+
+  @override
+  String get feedbackMailSubject => 'Artora Beta feedback';
+
+  @override
+  String feedbackMailBody(String version) {
+    return 'Hi! My feedback about Artora:\n\n\n---\nVersion: $version';
+  }
+
+  @override
   String get signOut => 'Sign Out';
 
   @override

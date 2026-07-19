@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -283,6 +285,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
               const SizedBox(height: 32),
+              // Beta geri bildirim kanalı: hazır şablonla e-posta uygulamasını açar
+              ListTile(
+                leading: const Icon(Icons.feedback_outlined),
+                title: Text(t.feedbackButton),
+                subtitle: Text(t.sendFeedbackBody),
+                onTap: () => _sendFeedback(context),
+              ),
               ListTile(
                 leading: const Icon(Icons.logout),
                 title: Text(t.signOut),
@@ -303,6 +312,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _sendFeedback(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    final info = await PackageInfo.fromPlatform();
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'ismet17inan@gmail.com',
+      query: Uri(queryParameters: {
+        'subject': t.feedbackMailSubject,
+        'body': t.feedbackMailBody('${info.version}+${info.buildNumber}'),
+      }).query,
+    );
+    try {
+      await launchUrl(uri);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(t.errorUnexpected)));
+      }
+    }
   }
 
   void _showLevelRoadmap(BuildContext context, Map<String, dynamic> p) {

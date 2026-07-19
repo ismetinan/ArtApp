@@ -11,6 +11,7 @@ plugins {
 // devreye girer; dosya yokken build kırılmasın diye koşullu uygulanır.
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 // Release imzası: android/key.properties (git dışında) varsa kullanılır

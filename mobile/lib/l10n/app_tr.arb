@@ -165,6 +165,16 @@
   "languageTurkish": "Türkçe",
   "languageEnglish": "English",
 
+  "feedbackButton": "Geri bildirim gönder",
+  "sendFeedbackBody": "Beta'da bir sorun mu gördün, fikrin mi var? Bize yaz!",
+  "feedbackMailSubject": "Artora Beta geri bildirimi",
+  "feedbackMailBody": "Merhaba! Artora hakkında geri bildirimim:\n\n\n---\nSürüm: {version}",
+  "@feedbackMailBody": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+
   "signOut": "Çıkış Yap",
   "signOutConfirmTitle": "Çıkış yapılsın mı?",
   "signOutConfirmBody": "Aynı hesapla tekrar giriş yapabilirsin; ilerlemen sunucuda güvende.",

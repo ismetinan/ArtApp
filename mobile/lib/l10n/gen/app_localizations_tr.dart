@@ -292,6 +292,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get feedbackButton => 'Geri bildirim gönder';
+
+  @override
+  String get sendFeedbackBody =>
+      'Beta\'da bir sorun mu gördün, fikrin mi var? Bize yaz!';
+
+  @override
+  String get feedbackMailSubject => 'Artora Beta geri bildirimi';
+
+  @override
+  String feedbackMailBody(String version) {
+    return 'Merhaba! Artora hakkında geri bildirimim:\n\n\n---\nSürüm: $version';
+  }
+
+  @override
   String get signOut => 'Çıkış Yap';
 
   @override

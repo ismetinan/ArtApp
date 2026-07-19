@@ -23,6 +23,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.3.20" apply false
     // FCM: google-services.json'u işler (app tarafında koşullu uygulanır)
     id("com.google.gms.google-services") version "4.4.2" apply false
+    // Crashlytics: çökme raporları + mapping yükleme (app tarafında koşullu)
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
 }
 
 include(":app")
