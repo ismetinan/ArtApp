@@ -13,8 +13,8 @@ import httpx
 from pydantic import BaseModel
 
 from .base import AIProvider
-from .prompts import assess_prompt, assignment_prompt, redline_prompt
-from .schemas import AssignmentBrief, LevelAssessment, RedlineResult
+from .prompts import MODERATION_PROMPT, assess_prompt, assignment_prompt, redline_prompt
+from .schemas import AssignmentBrief, LevelAssessment, ModerationVerdict, RedlineResult
 
 _API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -117,3 +117,7 @@ class OpenRouterProvider(AIProvider):
             {"type": "text", "text": assignment_prompt(node_title, node_description, language)}
         ]
         return await self._generate(content, AssignmentBrief)
+
+    async def moderation_check(self, image: bytes) -> ModerationVerdict:
+        content = [_image_part(image), {"type": "text", "text": MODERATION_PROMPT}]
+        return await self._generate(content, ModerationVerdict)

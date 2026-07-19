@@ -6,7 +6,7 @@ arayüz üzerinden gider. Yeni sağlayıcı = bu sınıfı uygulayan tek yeni do
 
 from abc import ABC, abstractmethod
 
-from .schemas import AssignmentBrief, LevelAssessment, RedlineResult
+from .schemas import AssignmentBrief, LevelAssessment, ModerationVerdict, RedlineResult
 
 
 class AIProvider(ABC):
@@ -28,6 +28,14 @@ class AIProvider(ABC):
         lesson_context: ödevin bağlı olduğu dersin başlığı/konusu (ör. "temel kafa
         oranları") — model geri bildirimi derse odaklar.
         language: çıktı metinlerinin dili (tr/en).
+        """
+
+    @abstractmethod
+    async def moderation_check(self, image: bytes) -> ModerationVerdict:
+        """Paylaşım öncesi güvenlik kontrolü: görsel topluluğa/mentora uygun mu?
+
+        Herkese açık yapma, mentor portfolyosu ve mentor isteği anlarında çağrılır;
+        sonuç gönderi başına bir kez hesaplanıp saklanır.
         """
 
     @abstractmethod

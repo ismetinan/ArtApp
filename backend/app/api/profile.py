@@ -13,6 +13,7 @@ from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityScore, MentorProfile, Submission, User
 from ..services import billing as billing_service
+from ..services import moderation
 from ..services.gamification import XP_PER_LEVEL
 from ..services.storage import load_drawing
 
@@ -95,7 +96,7 @@ class PrivacyUpdate(BaseModel):
 
 
 @router.patch("/submissions/{submission_id}/privacy")
-def update_privacy(
+async def update_privacy(
     submission_id: int,
     body: PrivacyUpdate,
     user: User = Depends(get_current_user),
@@ -109,6 +110,9 @@ def update_privacy(
         raise HTTPException(
             status_code=403, detail=msg("moderation_blocked", user.language)
         )
+    # Önleyici filtre: herkese açılmadan önce AI güvenlik kontrolü
+    if body.is_public:
+        await moderation.ensure_safe(db, user, submission)
     submission.is_public = body.is_public
     db.commit()
     return {"submission_id": submission.id, "is_public": submission.is_public}

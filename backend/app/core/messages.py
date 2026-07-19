@@ -156,6 +156,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Başvuru bulunamadı",
         "en": "Application not found",
     },
+    "content_unsafe": {
+        "tr": "Bu görsel topluluk kurallarına uygun görünmediği için paylaşılamıyor. Bir hata olduğunu düşünüyorsan Profil'deki geri bildirim butonundan bize yaz.",
+        "en": "This image can't be shared because it doesn't appear to follow the community guidelines. If you think this is a mistake, contact us via the feedback button in your Profile.",
+    },
     "moderation_blocked": {
         "tr": "Bu çizim topluluk kuralları gereği kaldırıldı ve yeniden paylaşılamaz. Bir hata olduğunu düşünüyorsan bize yaz.",
         "en": "This drawing was removed under the community guidelines and can't be shared again. If you think this is a mistake, contact us.",

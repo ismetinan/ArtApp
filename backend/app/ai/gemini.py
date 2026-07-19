@@ -8,8 +8,8 @@ from google import genai
 from google.genai import types
 
 from .base import AIProvider
-from .prompts import assess_prompt, assignment_prompt, redline_prompt
-from .schemas import AssignmentBrief, LevelAssessment, RedlineResult
+from .prompts import MODERATION_PROMPT, assess_prompt, assignment_prompt, redline_prompt
+from .schemas import AssignmentBrief, LevelAssessment, ModerationVerdict, RedlineResult
 
 
 def _image_part(image: bytes) -> types.Part:
@@ -52,3 +52,8 @@ class GeminiProvider(AIProvider):
     ) -> AssignmentBrief:
         prompt = assignment_prompt(node_title, node_description, language)
         return await self._generate([prompt], AssignmentBrief)
+
+    async def moderation_check(self, image: bytes) -> ModerationVerdict:
+        return await self._generate(
+            [_image_part(image), MODERATION_PROMPT], ModerationVerdict
+        )

@@ -24,7 +24,7 @@ from ..models.tables import (
     Submission,
     User,
 )
-from ..services import jetons
+from ..services import jetons, moderation
 from ..services.push import send_push
 
 REQUEST_TIMEOUT = timedelta(hours=48)
@@ -162,7 +162,7 @@ class MentorRequestBody(BaseModel):
     "/submissions/{submission_id}/mentor-request",
     dependencies=[Depends(require_mentor_market)],
 )
-def create_mentor_request(
+async def create_mentor_request(
     submission_id: int,
     body: MentorRequestBody | None = None,
     user: User = Depends(get_current_user),
@@ -175,6 +175,8 @@ def create_mentor_request(
         raise HTTPException(
             status_code=404, detail=msg("submission_not_found", user.language)
         )
+    # Önleyici filtre: bir insana (mentora) gidecek görsel önce güvenlik kontrolünden geçer
+    await moderation.ensure_safe(db, user, submission)
     active = db.execute(
         select(MentorshipRequest).where(
             MentorshipRequest.submission_id == submission_id,
@@ -308,7 +310,7 @@ class ApplyBody(BaseModel):
 
 
 @router.post("/mentors/apply", dependencies=[Depends(require_mentor_market)])
-def apply_mentor(
+async def apply_mentor(
     body: ApplyBody,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -321,6 +323,8 @@ def apply_mentor(
             raise HTTPException(
                 status_code=422, detail=msg("portfolio_not_yours", user.language)
             )
+        # Portfolyo herkese açık olur — önce güvenlik kontrolü
+        await moderation.ensure_safe(db, user, s)
 
     existing = db.execute(
         select(MentorProfile).where(MentorProfile.user_id == user.id)

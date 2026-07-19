@@ -10,6 +10,7 @@ from .base import AIProvider
 from .schemas import (
     AssignmentBrief,
     LevelAssessment,
+    ModerationVerdict,
     RedlineFinding,
     RedlineResult,
     Severity,
@@ -115,6 +116,12 @@ class MockAIProvider(AIProvider):
             ),
             focus_axes=weakest,
         )
+
+    async def moderation_check(self, image: bytes) -> ModerationVerdict:
+        # Test kancası: içeriğinde "NSFW" baytları geçen görsel güvensiz sayılır
+        if b"NSFW" in image:
+            return ModerationVerdict(is_safe=False, category="nudity")
+        return ModerationVerdict(is_safe=True, category="ok")
 
     async def assignment_brief(
         self, node_title: str, node_description: str, language: str = "tr"

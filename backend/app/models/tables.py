@@ -89,6 +89,8 @@ class Submission(Base):
     is_public: Mapped[bool] = mapped_column(Boolean, default=False)
     # Moderasyon: admin gizlediyse sahibi yeniden herkese açık YAPAMAZ (UGC politikası)
     moderation_hidden: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Önleyici AI filtresi sonucu: unchecked | safe | unsafe (paylaşımda bir kez)
+    moderation_status: Mapped[str] = mapped_column(String(12), default="unchecked")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     user: Mapped[User] = relationship(back_populates="submissions")

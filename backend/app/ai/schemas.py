@@ -48,6 +48,15 @@ class RedlineResult(BaseModel):
     )
 
 
+class ModerationVerdict(BaseModel):
+    """Paylaşım öncesi içerik güvenlik kararı (topluluk/mentor'a giden görseller)."""
+
+    is_safe: bool
+    category: str = Field(
+        description="ok | nudity | violence | hate | other (unsafe sebep kategorisi)"
+    )
+
+
 class AssignmentBrief(BaseModel):
     """AI'ın ürettiği kişisel ödev görevi (düğüm başına bir kez üretilir, saklanır)."""
 
