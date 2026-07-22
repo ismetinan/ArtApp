@@ -164,6 +164,27 @@ class JetonTransaction(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class MentorEarning(Base):
+    """Faz 4 (gelir paylaşımı) — Faz A: mentor kazanç defteri.
+
+    Mentor bir isteği CEVAPLADIĞINDA (answered, terminal durum — iade yok) bir satır
+    işlenir; kazanç öğrencinin harcadığı jeton_cost kadar JETON-EŞDEĞERİ olarak
+    biriktirilir. Para çevrimi + paylaşım yüzdesi (oran) Faz B'de payout anında
+    uygulanır — bu defter salt jeton-eşdeğeri kalır. request_id unique: aynı istek
+    iki kez kredi veremez (para/güven akışı, CLAUDE.md §6). Bakiye = SUM(jeton_equivalent)."""
+
+    __tablename__ = "mentor_earnings"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    mentor_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    request_id: Mapped[int | None] = mapped_column(
+        ForeignKey("mentorship_requests.id"), unique=True, nullable=True
+    )
+    jeton_equivalent: Mapped[int] = mapped_column(Integer)  # + kazanç (havuz=1, seçmeli=3)
+    reason: Mapped[str] = mapped_column(String(24), default="mentor_feedback")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class Assignment(Base):
     """AI'ın kullanıcıya özel ürettiği ödev görevi — düğüm başına bir kez üretilir,
     sonraki okumalar kota harcamaz."""

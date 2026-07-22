@@ -14,6 +14,9 @@ import 'screens/onboarding.dart';
 /// Profildeki dil seçici bunu değiştirir; MaterialApp dinler ve yeniden çizer.
 final ValueNotifier<Locale?> appLocale = ValueNotifier(null);
 
+/// Karanlık tema anahtarı. Profildeki buton bunu değiştirir; MaterialApp dinler.
+final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.light);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Crashlytics: beta'da çökme görünürlüğü. Firebase yapılandırması yoksa
@@ -28,6 +31,8 @@ Future<void> main() async {
   await ApiClient.instance.loadSession();
   final saved = ApiClient.instance.savedLanguage;
   if (saved != null) appLocale.value = Locale(saved);
+  appThemeMode.value =
+      ApiClient.instance.darkMode ? ThemeMode.dark : ThemeMode.light;
   unawaited(initPush()); // açılışı bloklamaz; oturum yoksa kendisi atlar
   // Abonelik lazy yenileme (Pub/Sub'sız v1): açılışta sessizce tazelenir
   if (ApiClient.instance.token != null && ApiClient.instance.billingEnabled) {
@@ -43,21 +48,33 @@ class ArtApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Locale?>(
       valueListenable: appLocale,
-      builder: (context, locale, _) => MaterialApp(
-        title: 'Artora', // marka adı — çevrilmez
-        scaffoldMessengerKey: messengerKey, // öndeyken push → SnackBar
-        navigatorKey: navigatorKey, // bildirim derin bağlantıları
-        locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        // en listede önce: desteklenmeyen cihaz dillerinde İngilizce'ye düşülür
-        supportedLocales: const [Locale('en'), Locale('tr')],
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4)),
-          useMaterial3: true,
+      builder: (context, locale, _) => ValueListenableBuilder<ThemeMode>(
+        valueListenable: appThemeMode,
+        builder: (context, themeMode, _) => MaterialApp(
+          title: 'Artora', // marka adı — çevrilmez
+          scaffoldMessengerKey: messengerKey, // öndeyken push → SnackBar
+          navigatorKey: navigatorKey, // bildirim derin bağlantıları
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          // en listede önce: desteklenmeyen cihaz dillerinde İngilizce'ye düşülür
+          supportedLocales: const [Locale('en'), Locale('tr')],
+          themeMode: themeMode,
+          theme: ThemeData(
+            colorScheme:
+                ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4)),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF6750A4),
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+          ),
+          home: ApiClient.instance.token == null
+              ? const WelcomeScreen()
+              : const StartupGate(),
         ),
-        home: ApiClient.instance.token == null
-            ? const WelcomeScreen()
-            : const StartupGate(),
       ),
     );
   }

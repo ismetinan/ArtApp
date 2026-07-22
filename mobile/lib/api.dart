@@ -189,6 +189,16 @@ class MentorQueueItem {
             : RedlineResult.fromJson(Map<String, dynamic>.from(j['ai_result']));
 }
 
+/// Faz 4 (gelir paylaşımı): mentorun birikmiş kazancı (jeton-eşdeğeri).
+/// Para çevrimi + ödeme altyapısı Faz B — şimdilik salt biriktirme/gösterim.
+class EarningsInfo {
+  final int jetonEquivalent, answeredCount;
+
+  EarningsInfo.fromJson(Map<String, dynamic> j)
+      : jetonEquivalent = j['jeton_equivalent'] ?? 0,
+        answeredCount = j['answered_count'] ?? 0;
+}
+
 class ApiClient {
   ApiClient._();
   static final instance = ApiClient._();
@@ -209,6 +219,9 @@ class ApiClient {
   /// Kullanıcının açıkça seçtiği dil (profildeki seçici). null = cihaz dili.
   String? savedLanguage;
 
+  /// Profildeki karanlık tema anahtarı — yalnız cihaz-yerel tercih (backend'e yazılmaz).
+  bool darkMode = false;
+
   /// Backend'e gönderilen etkin dil: açık seçim > cihaz dili (tr dışı = en).
   String get language {
     if (savedLanguage != null) return savedLanguage!;
@@ -227,6 +240,7 @@ class ApiClient {
     token = prefs.getString('token');
     isGuest = prefs.getBool('is_guest') ?? true;
     savedLanguage = prefs.getString('language');
+    darkMode = prefs.getBool('dark_mode') ?? false;
     mentorMarketEnabled = prefs.getBool('mentor_market') ?? false;
     billingEnabled = prefs.getBool('billing') ?? false;
     onboardingSkipped = prefs.getBool('onboarding_skipped') ?? false;
@@ -262,6 +276,13 @@ class ApiClient {
       );
       _decode(r);
     }
+  }
+
+  /// Karanlık tema anahtarı: yerelde saklar, sunucuya yazılmaz (salt UI tercihi).
+  Future<void> setDarkMode(bool value) async {
+    darkMode = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('dark_mode', value);
   }
 
   Future<void> _saveSession(Map<String, dynamic> auth) async {
@@ -576,6 +597,13 @@ class ApiClient {
     return (_decode(r)['requests'] as List)
         .map((m) => MentorQueueItem.fromJson(Map<String, dynamic>.from(m)))
         .toList();
+  }
+
+  /// Faz 4: mentorun birikmiş kazancı (jeton-eşdeğeri). Yalnız onaylı mentor.
+  Future<EarningsInfo> getMentorEarnings() async {
+    final r =
+        await http.get(Uri.parse('$apiBase/mentor/earnings'), headers: authHeaders);
+    return EarningsInfo.fromJson(Map<String, dynamic>.from(_decode(r)));
   }
 
   Future<void> sendMentorFeedback(int requestId, String text) async {

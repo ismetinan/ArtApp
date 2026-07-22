@@ -17,6 +17,7 @@ class MentorPanelScreen extends StatefulWidget {
 
 class _MentorPanelScreenState extends State<MentorPanelScreen> {
   late Future<List<MentorQueueItem>> _future;
+  late Future<EarningsInfo> _earnings;
   late bool _available;
 
   @override
@@ -33,9 +34,13 @@ class _MentorPanelScreenState extends State<MentorPanelScreen> {
       }).catchError((_) {});
     }
     _future = ApiClient.instance.getMentorQueue();
+    _earnings = ApiClient.instance.getMentorEarnings();
   }
 
-  void _reload() => setState(() => _future = ApiClient.instance.getMentorQueue());
+  void _reload() => setState(() {
+        _future = ApiClient.instance.getMentorQueue();
+        _earnings = ApiClient.instance.getMentorEarnings(); // cevap sonrası tazele
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +65,7 @@ class _MentorPanelScreenState extends State<MentorPanelScreen> {
               }
             },
           ),
+          _EarningsCard(future: _earnings),
           const Divider(height: 1),
           Expanded(
             child: FutureBuilder(
@@ -125,6 +131,69 @@ class _MentorPanelScreenState extends State<MentorPanelScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Faz 4 (gelir paylaşımı): mentorun birikmiş kazancı (jeton-eşdeğeri) +
+/// "ödemeler yakında" notu. Kazanç okunamıyorsa (hata) sessizce gizlenir —
+/// panelin ana işlevi (kuyruk) etkilenmez.
+class _EarningsCard extends StatelessWidget {
+  final Future<EarningsInfo> future;
+  const _EarningsCard({required this.future});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return FutureBuilder<EarningsInfo>(
+      future: future,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+        final e = snapshot.data!;
+        return Card(
+          margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+          color: scheme.primaryContainer,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Icon(Icons.savings_outlined, color: scheme.onPrimaryContainer),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.mentorEarningsTitle,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: scheme.onPrimaryContainer)),
+                      const SizedBox(height: 2),
+                      Text(
+                        t.mentorEarningsUnit(e.jetonEquivalent),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: scheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        t.mentorEarningsAnswered(e.answeredCount),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: scheme.onPrimaryContainer),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        t.mentorEarningsSoon,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: scheme.onPrimaryContainer,
+                            fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

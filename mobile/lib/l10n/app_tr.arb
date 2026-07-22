@@ -184,6 +184,9 @@
   "languageTurkish": "Türkçe",
   "languageEnglish": "English",
 
+  "darkModeTitle": "Karanlık Tema",
+  "darkModeSubtitle": "Uygulamayı koyu renklerle kullan",
+
   "feedbackButton": "Geri bildirim gönder",
   "sendFeedbackBody": "Beta'da bir sorun mu gördün, fikrin mi var? Bize yaz!",
   "feedbackMailSubject": "Artora Beta geri bildirimi",
@@ -257,6 +260,20 @@
   "mentorAskDirect": "Soru sor — 3 jeton",
   "mentorPickDrawing": "Hangi çizimini göndereceksin?",
   "mentorNoDrawings": "Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.",
+  "mentorEarningsTitle": "Kazancım",
+  "mentorEarningsUnit": "{count} jeton-eşdeğeri",
+  "@mentorEarningsUnit": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "mentorEarningsAnswered": "{count} cevaplanan istek",
+  "@mentorEarningsAnswered": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "mentorEarningsSoon": "Ödeme altyapısı yakında — kazançların şimdiden birikiyor.",
 
   "storeTitle": "Jeton Mağazası",
   "storeJetonSection": "Jeton paketleri",

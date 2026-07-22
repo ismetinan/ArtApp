@@ -331,6 +331,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get darkModeTitle => 'Dark Theme';
+
+  @override
+  String get darkModeSubtitle => 'Use the app with dark colors';
+
+  @override
   String get feedbackButton => 'Send feedback';
 
   @override
@@ -500,6 +506,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mentorNoDrawings =>
       'Upload a lesson assignment first — after the analysis you can send it to a mentor from here.';
+
+  @override
+  String get mentorEarningsTitle => 'My Earnings';
+
+  @override
+  String mentorEarningsUnit(int count) {
+    return '$count jeton-equivalent';
+  }
+
+  @override
+  String mentorEarningsAnswered(int count) {
+    return '$count answered requests';
+  }
+
+  @override
+  String get mentorEarningsSoon =>
+      'Payouts coming soon — your earnings are already accruing.';
 
   @override
   String get storeTitle => 'Jeton Store';

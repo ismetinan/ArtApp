@@ -662,6 +662,18 @@ abstract class AppLocalizations {
   /// **'English'**
   String get languageEnglish;
 
+  /// No description provided for @darkModeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Karanlık Tema'**
+  String get darkModeTitle;
+
+  /// No description provided for @darkModeSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulamayı koyu renklerle kullan'**
+  String get darkModeSubtitle;
+
   /// No description provided for @feedbackButton.
   ///
   /// In tr, this message translates to:
@@ -961,6 +973,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.'**
   String get mentorNoDrawings;
+
+  /// No description provided for @mentorEarningsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kazancım'**
+  String get mentorEarningsTitle;
+
+  /// No description provided for @mentorEarningsUnit.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} jeton-eşdeğeri'**
+  String mentorEarningsUnit(int count);
+
+  /// No description provided for @mentorEarningsAnswered.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} cevaplanan istek'**
+  String mentorEarningsAnswered(int count);
+
+  /// No description provided for @mentorEarningsSoon.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödeme altyapısı yakında — kazançların şimdiden birikiyor.'**
+  String get mentorEarningsSoon;
 
   /// No description provided for @storeTitle.
   ///

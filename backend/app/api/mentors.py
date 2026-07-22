@@ -24,7 +24,7 @@ from ..models.tables import (
     Submission,
     User,
 )
-from ..services import jetons, moderation
+from ..services import earnings, jetons, moderation
 from ..services.push import send_push
 
 REQUEST_TIMEOUT = timedelta(hours=48)
@@ -422,6 +422,14 @@ def mentor_queue(user: User = Depends(get_current_user), db: Session = Depends(g
     return {"requests": out}
 
 
+@router.get("/mentor/earnings", dependencies=[Depends(require_mentor_market)])
+def mentor_earnings(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Mentorun birikmiş kazancı (jeton-eşdeğeri). Ödeme altyapısı Faz B —
+    şimdilik salt biriktirme/gösterim."""
+    _approved_profile(db, user)
+    return earnings.summary(db, user.id)
+
+
 class FeedbackBody(BaseModel):
     feedback_text: str = Field(max_length=10_000)
 
@@ -452,6 +460,8 @@ def give_feedback(
     r.feedback_text = body.feedback_text.strip()
     r.status = "answered"
     r.answered_at = datetime.now(timezone.utc)
+    # Gelir paylaşımı (Faz A): cevaplanan istek mentora jeton-eşdeğeri kazanç yazar
+    earnings.credit(db, user.id, r)
     db.commit()
     student = db.get(User, r.student_id)
     if student is not None:

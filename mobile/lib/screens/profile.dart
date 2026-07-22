@@ -284,6 +284,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   appLocale.value = Locale(code);
                 },
               ),
+              const SizedBox(height: 16),
+              // Karanlık tema anahtarı: yalnız cihaz-yerel tercih, sunucuya yazılmaz
+              SwitchListTile(
+                secondary: const Icon(Icons.dark_mode_outlined),
+                title: Text(t.darkModeTitle),
+                subtitle: Text(t.darkModeSubtitle),
+                value: ApiClient.instance.darkMode,
+                onChanged: (value) async {
+                  await ApiClient.instance.setDarkMode(value);
+                  appThemeMode.value = value ? ThemeMode.dark : ThemeMode.light;
+                  setState(() {});
+                },
+              ),
               const SizedBox(height: 32),
               // Beta geri bildirim kanalı: hazır şablonla e-posta uygulamasını açar
               ListTile(

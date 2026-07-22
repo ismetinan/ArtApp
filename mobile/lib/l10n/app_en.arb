@@ -109,6 +109,9 @@
   "languageTurkish": "Türkçe",
   "languageEnglish": "English",
 
+  "darkModeTitle": "Dark Theme",
+  "darkModeSubtitle": "Use the app with dark colors",
+
   "feedbackButton": "Send feedback",
   "sendFeedbackBody": "Found a problem in the beta or have an idea? Tell us!",
   "feedbackMailSubject": "Artora Beta feedback",
@@ -162,6 +165,20 @@
   "mentorAskDirect": "Ask this mentor — 3 jetons",
   "mentorPickDrawing": "Which drawing do you want to send?",
   "mentorNoDrawings": "Upload a lesson assignment first — after the analysis you can send it to a mentor from here.",
+  "mentorEarningsTitle": "My Earnings",
+  "mentorEarningsUnit": "{count} jeton-equivalent",
+  "@mentorEarningsUnit": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "mentorEarningsAnswered": "{count} answered requests",
+  "@mentorEarningsAnswered": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "mentorEarningsSoon": "Payouts coming soon — your earnings are already accruing.",
 
   "storeTitle": "Jeton Store",
   "storeJetonSection": "Jeton packs",

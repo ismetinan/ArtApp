@@ -333,6 +333,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get darkModeTitle => 'Karanlık Tema';
+
+  @override
+  String get darkModeSubtitle => 'Uygulamayı koyu renklerle kullan';
+
+  @override
   String get feedbackButton => 'Geri bildirim gönder';
 
   @override
@@ -500,6 +506,23 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get mentorNoDrawings =>
       'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.';
+
+  @override
+  String get mentorEarningsTitle => 'Kazancım';
+
+  @override
+  String mentorEarningsUnit(int count) {
+    return '$count jeton-eşdeğeri';
+  }
+
+  @override
+  String mentorEarningsAnswered(int count) {
+    return '$count cevaplanan istek';
+  }
+
+  @override
+  String get mentorEarningsSoon =>
+      'Ödeme altyapısı yakında — kazançların şimdiden birikiyor.';
 
   @override
   String get storeTitle => 'Jeton Mağazası';

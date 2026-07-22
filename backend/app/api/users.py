@@ -14,6 +14,7 @@ from ..models.tables import (
     AiUsage,
     ContentReport,
     JetonTransaction,
+    MentorEarning,
     MentorProfile,
     MentorshipRequest,
     Purchase,
@@ -271,12 +272,22 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
         .where(MentorshipRequest.mentor_id == user.id)
         .values(mentor_id=None)
     )
+    # Kazanç defteri: kullanıcının mentor olarak kazandıkları silinir (ödenecek
+    # kimse kalmadı). Aşağıda öğrenci istekleri silinmeden önce, o isteklere bağlı
+    # BAŞKA mentorların kazanç satırlarının request_id'si NULL'lanır (FK'yi çözer,
+    # mentorun kredisini korur).
+    db.execute(delete(MentorEarning).where(MentorEarning.mentor_id == user.id))
     db.execute(delete(JetonTransaction).where(JetonTransaction.user_id == user.id))
     student_request_ids = select(MentorshipRequest.id).where(
         MentorshipRequest.student_id == user.id
     )
     db.execute(
         delete(JetonTransaction).where(JetonTransaction.request_id.in_(student_request_ids))
+    )
+    db.execute(
+        MentorEarning.__table__.update()
+        .where(MentorEarning.request_id.in_(student_request_ids))
+        .values(request_id=None)
     )
     db.execute(delete(MentorshipRequest).where(MentorshipRequest.student_id == user.id))
     db.execute(delete(MentorProfile).where(MentorProfile.user_id == user.id))
