@@ -133,7 +133,9 @@ def _apply_subscription(
     if granted is not None and granted.tzinfo is None:
         granted = granted.replace(tzinfo=timezone.utc)
     if granted is None or expiry > granted:
-        jetons.grant(db, user, get_settings().premium_monthly_jetons, "premium_monthly")
+        jetons.grant(
+            db, user, get_settings().premium_monthly_jetons, "premium_monthly", paid=True
+        )
         purchase.granted_expiry = expiry
     user.premium_until = expiry
 
@@ -163,7 +165,7 @@ def process_purchase(db: Session, user: User, product_id: str, token: str) -> Pu
             )
             db.add(purchase)
             db.flush()
-            jetons.grant(db, user, JETON_PRODUCTS[product_id], "purchase")
+            jetons.grant(db, user, JETON_PRODUCTS[product_id], "purchase", paid=True)
         else:
             data = verify_subscription_with_play(token)
             purchase = existing

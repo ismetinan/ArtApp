@@ -29,6 +29,11 @@ class User(Base):
     xp: Mapped[int] = mapped_column(Integer, default=0)
     # Faz 2: mentor istekleri jetonla; beta'da satın alma yok, hoşgeldin jetonu var
     jeton_balance: Mapped[int] = mapped_column(Integer, default=0)
+    # Faz 4 (gelir paylaşımı): jeton_balance'ın kaçı GELİR-DESTEKLİ (satın alınmış/
+    # Premium). Ücretsiz bakiye = jeton_balance - jeton_paid_balance. Harcama
+    # önce-ücretsiz kuralıyla ayrışır; mentor kazancının nakde çevrilebilir kısmı
+    # yalnız gelir-destekli jetonlardan doğar (bkz. services/jetons.py, earnings.py).
+    jeton_paid_balance: Mapped[int] = mapped_column(Integer, default=0)
     # Mentor başvurularını onaylayan hesap (beta'da SQL ile bir kez atanır)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     # Premium abonelik bitişi (Play Billing) — None/geçmiş = ücretsiz katman
@@ -138,6 +143,10 @@ class MentorshipRequest(Base):
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     mentor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     jeton_cost: Mapped[int] = mapped_column(Integer, default=1)
+    # Faz 4: jeton_cost'un kaçı GELİR-DESTEKLİ jetonla ödendi (harcama anında
+    # önce-ücretsiz kuralıyla saptanır). İade bu bileşimi geri yükler; cevaplanınca
+    # mentor kazancının nakde çevrilebilir kısmına (paid_equivalent) taşınır.
+    paid_cost: Mapped[int] = mapped_column(Integer, default=0)
     status: Mapped[str] = mapped_column(String(16), default="assigned")  # assigned|answered|expired
     feedback_text: Mapped[str] = mapped_column(Text, default="")
     rating: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-5, öğrenci verir
@@ -181,6 +190,10 @@ class MentorEarning(Base):
         ForeignKey("mentorship_requests.id"), unique=True, nullable=True
     )
     jeton_equivalent: Mapped[int] = mapped_column(Integer)  # + kazanç (havuz=1, seçmeli=3)
+    # Faz 4: jeton_equivalent'ın kaçı GELİR-DESTEKLİ jetondan geldi (nakde
+    # çevrilebilir kısım). Ücretsiz jetonla ödenen iş itibar/rating kazandırır ama
+    # paid_equivalent=0 → Faz B payout'unda nakit talebi doğurmaz.
+    paid_equivalent: Mapped[int] = mapped_column(Integer, default=0)
     reason: Mapped[str] = mapped_column(String(24), default="mentor_feedback")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
