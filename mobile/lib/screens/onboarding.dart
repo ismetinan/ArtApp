@@ -69,12 +69,17 @@ class WelcomeScreen extends StatelessWidget {
                 child: Text(AppLocalizations.of(context).continueAsGuest),
               ),
               const SizedBox(height: 12),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.g_mobiledata, size: 28),
-                label: Text(AppLocalizations.of(context).continueWithGoogle),
-                onPressed: () => signInWithGoogleAndRoute(context),
-              ),
-              const SizedBox(height: 12),
+              // Google girişi iOS'ta gizli: yalnız e-posta + misafir sunulunca
+              // App Store "Apple ile Giriş" şartı (Guideline 4.8) tetiklenmez.
+              // Android'de aynen kalır.
+              if (!Platform.isIOS) ...[
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.g_mobiledata, size: 28),
+                  label: Text(AppLocalizations.of(context).continueWithGoogle),
+                  onPressed: () => signInWithGoogleAndRoute(context),
+                ),
+                const SizedBox(height: 12),
+              ],
               OutlinedButton(
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => const AuthFormScreen(mode: AuthMode.login))),

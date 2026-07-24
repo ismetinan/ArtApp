@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../api.dart';
@@ -138,21 +140,24 @@ class _AuthFormScreenState extends State<AuthFormScreen> {
               _busy
                   ? const CircularProgressIndicator()
                   : FilledButton(onPressed: _submit, child: Text(_title(context))),
-              const SizedBox(height: 16),
-              Row(children: [
-                const Expanded(child: Divider()),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(AppLocalizations.of(context).orDivider),
+              // Google girişi iOS'ta gizli (App Store 4.8) — e-posta formu kalır.
+              if (!Platform.isIOS) ...[
+                const SizedBox(height: 16),
+                Row(children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(AppLocalizations.of(context).orDivider),
+                  ),
+                  const Expanded(child: Divider()),
+                ]),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.g_mobiledata, size: 28),
+                  label: Text(AppLocalizations.of(context).continueWithGoogle),
+                  onPressed: _busy ? null : _google,
                 ),
-                const Expanded(child: Divider()),
-              ]),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.g_mobiledata, size: 28),
-                label: Text(AppLocalizations.of(context).continueWithGoogle),
-                onPressed: _busy ? null : _google,
-              ),
+              ],
             ],
           ),
         ),

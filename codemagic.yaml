@@ -1,0 +1,63 @@
+# Codemagic CI — Artora iOS build + TestFlight yükleme.
+# Flutter projesi repo kökünde değil, `mobile/` alt klasöründe → her adım oraya cd eder.
+#
+# KULLANICI KURULUMU (Codemagic UI, bir kez):
+#   1) Team → Integrations → App Store Connect: bir API key entegrasyonu ekle
+#      (Apple'dan .p8 + Issuer ID + Key ID). Bu entegrasyonun ADINI aşağıdaki
+#      `integrations.app_store_connect` alanına yaz (varsayılan: "CodemagicASC").
+#   2) App Store Connect'te uygulamayı oluşturunca "Apple ID" (sayısal) değerini
+#      `vars.APP_STORE_APPLE_ID` yerine gir.
+#   3) Bundle id App Store Connect'teki uygulamayla aynı: com.ismetinan.artapp.
+# Not: Hiçbir sır bu dosyada tutulmaz; imza + yükleme kimlik bilgileri entegrasyondan gelir.
+
+workflows:
+  ios-testflight:
+    name: Artora iOS TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: CodemagicASC   # ← Codemagic UI'daki App Store Connect entegrasyon adı
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ismetinan.artapp
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        APP_STORE_APPLE_ID: 0000000000   # ← uygulama oluşturulunca App Store Connect'ten al
+        API_BASE: "https://artapp-production.up.railway.app"
+    scripts:
+      - name: Flutter bağımlılıkları
+        script: |
+          cd mobile
+          flutter pub get
+      - name: İmza profillerini uygula
+        script: |
+          cd mobile
+          xcode-project use-profiles
+      - name: CocoaPods kur
+        script: |
+          cd mobile/ios
+          pod install
+      - name: IPA derle (build no otomatik artar)
+        script: |
+          cd mobile
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          echo "Son TestFlight build no: $LATEST"
+          flutter build ipa --release \
+            --build-number=$(($LATEST + 1)) \
+            --dart-define=API_BASE=$API_BASE \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - mobile/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - mobile/flutter_drive.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # Beta test grubuna otomatik atamak istersen (grubu App Store Connect'te
+        # önce oluştur), aşağıyı aç:
+        # beta_groups:
+        #   - Artora Beta
