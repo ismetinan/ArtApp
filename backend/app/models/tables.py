@@ -34,6 +34,12 @@ class User(Base):
     # önce-ücretsiz kuralıyla ayrışır; mentor kazancının nakde çevrilebilir kısmı
     # yalnız gelir-destekli jetonlardan doğar (bkz. services/jetons.py, earnings.py).
     jeton_paid_balance: Mapped[int] = mapped_column(Integer, default=0)
+    # Faz 4: haftalık ücretsiz jeton damlasının son verildiği an. None = hiç
+    # verilmedi (ilk /profile açılışında verilir). Damla ücretsizdir (paid=False):
+    # yalnız havuz mentoru için harcanabilir, seçmeli mentor altın (paid) ister.
+    free_jeton_last_grant: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     # Mentor başvurularını onaylayan hesap (beta'da SQL ile bir kez atanır)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     # Premium abonelik bitişi (Play Billing) — None/geçmiş = ücretsiz katman

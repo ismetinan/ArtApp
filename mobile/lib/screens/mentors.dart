@@ -348,7 +348,7 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
               ? const Center(child: CircularProgressIndicator())
               : FilledButton.icon(
                   icon: const Icon(Icons.support_agent),
-                  label: Text(t.mentorAskDirect),
+                  label: Text(t.mentorAskDirectGold),
                   onPressed: mentor.isAvailable ? _askMentor : null,
                 ),
           const SizedBox(height: 16),

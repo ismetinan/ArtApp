@@ -201,6 +201,7 @@ async def create_mentor_request(
                 status_code=409, detail=msg("mentor_unavailable", user.language)
             )
         cost = DIRECT_COST
+        gold_only = True  # seçmeli mentor yalnız altın (gelir-destekli) jetonla
     else:
         candidates = db.execute(
             select(MentorProfile).where(
@@ -215,6 +216,7 @@ async def create_mentor_request(
             )
         mentor_profile = random.choice(candidates)
         cost = POOL_COST
+        gold_only = False  # havuz: önce-ücretsiz (ücretsiz jetonla da sorulabilir)
 
     now = datetime.now(timezone.utc)
     request = MentorshipRequest(
@@ -227,7 +229,7 @@ async def create_mentor_request(
     )
     db.add(request)
     db.flush()  # request.id, transaction kaydına girsin
-    jetons.spend(db, user, cost, request)  # yetersizse 402, hiçbir şey commit edilmez
+    jetons.spend(db, user, cost, request, gold_only=gold_only)  # yetersizse 402, commit yok
     db.commit()
 
     mentor_user = db.get(User, mentor_profile.user_id)
@@ -408,6 +410,7 @@ def mentor_queue(user: User = Depends(get_current_user), db: Session = Depends(g
         if r.status not in ("assigned", "answered"):
             continue
         student = db.get(User, r.student_id)
+        gold = r.paid_cost > 0  # gelir-destekli (altın) → öncelik + 'derin redline'
         out.append(
             {
                 "id": r.id,
@@ -416,9 +419,12 @@ def mentor_queue(user: User = Depends(get_current_user), db: Session = Depends(g
                 "status": r.status,
                 "student_display_name": student.display_name if student else "",
                 "ai_result": r.submission.ai_result if r.submission else None,
+                "gold": gold,
                 "created_at": r.created_at.isoformat(),
             }
         )
+    # Bekleyen altın (öncelikli) istekler kuyruğun başında; sonra en yeni.
+    out.sort(key=lambda x: (x["status"] != "assigned", not x["gold"]))
     return {"requests": out}
 
 

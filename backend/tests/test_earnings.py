@@ -55,8 +55,11 @@ def test_answering_credits_mentor_pool_one(client, monkeypatch):
 
 def test_direct_request_credits_three(client, monkeypatch):
     _enable_market(monkeypatch)
+    _enable_billing(monkeypatch)
+    _mock_play(monkeypatch)
     mentor_h = _approved_mentor(client, monkeypatch)
     student_h, _ = _user(client, "Seçici")
+    _buy_jeton_5(client, student_h)  # seçmeli yalnız altınla: 3 ücretsiz + 5 altın
     sid = _submit(client, student_h)
     pid = client.get("/mentors", headers=student_h).json()["mentors"][0]["id"]
 
@@ -65,10 +68,10 @@ def test_direct_request_credits_three(client, monkeypatch):
     ).json()
     _answer(client, mentor_h, req["request_id"])
 
-    # 3 ücretsiz hoşgeldin jetonuyla ödendi → jeton_equivalent 3, paid 0
+    # 3 altın jetonla ödendi → jeton_equivalent 3, tamamı nakde çevrilebilir (paid 3)
     assert client.get("/mentor/earnings", headers=mentor_h).json() == {
         "jeton_equivalent": 3,
-        "paid_equivalent": 0,
+        "paid_equivalent": 3,
         "answered_count": 1,
     }
 
@@ -135,42 +138,92 @@ def _buy_jeton_5(client, headers, token="tok-earn"):
     return r.json()["jeton_balance"]
 
 
-def test_paid_jetons_tracked_and_earned(client, monkeypatch):
-    """Satın alınmış jeton gelir-destekli sayılır; önce-ücretsiz kuralıyla harcanınca
-    mentorun nakde çevrilebilir kazancına (paid_equivalent) taşınır."""
+def test_tiered_pool_free_direct_gold(client, monkeypatch):
+    """Katmanlı model: havuz önce-ücretsizle ödenir (paid=0, itibar); seçmeli mentor
+    yalnız altınla (paid=3, nakde çevrilebilir). İki kazanç türü ayrışır."""
     _enable_market(monkeypatch)
     _enable_billing(monkeypatch)
     _mock_play(monkeypatch)
     mentor_h = _approved_mentor(client, monkeypatch)
     student_h, sdata = _user(client, "Alıcı Öğrenci")
 
-    # 3 ücretsiz + 5 satın alınmış = 8 (paid_balance=5)
+    # 3 ücretsiz + 5 altın = 8 (altın=5)
     assert _buy_jeton_5(client, student_h) == 8
     assert _paid_balance(sdata["id"]) == 5
 
-    # İlk seçmeli istek (3): önce-ücretsiz → 3 ücretsiz jeton harcanır, paid_spent=0
+    # Havuz (1): önce-ücretsiz → 1 ücretsiz harcanır, altın durur, paid_cost=0
     sid1 = _submit(client, student_h, node="cizgi-temelleri")
-    pid = client.get("/mentors", headers=student_h).json()["mentors"][0]["id"]
     req1 = client.post(
-        f"/submissions/{sid1}/mentor-request", json={"mentor_id": pid}, headers=student_h
+        f"/submissions/{sid1}/mentor-request", headers=student_h
     ).json()
-    assert req1["jeton_balance"] == 5
-    assert _paid_balance(sdata["id"]) == 5  # ücretsizler gitti, gelir-destekli durur
+    assert req1["jeton_balance"] == 7
+    assert _paid_balance(sdata["id"]) == 5  # altın hiç harcanmadı
     _answer(client, mentor_h, req1["request_id"])
     e = client.get("/mentor/earnings", headers=mentor_h).json()
-    assert e == {"jeton_equivalent": 3, "paid_equivalent": 0, "answered_count": 1}
+    assert e == {"jeton_equivalent": 1, "paid_equivalent": 0, "answered_count": 1}
 
-    # İkinci seçmeli istek (3): ücretsiz kalmadı → 3'ü de gelir-destekli, paid_spent=3
+    # Seçmeli (3): yalnız altın → 3 altın harcanır, paid_cost=3
     sid2 = _submit(client, student_h, node="sekil-ve-form")
+    pid = client.get("/mentors", headers=student_h).json()["mentors"][0]["id"]
     req2 = client.post(
         f"/submissions/{sid2}/mentor-request", json={"mentor_id": pid}, headers=student_h
     ).json()
-    assert req2["jeton_balance"] == 2
+    assert req2["jeton_balance"] == 4
     assert _paid_balance(sdata["id"]) == 2
     _answer(client, mentor_h, req2["request_id"])
     e = client.get("/mentor/earnings", headers=mentor_h).json()
-    # toplam 6 kazanç, bunun 3'ü nakde çevrilebilir
-    assert e == {"jeton_equivalent": 6, "paid_equivalent": 3, "answered_count": 2}
+    # toplam 4 kazanç (1 havuz + 3 seçmeli), bunun 3'ü nakde çevrilebilir
+    assert e == {"jeton_equivalent": 4, "paid_equivalent": 3, "answered_count": 2}
+
+
+def test_gold_spent_on_pool_is_cashable(client, monkeypatch):
+    """Ücretsiz bitince havuz da altından ödenir → o kısım nakde çevrilebilir olur."""
+    _enable_market(monkeypatch)
+    _enable_billing(monkeypatch)
+    _mock_play(monkeypatch)
+    mentor_h = _approved_mentor(client, monkeypatch)
+    student_h, sdata = _user(client, "Havuz Altın")
+    _buy_jeton_5(client, student_h)  # 3 ücretsiz + 5 altın
+
+    # 3 havuz isteğiyle ücretsizleri tüket (hepsi cevaplanır, iade yok)
+    for node in ("cizgi-temelleri", "sekil-ve-form", "jest-cizimi"):
+        sid = _submit(client, student_h, node=node)
+        rq = client.post(f"/submissions/{sid}/mentor-request", headers=student_h).json()
+        _answer(client, mentor_h, rq["request_id"])
+    assert _paid_balance(sdata["id"]) == 5  # ücretsizler gitti, altın durur
+
+    # 4. havuz: ücretsiz kalmadı → 1 altın harcanır, paid_cost=1
+    sid = _submit(client, student_h, node="temel-oranlar")
+    rq = client.post(f"/submissions/{sid}/mentor-request", headers=student_h).json()
+    assert _paid_balance(sdata["id"]) == 4
+    _answer(client, mentor_h, rq["request_id"])
+    e = client.get("/mentor/earnings", headers=mentor_h).json()
+    assert e == {"jeton_equivalent": 4, "paid_equivalent": 1, "answered_count": 4}
+
+
+def test_weekly_free_drip(client, monkeypatch):
+    """Haftalık ücretsiz jeton damlası: ≥7 gün geçince bir kez damlar, tekrar çağrı
+    aynı hafta damlatmaz. Damla ücretsizdir (altın bakiyesini artırmaz)."""
+    from datetime import datetime, timedelta, timezone
+
+    from app import db as db_module
+    from app.models.tables import User
+
+    student_h, sdata = _user(client, "Damla")
+    # Kayıt sonrası 3 ücretsiz; sayaç 'now' → ilk /profile hemen damlatmaz
+    assert client.get("/profile", headers=student_h).json()["jeton_balance"] == 3
+
+    # Sayacı 8 gün öncesine çek → sonraki /profile bir kez +1 damlar
+    with db_module.SessionLocal() as s:
+        u = s.get(User, sdata["id"])
+        u.free_jeton_last_grant = datetime.now(timezone.utc) - timedelta(days=8)
+        s.commit()
+    p = client.get("/profile", headers=student_h).json()
+    assert p["jeton_balance"] == 4
+    assert p["gold_jeton_balance"] == 0  # damla ücretsiz — altın değil
+
+    # İkinci çağrı aynı hafta → damlamaz
+    assert client.get("/profile", headers=student_h).json()["jeton_balance"] == 4
 
 
 def test_refund_restores_paid_composition(client, monkeypatch):

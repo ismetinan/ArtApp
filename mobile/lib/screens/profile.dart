@@ -106,16 +106,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () => _showLevelRoadmap(context, p),
                   ),
                   Wrap(spacing: 8, children: [
-                    if (ApiClient.instance.mentorMarketEnabled)
-                      // Billing açıkken jeton çipi mağazaya götürür
+                    if (ApiClient.instance.mentorMarketEnabled) ...[
+                      // Ücretsiz jeton (toplam - altın): havuz mentoru için
                       ActionChip(
-                        label: Text(
-                            t.jetonBalance((p['jeton_balance'] ?? 0) as int)),
+                        label: Text(t.jetonBalance(
+                            (((p['jeton_balance'] ?? 0) as int) -
+                                    ((p['gold_jeton_balance'] ?? 0) as int))
+                                .clamp(0, 1 << 31))),
                         avatar: const Icon(Icons.toll, size: 18),
                         onPressed: ApiClient.instance.billingEnabled
                             ? () => _openStore(context, p)
                             : null,
                       ),
+                      // Altın jeton: satın alınan; seçmeli mentor için. Mağazaya götürür.
+                      ActionChip(
+                        label: Text(t.goldJetonBalance(
+                            (p['gold_jeton_balance'] ?? 0) as int)),
+                        avatar: const Icon(Icons.paid,
+                            size: 18, color: Color(0xFFD4AF37)),
+                        onPressed: ApiClient.instance.billingEnabled
+                            ? () => _openStore(context, p)
+                            : null,
+                      ),
+                    ],
                     if (p['is_premium'] == true)
                       Chip(
                         label: Text(t.premiumBadge),

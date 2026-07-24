@@ -31,6 +31,7 @@ class VerifyBody(BaseModel):
 def _status_json(user: User) -> dict:
     return {
         "jeton_balance": user.jeton_balance,
+        "gold_jeton_balance": user.jeton_paid_balance,  # satın alınan/Premium hediyesi
         "is_premium": billing.is_premium(user),
         "premium_until": user.premium_until.isoformat() if user.premium_until else None,
         "jeton_products": billing.JETON_PRODUCTS,

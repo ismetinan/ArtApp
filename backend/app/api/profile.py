@@ -13,6 +13,7 @@ from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityScore, MentorProfile, Submission, User
 from ..services import billing as billing_service
+from ..services import jetons
 from ..services import moderation
 from ..services.gamification import XP_PER_LEVEL
 from ..services.storage import load_drawing
@@ -40,6 +41,9 @@ def get_submission_image(
 
 @router.get("/profile")
 def get_profile(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Haftalık ücretsiz jeton damlası (tembel): ≥7 gün geçtiyse bir kez damlar.
+    if jetons.maybe_grant_weekly_free(db, user):
+        db.commit()
     scores = db.execute(
         select(AbilityScore).where(AbilityScore.user_id == user.id)
     ).scalars().all()
@@ -61,6 +65,9 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         "xp_per_level": XP_PER_LEVEL,
         "language": user.language,
         "jeton_balance": user.jeton_balance,
+        # Altın (gelir-destekli) bakiye; ücretsiz = jeton_balance - gold_jeton_balance.
+        # Seçmeli mentor yalnız altınla; eski istemci bu alanı yok sayar (uyumlu).
+        "gold_jeton_balance": user.jeton_paid_balance,
         "mentor_market_enabled": get_settings().mentor_market_enabled,
         # Beta admini: Flutter buna bakarak başvuru onay panelini gösterir
         "is_admin": user.is_admin,

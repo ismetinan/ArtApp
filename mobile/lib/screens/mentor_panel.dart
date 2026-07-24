@@ -108,7 +108,18 @@ class _MentorPanelScreenState extends State<MentorPanelScreen> {
                                     const Icon(Icons.image),
                               ),
                             ),
-                            title: Text(item.studentDisplayName),
+                            title: Row(children: [
+                              Flexible(child: Text(item.studentDisplayName)),
+                              if (item.gold) ...[
+                                const SizedBox(width: 6),
+                                Tooltip(
+                                  message: AppLocalizations.of(context)
+                                      .mentorGoldRequestHint,
+                                  child: const Icon(Icons.paid,
+                                      size: 16, color: Color(0xFFD4AF37)),
+                                ),
+                              ],
+                            ]),
                             subtitle: Text(item.nodeId ?? ''),
                             trailing: item.status == 'answered'
                                 ? const Icon(Icons.check_circle,

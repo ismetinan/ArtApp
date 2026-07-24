@@ -424,6 +424,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String goldJetonBalance(int count) {
+    return '$count altın';
+  }
+
+  @override
   String get becomeMentor => 'Mentor Ol';
 
   @override
@@ -499,6 +504,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get mentorAskDirect => 'Soru sor — 3 jeton';
+
+  @override
+  String get mentorAskDirectGold => 'Soru sor — 3 altın jeton';
+
+  @override
+  String get mentorGoldRequestHint =>
+      'Altın (öncelikli) istek — detaylı geri bildirim beklenir';
 
   @override
   String get mentorPickDrawing => 'Hangi çizimini göndereceksin?';

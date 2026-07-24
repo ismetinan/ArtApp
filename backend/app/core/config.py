@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     android_package_name: str = "com.ismetinan.artapp"
     ai_daily_limit_premium: int = 50
     premium_monthly_jetons: int = 10
+    # Faz 4: her 7 günde bir verilen ÜCRETSİZ jeton damlası (yalnız havuz mentoru
+    # için harcanır). Altın satışını baltalamamak için bilinçli düşük tutulur.
+    weekly_free_jetons: int = 1
 
 
 @lru_cache

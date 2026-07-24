@@ -104,6 +104,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Jetonun yetersiz — bu istek {cost} jeton gerektiriyor.",
         "en": "Not enough jetons — this request costs {cost} jeton(s).",
     },
+    "gold_insufficient": {
+        "tr": "Seçmeli mentor {cost} altın jeton gerektiriyor — ücretsiz jetonlar yalnız havuzda geçerli. Mağazadan altın jeton alabilirsin.",
+        "en": "Choosing a mentor costs {cost} gold jetons — free jetons only work for the pool. You can buy gold jetons in the store.",
+    },
     "no_mentor_available": {
         "tr": "Şu an müsait mentor yok — jetonun harcanmadı, biraz sonra tekrar dene.",
         "en": "No mentor is available right now — your jeton wasn't spent, try again soon.",

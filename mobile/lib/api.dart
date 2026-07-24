@@ -177,12 +177,16 @@ class MentorQueueItem {
   final String? nodeId;
   final String status, studentDisplayName;
   final RedlineResult? aiResult;
+  // Gelir-destekli (altın) istek → öncelikli + 'derin redline' beklenir.
+  // Eski backend bu alanı döndürmezse false (uyumlu).
+  final bool gold;
 
   MentorQueueItem.fromJson(Map<String, dynamic> j)
       : id = j['id'],
         submissionId = j['submission_id'],
         nodeId = j['node_id'],
         status = j['status'],
+        gold = j['gold'] == true,
         studentDisplayName = j['student_display_name'] ?? '',
         aiResult = j['ai_result'] == null
             ? null

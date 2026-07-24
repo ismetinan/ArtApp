@@ -818,6 +818,12 @@ abstract class AppLocalizations {
   /// **'{count} jeton'**
   String jetonBalance(int count);
 
+  /// No description provided for @goldJetonBalance.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} altın'**
+  String goldJetonBalance(int count);
+
   /// No description provided for @becomeMentor.
   ///
   /// In tr, this message translates to:
@@ -961,6 +967,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Soru sor — 3 jeton'**
   String get mentorAskDirect;
+
+  /// No description provided for @mentorAskDirectGold.
+  ///
+  /// In tr, this message translates to:
+  /// **'Soru sor — 3 altın jeton'**
+  String get mentorAskDirectGold;
+
+  /// No description provided for @mentorGoldRequestHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Altın (öncelikli) istek — detaylı geri bildirim beklenir'**
+  String get mentorGoldRequestHint;
 
   /// No description provided for @mentorPickDrawing.
   ///

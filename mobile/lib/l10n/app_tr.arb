@@ -234,6 +234,12 @@
       "count": {"type": "int"}
     }
   },
+  "goldJetonBalance": "{count} altın",
+  "@goldJetonBalance": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "becomeMentor": "Mentor Ol",
   "becomeMentorBody": "Deneyimini paylaş, öğrencilerin ödevlerine geri bildirim ver.",
   "mentorApplyTitle": "Mentor Başvurusu",
@@ -258,6 +264,8 @@
   "ratedThanks": "Teşekkürler, puanın kaydedildi!",
   "mentorSearchHint": "Mentor ara (ad veya bio)...",
   "mentorAskDirect": "Soru sor — 3 jeton",
+  "mentorAskDirectGold": "Soru sor — 3 altın jeton",
+  "mentorGoldRequestHint": "Altın (öncelikli) istek — detaylı geri bildirim beklenir",
   "mentorPickDrawing": "Hangi çizimini göndereceksin?",
   "mentorNoDrawings": "Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.",
   "mentorEarningsTitle": "Kazancım",
