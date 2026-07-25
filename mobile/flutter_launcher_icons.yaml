@@ -1,6 +1,10 @@
 flutter_launcher_icons:
-  android: true
-  ios: false
+  # Android simgeleri üretildikten sonra elle ayarlandı (adaptive background
+  # @drawable/ic_launcher_bg). Yeniden üretmek o düzeltmeyi ezer → kapalı.
+  android: false
+  ios: true
+  # App Store alfa kanallı ikon kabul etmiyor; kaynak zaten RGB ama garanti olsun.
+  remove_alpha_ios: true
   image_path: "assets/icon/app_icon.png"
   adaptive_icon_background: "#6750A4"
   adaptive_icon_foreground: "assets/icon/app_icon.png"
