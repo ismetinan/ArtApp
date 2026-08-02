@@ -344,13 +344,17 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
             Text(mentor.bio),
           ],
           const SizedBox(height: 16),
-          _busy
-              ? const Center(child: CircularProgressIndicator())
-              : FilledButton.icon(
-                  icon: const Icon(Icons.support_agent),
-                  label: Text(t.mentorAskDirectGold),
-                  onPressed: mentor.isAvailable ? _askMentor : null,
-                ),
+          // Seçmeli mentorluk altın jetonla ödenir; mağaza kapalıyken (iOS)
+          // altın jeton edinmenin yolu yok, o yüzden butonu hiç göstermiyoruz.
+          // Havuza sorma akışı redline ekranından ücretsiz jetonla çalışıyor.
+          if (ApiClient.instance.billingEnabled)
+            _busy
+                ? const Center(child: CircularProgressIndicator())
+                : FilledButton.icon(
+                    icon: const Icon(Icons.support_agent),
+                    label: Text(t.mentorAskDirectGold),
+                    onPressed: mentor.isAvailable ? _askMentor : null,
+                  ),
           const SizedBox(height: 16),
           Text(t.mentorPortfolioTitle,
               style: Theme.of(context).textTheme.titleMedium),

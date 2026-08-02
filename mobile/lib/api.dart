@@ -213,8 +213,13 @@ class ApiClient {
   /// Backend'deki mentor_market_enabled flag'i — mentor UI'ı buna göre görünür.
   bool mentorMarketEnabled = false;
 
-  /// Backend'deki billing_enabled flag'i — mağaza UI'ı buna göre görünür.
-  bool billingEnabled = false;
+  /// Backend'deki billing_enabled flag'i (sunucu tarafı, platformdan bağımsız).
+  bool _billingEnabledServer = false;
+
+  /// Mağaza UI'ı buna göre görünür. iOS'ta satın alma henüz yok — App Store
+  /// Connect'te ürün tanımlı değil — bu yüzden sunucu açık dese de kapalı
+  /// sayılır; aksi halde boş bir mağaza ve çalışmayan "Jeton Al" akışı çıkardı.
+  bool get billingEnabled => !Platform.isIOS && _billingEnabledServer;
 
   /// Kullanıcı seviye belirleme ekranını bilerek atladı (cihaz-yerel tercih).
   /// Atlamadıysa ve chart boşsa açılışta 3-resim ekranına geri yönlendirilir.
@@ -246,7 +251,7 @@ class ApiClient {
     savedLanguage = prefs.getString('language');
     darkMode = prefs.getBool('dark_mode') ?? false;
     mentorMarketEnabled = prefs.getBool('mentor_market') ?? false;
-    billingEnabled = prefs.getBool('billing') ?? false;
+    _billingEnabledServer = prefs.getBool('billing') ?? false;
     onboardingSkipped = prefs.getBool('onboarding_skipped') ?? false;
   }
 
@@ -491,8 +496,8 @@ class ApiClient {
     final j = _decode(r);
     mentorMarketEnabled = j['mentor_market_enabled'] ?? mentorMarketEnabled;
     final billing = j['billing_enabled'];
-    if (billing is bool && billing != billingEnabled) {
-      billingEnabled = billing;
+    if (billing is bool && billing != _billingEnabledServer) {
+      _billingEnabledServer = billing;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('billing', billing);
     }
