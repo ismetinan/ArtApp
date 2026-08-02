@@ -5,9 +5,7 @@
 #   1) Team → Integrations → App Store Connect: bir API key entegrasyonu ekle
 #      (Apple'dan .p8 + Issuer ID + Key ID). Bu entegrasyonun ADINI aşağıdaki
 #      `integrations.app_store_connect` alanına yaz (varsayılan: "CodemagicASC").
-#   2) App Store Connect'te uygulamayı oluşturunca "Apple ID" (sayısal) değerini
-#      `vars.APP_STORE_APPLE_ID` yerine gir.
-#   3) Bundle id App Store Connect'teki uygulamayla aynı: com.ismetinan.artapp.
+#   2) Bundle id App Store Connect'teki uygulamayla aynı: com.ismetinan.artapp.
 # Not: Hiçbir sır bu dosyada tutulmaz; imza + yükleme kimlik bilgileri entegrasyondan gelir.
 
 workflows:
@@ -25,7 +23,7 @@ workflows:
       xcode: latest
       cocoapods: default
       vars:
-        APP_STORE_APPLE_ID: 0000000000   # ← uygulama oluşturulunca App Store Connect'ten al
+        APP_STORE_APPLE_ID: 6797175551   # App Store Connect → Artora → App Information
         API_BASE: "https://artapp-production.up.railway.app"
     scripts:
       - name: Flutter bağımlılıkları
