@@ -40,6 +40,9 @@ workflows:
             --create
           keychain initialize
           keychain add-certificates
+          # Tanı: keychain'e gerçekten imza kimliği girdi mi? "0 valid identities
+          # found" görünüyorsa sertifika üretilememiştir (bkz. eski sertifikalar).
+          security find-identity -v -p codesigning
           cd mobile
           xcode-project use-profiles
       - name: IPA derle (build no otomatik artar)
