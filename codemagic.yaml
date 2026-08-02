@@ -2,40 +2,46 @@
 # Flutter projesi repo kökünde değil, `mobile/` alt klasöründe → her adım oraya cd eder.
 #
 # KULLANICI KURULUMU (Codemagic UI, bir kez):
-#   1) Team → Integrations → App Store Connect: bir API key entegrasyonu ekle
-#      (Apple'dan .p8 + Issuer ID + Key ID). Bu entegrasyonun ADINI aşağıdaki
-#      `integrations.app_store_connect` alanına yaz (varsayılan: "CodemagicASC").
-#   2) Bundle id App Store Connect'teki uygulamayla aynı: com.ismetinan.artapp.
-# Not: Hiçbir sır bu dosyada tutulmaz; imza + yükleme kimlik bilgileri entegrasyondan gelir.
+#   Environment variables bölümünde `appstore_credentials` adlı bir grup oluştur
+#   ve şu üç değişkeni ekle (App Store Connect API key'inden):
+#     APP_STORE_CONNECT_ISSUER_ID      — Issuer ID (UUID)
+#     APP_STORE_CONNECT_KEY_IDENTIFIER — Key ID (10 karakter)
+#     APP_STORE_CONNECT_PRIVATE_KEY    — .p8 dosyasının TAM içeriği, "Secure" işaretli
+#   Bu isimler codemagic-cli-tools'un otomatik okuduğu isimlerdir; birebir böyle olmalı.
+#
+# Adlandırılmış "integration" kullanılmıyor: imza sertifikası ve provisioning
+# profili aşağıdaki `fetch-signing-files --create` adımında üretiliyor.
+# Not: Hiçbir sır bu dosyada tutulmaz.
 
 workflows:
   ios-testflight:
     name: Artora iOS TestFlight
     instance_type: mac_mini_m2
     max_build_duration: 60
-    integrations:
-      app_store_connect: CodemagicASC   # ← Codemagic UI'daki App Store Connect entegrasyon adı
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.ismetinan.artapp
+      groups:
+        - appstore_credentials
       flutter: stable
       xcode: latest
       vars:
         APP_STORE_APPLE_ID: "6797175551" # App Store Connect → Artora → App Information
+        BUNDLE_ID: "com.ismetinan.artapp"
         API_BASE: "https://artapp-production.up.railway.app"
     scripts:
       - name: Flutter bağımlılıkları
         script: |
           cd mobile
           flutter pub get
-      - name: İmza profillerini uygula
+      - name: İmza dosyalarını üret ve uygula
         script: |
+          # Sertifika/profil yoksa Apple tarafında oluşturur (--create).
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain initialize
+          keychain add-certificates
           cd mobile
           xcode-project use-profiles
-      # CocoaPods adımı yok: tüm eklentiler Swift Package olarak çözülüyor
-      # (Flutter 3.44 + SPM). Podfile bırakmak "sandbox is not in sync" hatası
-      # veriyordu; Flutter gerekirse Podfile'ı kendi üretir.
       - name: IPA derle (build no otomatik artar)
         script: |
           cd mobile
@@ -48,10 +54,11 @@ workflows:
     artifacts:
       - mobile/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-      - mobile/flutter_drive.log
     publishing:
       app_store_connect:
-        auth: integration
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
         # Beta test grubuna otomatik atamak istersen (grubu App Store Connect'te
         # önce oluştur), aşağıyı aç:

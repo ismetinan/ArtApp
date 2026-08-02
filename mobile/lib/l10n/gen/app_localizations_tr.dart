@@ -411,7 +411,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get mentorPortfolioTitle => 'Portfolyo';
 
   @override
-  String get mentorAsk => 'Mentora sor — 1 jeton';
+  String get mentorAsk => 'Havuza sor — 1 jeton';
 
   @override
   String mentorAskSent(String name) {
@@ -420,12 +420,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String jetonBalance(int count) {
-    return '$count jeton';
+    return '$count ücretsiz jeton';
   }
 
   @override
   String goldJetonBalance(int count) {
-    return '$count altın';
+    return '$count altın jeton';
   }
 
   @override
@@ -520,6 +520,17 @@ class AppLocalizationsTr extends AppLocalizations {
       'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.';
 
   @override
+  String get jetonPaymentTitle => 'Ödeme nasıl işler?';
+
+  @override
+  String get mentorPoolPaymentInfo =>
+      'Havuz isteği 1 jeton. Önce ücretsiz jetonların harcanır; ücretsiz jetonun kalmadıysa altın jetondan düşülür. İsteğin havuzdaki rastgele müsait bir mentora gider.';
+
+  @override
+  String get mentorDirectPaymentInfo =>
+      'Seçmeli mentorluk 3 altın jeton. Yalnız satın alınan altın jetonlar geçerlidir — ücretsiz (haftalık hediye) jetonlar burada kullanılamaz. Bunun nedeni, ödemenin bir kısmının doğrudan seçtiğin mentora gitmesi; bu yüzden gerçek bir ödemeden gelmesi gerekir.';
+
+  @override
   String get mentorEarningsTitle => 'Kazancım';
 
   @override
@@ -537,14 +548,18 @@ class AppLocalizationsTr extends AppLocalizations {
       'Ödeme altyapısı yakında — kazançların şimdiden birikiyor.';
 
   @override
-  String get storeTitle => 'Jeton Mağazası';
+  String get storeTitle => 'Altın Jeton Mağazası';
 
   @override
-  String get storeJetonSection => 'Jeton paketleri';
+  String get storeGoldExplainer =>
+      'Altın jetonlar gerçek satın alımdır. Seçmeli (öncelikli) mentorluk için gereklidir ve mentorlara ödenen kazancın kaynağıdır. Havuz mentoru + AI analizi için her hafta hediye edilen ücretsiz jetonlar yeter; altın jetonu yalnız seçmeli mentorluk veya ekstra ücretsiz jeton istersen al.';
+
+  @override
+  String get storeJetonSection => 'Altın jeton paketleri';
 
   @override
   String storeJetonPack(int count) {
-    return '$count jeton';
+    return '$count altın jeton';
   }
 
   @override
@@ -552,7 +567,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String storePremiumPerk1(int count) {
-    return 'Her ay $count hediye jeton';
+    return 'Her ay $count altın jeton hediye';
   }
 
   @override
@@ -582,11 +597,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String storeSuccess(int count) {
-    return 'Satın alma tamamlandı — yeni bakiyen: $count jeton';
+    return 'Satın alma tamamlandı — güncel altın jeton bakiyen: $count';
   }
 
   @override
-  String get storeBuyJetons => 'Jeton Al';
+  String get storeBuyJetons => 'Altın Jeton Al';
 
   @override
   String get premiumBadge => 'Premium';

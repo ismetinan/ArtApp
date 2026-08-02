@@ -221,20 +221,20 @@
     }
   },
   "mentorPortfolioTitle": "Portfolyo",
-  "mentorAsk": "Mentora sor — 1 jeton",
+  "mentorAsk": "Havuza sor — 1 jeton",
   "mentorAskSent": "Ödevin {name} adlı mentora iletildi!",
   "@mentorAskSent": {
     "placeholders": {
       "name": {"type": "String"}
     }
   },
-  "jetonBalance": "{count} jeton",
+  "jetonBalance": "{count} ücretsiz jeton",
   "@jetonBalance": {
     "placeholders": {
       "count": {"type": "int"}
     }
   },
-  "goldJetonBalance": "{count} altın",
+  "goldJetonBalance": "{count} altın jeton",
   "@goldJetonBalance": {
     "placeholders": {
       "count": {"type": "int"}
@@ -268,6 +268,9 @@
   "mentorGoldRequestHint": "Altın (öncelikli) istek — detaylı geri bildirim beklenir",
   "mentorPickDrawing": "Hangi çizimini göndereceksin?",
   "mentorNoDrawings": "Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.",
+  "jetonPaymentTitle": "Ödeme nasıl işler?",
+  "mentorPoolPaymentInfo": "Havuz isteği 1 jeton. Önce ücretsiz jetonların harcanır; ücretsiz jetonun kalmadıysa altın jetondan düşülür. İsteğin havuzdaki rastgele müsait bir mentora gider.",
+  "mentorDirectPaymentInfo": "Seçmeli mentorluk 3 altın jeton. Yalnız satın alınan altın jetonlar geçerlidir — ücretsiz (haftalık hediye) jetonlar burada kullanılamaz. Bunun nedeni, ödemenin bir kısmının doğrudan seçtiğin mentora gitmesi; bu yüzden gerçek bir ödemeden gelmesi gerekir.",
   "mentorEarningsTitle": "Kazancım",
   "mentorEarningsUnit": "{count} jeton-eşdeğeri",
   "@mentorEarningsUnit": {
@@ -283,16 +286,17 @@
   },
   "mentorEarningsSoon": "Ödeme altyapısı yakında — kazançların şimdiden birikiyor.",
 
-  "storeTitle": "Jeton Mağazası",
-  "storeJetonSection": "Jeton paketleri",
-  "storeJetonPack": "{count} jeton",
+  "storeTitle": "Altın Jeton Mağazası",
+  "storeGoldExplainer": "Altın jetonlar gerçek satın alımdır. Seçmeli (öncelikli) mentorluk için gereklidir ve mentorlara ödenen kazancın kaynağıdır. Havuz mentoru + AI analizi için her hafta hediye edilen ücretsiz jetonlar yeter; altın jetonu yalnız seçmeli mentorluk veya ekstra ücretsiz jeton istersen al.",
+  "storeJetonSection": "Altın jeton paketleri",
+  "storeJetonPack": "{count} altın jeton",
   "@storeJetonPack": {
     "placeholders": {
       "count": {"type": "int"}
     }
   },
   "storePremiumTitle": "Artora Premium",
-  "storePremiumPerk1": "Her ay {count} hediye jeton",
+  "storePremiumPerk1": "Her ay {count} altın jeton hediye",
   "@storePremiumPerk1": {
     "placeholders": {
       "count": {"type": "int"}
@@ -310,13 +314,13 @@
   "storeBuy": "Satın Al",
   "storeRestore": "Satın alımları geri yükle",
   "storeUnavailable": "Mağaza şu an kullanılamıyor (Play Store bağlantısı yok).",
-  "storeSuccess": "Satın alma tamamlandı — yeni bakiyen: {count} jeton",
+  "storeSuccess": "Satın alma tamamlandı — güncel altın jeton bakiyen: {count}",
   "@storeSuccess": {
     "placeholders": {
       "count": {"type": "int"}
     }
   },
-  "storeBuyJetons": "Jeton Al",
+  "storeBuyJetons": "Altın Jeton Al",
   "premiumBadge": "Premium",
 
   "adminPanelTitle": "Admin — Mentor Başvuruları",

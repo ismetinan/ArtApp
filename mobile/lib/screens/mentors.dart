@@ -347,7 +347,10 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
           // Seçmeli mentorluk altın jetonla ödenir; mağaza kapalıyken (iOS)
           // altın jeton edinmenin yolu yok, o yüzden butonu hiç göstermiyoruz.
           // Havuza sorma akışı redline ekranından ücretsiz jetonla çalışıyor.
-          if (ApiClient.instance.billingEnabled)
+          if (ApiClient.instance.billingEnabled) ...[
+            JetonPaymentInfo(
+                title: t.jetonPaymentTitle, body: t.mentorDirectPaymentInfo),
+            const SizedBox(height: 8),
             _busy
                 ? const Center(child: CircularProgressIndicator())
                 : FilledButton.icon(
@@ -355,6 +358,7 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
                     label: Text(t.mentorAskDirectGold),
                     onPressed: mentor.isAvailable ? _askMentor : null,
                   ),
+          ],
           const SizedBox(height: 16),
           Text(t.mentorPortfolioTitle,
               style: Theme.of(context).textTheme.titleMedium),

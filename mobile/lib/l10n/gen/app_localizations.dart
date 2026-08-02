@@ -803,7 +803,7 @@ abstract class AppLocalizations {
   /// No description provided for @mentorAsk.
   ///
   /// In tr, this message translates to:
-  /// **'Mentora sor — 1 jeton'**
+  /// **'Havuza sor — 1 jeton'**
   String get mentorAsk;
 
   /// No description provided for @mentorAskSent.
@@ -815,13 +815,13 @@ abstract class AppLocalizations {
   /// No description provided for @jetonBalance.
   ///
   /// In tr, this message translates to:
-  /// **'{count} jeton'**
+  /// **'{count} ücretsiz jeton'**
   String jetonBalance(int count);
 
   /// No description provided for @goldJetonBalance.
   ///
   /// In tr, this message translates to:
-  /// **'{count} altın'**
+  /// **'{count} altın jeton'**
   String goldJetonBalance(int count);
 
   /// No description provided for @becomeMentor.
@@ -992,6 +992,24 @@ abstract class AppLocalizations {
   /// **'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.'**
   String get mentorNoDrawings;
 
+  /// No description provided for @jetonPaymentTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödeme nasıl işler?'**
+  String get jetonPaymentTitle;
+
+  /// No description provided for @mentorPoolPaymentInfo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Havuz isteği 1 jeton. Önce ücretsiz jetonların harcanır; ücretsiz jetonun kalmadıysa altın jetondan düşülür. İsteğin havuzdaki rastgele müsait bir mentora gider.'**
+  String get mentorPoolPaymentInfo;
+
+  /// No description provided for @mentorDirectPaymentInfo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçmeli mentorluk 3 altın jeton. Yalnız satın alınan altın jetonlar geçerlidir — ücretsiz (haftalık hediye) jetonlar burada kullanılamaz. Bunun nedeni, ödemenin bir kısmının doğrudan seçtiğin mentora gitmesi; bu yüzden gerçek bir ödemeden gelmesi gerekir.'**
+  String get mentorDirectPaymentInfo;
+
   /// No description provided for @mentorEarningsTitle.
   ///
   /// In tr, this message translates to:
@@ -1019,19 +1037,25 @@ abstract class AppLocalizations {
   /// No description provided for @storeTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Jeton Mağazası'**
+  /// **'Altın Jeton Mağazası'**
   String get storeTitle;
+
+  /// No description provided for @storeGoldExplainer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Altın jetonlar gerçek satın alımdır. Seçmeli (öncelikli) mentorluk için gereklidir ve mentorlara ödenen kazancın kaynağıdır. Havuz mentoru + AI analizi için her hafta hediye edilen ücretsiz jetonlar yeter; altın jetonu yalnız seçmeli mentorluk veya ekstra ücretsiz jeton istersen al.'**
+  String get storeGoldExplainer;
 
   /// No description provided for @storeJetonSection.
   ///
   /// In tr, this message translates to:
-  /// **'Jeton paketleri'**
+  /// **'Altın jeton paketleri'**
   String get storeJetonSection;
 
   /// No description provided for @storeJetonPack.
   ///
   /// In tr, this message translates to:
-  /// **'{count} jeton'**
+  /// **'{count} altın jeton'**
   String storeJetonPack(int count);
 
   /// No description provided for @storePremiumTitle.
@@ -1043,7 +1067,7 @@ abstract class AppLocalizations {
   /// No description provided for @storePremiumPerk1.
   ///
   /// In tr, this message translates to:
-  /// **'Her ay {count} hediye jeton'**
+  /// **'Her ay {count} altın jeton hediye'**
   String storePremiumPerk1(int count);
 
   /// No description provided for @storePremiumPerk2.
@@ -1091,13 +1115,13 @@ abstract class AppLocalizations {
   /// No description provided for @storeSuccess.
   ///
   /// In tr, this message translates to:
-  /// **'Satın alma tamamlandı — yeni bakiyen: {count} jeton'**
+  /// **'Satın alma tamamlandı — güncel altın jeton bakiyen: {count}'**
   String storeSuccess(int count);
 
   /// No description provided for @storeBuyJetons.
   ///
   /// In tr, this message translates to:
-  /// **'Jeton Al'**
+  /// **'Altın Jeton Al'**
   String get storeBuyJetons;
 
   /// No description provided for @premiumBadge.

@@ -123,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         label: Text(t.goldJetonBalance(
                             (p['gold_jeton_balance'] ?? 0) as int)),
                         avatar: const Icon(Icons.paid,
-                            size: 18, color: Color(0xFFD4AF37)),
+                            size: 18, color: goldJetonColor),
                         onPressed: ApiClient.instance.billingEnabled
                             ? () => _openStore(context, p)
                             : null,

@@ -145,6 +145,9 @@ class _RedlineScreenState extends State<RedlineScreen> {
               ApiClient.instance.mentorMarketEnabled &&
               !_requestSent) ...[
             const SizedBox(height: 16),
+            JetonPaymentInfo(
+                title: t.jetonPaymentTitle, body: t.mentorPoolPaymentInfo),
+            const SizedBox(height: 8),
             _requestBusy
                 ? const Center(child: CircularProgressIndicator())
                 : OutlinedButton.icon(

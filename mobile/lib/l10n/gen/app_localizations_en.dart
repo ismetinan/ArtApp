@@ -411,7 +411,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mentorPortfolioTitle => 'Portfolio';
 
   @override
-  String get mentorAsk => 'Ask a mentor — 1 jeton';
+  String get mentorAsk => 'Ask the pool — 1 jeton';
 
   @override
   String mentorAskSent(String name) {
@@ -420,12 +420,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String jetonBalance(int count) {
-    return '$count jetons';
+    return '$count free jetons';
   }
 
   @override
   String goldJetonBalance(int count) {
-    return '$count gold';
+    return '$count gold jetons';
   }
 
   @override
@@ -520,6 +520,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Upload a lesson assignment first — after the analysis you can send it to a mentor from here.';
 
   @override
+  String get jetonPaymentTitle => 'How payment works';
+
+  @override
+  String get mentorPoolPaymentInfo =>
+      'A pool request costs 1 jeton. Your free jetons are spent first; if you have none left, it comes out of your gold jetons. The request goes to a random available mentor in the pool.';
+
+  @override
+  String get mentorDirectPaymentInfo =>
+      'Selective mentoring costs 3 gold jetons. Only purchased gold jetons work here — free (weekly gift) jetons can\'t be used. That\'s because part of this payment goes directly to the mentor you picked, so it has to come from a real purchase.';
+
+  @override
   String get mentorEarningsTitle => 'My Earnings';
 
   @override
@@ -537,14 +548,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Payouts coming soon — your earnings are already accruing.';
 
   @override
-  String get storeTitle => 'Jeton Store';
+  String get storeTitle => 'Gold Jeton Store';
 
   @override
-  String get storeJetonSection => 'Jeton packs';
+  String get storeGoldExplainer =>
+      'Gold jetons are a real purchase. They\'re required for selective (priority) mentoring and are the source of the earnings paid out to mentors. The free jetons gifted every week are enough for pool mentoring + AI analysis; only buy gold if you want selective mentoring or extra free jetons.';
+
+  @override
+  String get storeJetonSection => 'Gold jeton packs';
 
   @override
   String storeJetonPack(int count) {
-    return '$count jetons';
+    return '$count gold jetons';
   }
 
   @override
@@ -552,7 +567,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String storePremiumPerk1(int count) {
-    return '$count bonus jetons every month';
+    return '$count gold jetons gifted every month';
   }
 
   @override
@@ -582,11 +597,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String storeSuccess(int count) {
-    return 'Purchase complete — new balance: $count jetons';
+    return 'Purchase complete — your gold jeton balance is now $count';
   }
 
   @override
-  String get storeBuyJetons => 'Buy Jetons';
+  String get storeBuyJetons => 'Buy Gold Jetons';
 
   @override
   String get premiumBadge => 'Premium';

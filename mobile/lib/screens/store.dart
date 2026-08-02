@@ -11,6 +11,52 @@ import '../l10n/gen/app_localizations.dart';
 const jetonProducts = {'jeton_5': 5, 'jeton_15': 15, 'jeton_40': 40};
 const subscriptionProduct = 'premium_monthly';
 
+/// Altın jetonun görsel kimliği — profil çipi, mağaza ve mentor akışlarında aynı.
+const goldJetonColor = Color(0xFFD4AF37);
+
+/// Ücretsiz vs altın jeton farkını açıklayan bilgi kartı. Mentor isteği
+/// akışlarında (havuz/seçmeli) ve mağazada ödemenin nasıl işlediğini anlatır.
+class JetonPaymentInfo extends StatelessWidget {
+  final String body;
+  final String? title;
+  const JetonPaymentInfo({super.key, required this.body, this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      color: scheme.surfaceContainerHighest,
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline, size: 20, color: scheme.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (title != null) ...[
+                    Text(title!,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                  ],
+                  Text(body, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Hata SnackBar'ı: jeton yetersiz (402) ve mağaza açıksa "Jeton Al" aksiyonu
 /// ekler; diğer hatalarda düz mesaj gösterir.
 void showErrorWithStoreAction(BuildContext context, Object e) {
@@ -126,7 +172,7 @@ class _StoreScreenState extends State<StoreScreen> {
       setState(() => _busy = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(AppLocalizations.of(context)
-              .storeSuccess((status['jeton_balance'] ?? 0) as int))));
+              .storeSuccess((status['gold_jeton_balance'] ?? 0) as int))));
       Navigator.of(context).pop(true); // profil yenilensin
     } catch (e) {
       // Doğrulama başarısız: completePurchase ÇAĞIRMA — restore ile tekrar denenir
@@ -154,6 +200,8 @@ class _StoreScreenState extends State<StoreScreen> {
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    JetonPaymentInfo(body: t.storeGoldExplainer),
+                    const SizedBox(height: 16),
                     _PremiumCard(
                       product: _products[subscriptionProduct],
                       isPremium: widget.isPremium,
@@ -272,7 +320,7 @@ class _JetonCard extends StatelessWidget {
     final t = AppLocalizations.of(context);
     return Card(
       child: ListTile(
-        leading: const Icon(Icons.toll),
+        leading: const Icon(Icons.paid, color: goldJetonColor),
         title: Text(t.storeJetonPack(count)),
         subtitle: product == null ? null : Text(product!.price),
         trailing: FilledButton.tonal(
