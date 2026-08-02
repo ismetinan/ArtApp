@@ -1,7 +1,7 @@
-# Artora iOS Podfile — standart Flutter şablonu (deployment target 13.0).
+# Artora iOS Podfile — standart Flutter şablonu (deployment target 15.0).
 # CocoaPods ilk kez burada kuruluyor; `flutter pub get` çalıştıktan sonra
 # Codemagic/Mac `pod install` ile Firebase/Google/image_picker pod'larını çeker.
-platform :ios, '13.0'
+platform :ios, '15.0'
 
 # CocoaPods istatistiklerini kapat (build gecikmesini azaltır).
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
