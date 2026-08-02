@@ -7,7 +7,11 @@
 #     APP_STORE_CONNECT_ISSUER_ID      — Issuer ID (UUID)
 #     APP_STORE_CONNECT_KEY_IDENTIFIER — Key ID (10 karakter)
 #     APP_STORE_CONNECT_PRIVATE_KEY    — .p8 dosyasının TAM içeriği, "Secure" işaretli
-#   Bu isimler codemagic-cli-tools'un otomatik okuduğu isimlerdir; birebir böyle olmalı.
+#     CERTIFICATE_PRIVATE_KEY          — imza sertifikasının RSA özel anahtarı
+#                                        (~/keystores/ios_cert_key.pem), "Secure"
+#   İlk üç isim codemagic-cli-tools'un otomatik okuduğu isimlerdir; birebir böyle olmalı.
+#   CERTIFICATE_PRIVATE_KEY kalıcı olmalı: kaybolursa Apple'daki sertifika
+#   kullanılamaz hale gelir, revoke edip yeniden üretmek gerekir.
 #
 # Adlandırılmış "integration" kullanılmıyor: imza sertifikası ve provisioning
 # profili aşağıdaki `fetch-signing-files --create` adımında üretiliyor.
@@ -35,8 +39,13 @@ workflows:
       - name: İmza dosyalarını üret ve uygula
         script: |
           # Sertifika/profil yoksa Apple tarafında oluşturur (--create).
+          # --certificate-key KRİTİK: her build sıfır makinede koştuğu için
+          # sertifikanın özel anahtarı kalıcı olmalı; yoksa CLI Apple'dan
+          # indirdiği sertifikayı kaydedemez ("without certificate private key")
+          # ve keychain boş kalır.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create
           keychain initialize
           keychain add-certificates
