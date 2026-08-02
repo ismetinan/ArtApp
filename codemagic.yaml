@@ -21,7 +21,6 @@ workflows:
         bundle_identifier: com.ismetinan.artapp
       flutter: stable
       xcode: latest
-      cocoapods: default
       vars:
         APP_STORE_APPLE_ID: "6797175551" # App Store Connect → Artora → App Information
         API_BASE: "https://artapp-production.up.railway.app"
@@ -34,10 +33,9 @@ workflows:
         script: |
           cd mobile
           xcode-project use-profiles
-      - name: CocoaPods kur
-        script: |
-          cd mobile/ios
-          pod install
+      # CocoaPods adımı yok: tüm eklentiler Swift Package olarak çözülüyor
+      # (Flutter 3.44 + SPM). Podfile bırakmak "sandbox is not in sync" hatası
+      # veriyordu; Flutter gerekirse Podfile'ı kendi üretir.
       - name: IPA derle (build no otomatik artar)
         script: |
           cd mobile
