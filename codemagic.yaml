@@ -23,7 +23,7 @@ workflows:
       xcode: latest
       cocoapods: default
       vars:
-        APP_STORE_APPLE_ID: 6797175551   # App Store Connect → Artora → App Information
+        APP_STORE_APPLE_ID: "6797175551" # App Store Connect → Artora → App Information
         API_BASE: "https://artapp-production.up.railway.app"
     scripts:
       - name: Flutter bağımlılıkları
