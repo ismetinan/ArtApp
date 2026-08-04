@@ -200,14 +200,19 @@ iPad görüntüsü **gerekmez**: hedef iPhone-only (`TARGETED_DEVICE_FAMILY = "1
 → elde 4 farklı kare var. Hepsi 1290×2796'ya ölçeklenip
 `store_assets/ios_screenshots/` altına yazıldı:
 
-| Dosya | İçerik | Yükleme durumu |
-|---|---|---|
-| `01_profil_ability_chart.png` | Profil üstü | ⚠️ tamamen boş durum |
-| `02_mentorlar.png` | Mentor listesi | ⚠️ test verisi |
-| `03_topluluk.png` | Topluluk galerisi | ⚠️ tek gönderi |
-| `04_profil_ayarlar.png` | Ayarlar (Sign Out / Delete Account) | ❌ pazarlama karesi değil |
+**Yükleme sırası** (dosya adlarındaki numara = App Store'daki sıra):
 
-### Neden bu haliyle gönderilmemeli
+| Dosya | İçerik | Not |
+|---|---|---|
+| `1_topluluk.png` | Topluluk galerisi | En temiz kare: gerçek çizim, test metni yok → hero |
+| `2_mentorlar.png` | Mentor listesi | UI zengin ama `test`/`test2` görünüyor |
+| `3_profil.png` | Profil + ability chart | Boş durum → en sona |
+| `4_ayarlar_YEDEK.png` | Ayarlar ekranı | **Yükleme.** Pazarlama karesi değil, sadece arşiv |
+
+Karar (2026-08-04): kullanıcı bu karelerle şimdi submit edip sonraki sürümde
+değiştirmeyi seçti. Aşağıdaki sorunlar bilinerek kabul edildi.
+
+### Bilinen sorunlar (sonraki sürümde düzeltilecek)
 
 1. **Boyut/kalite**: dosyalar WhatsApp'tan geldiği için 946×2048'e sıkıştırılmış;
    1290'a çıkarmak yazıları yumuşatıyor. Telefondan **AirDrop / iCloud / e-postaya
