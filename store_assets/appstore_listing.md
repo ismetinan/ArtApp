@@ -191,15 +191,47 @@ Notlar:
 
 ## 7. Ekran görüntüleri
 
-Zorunlu: **6.7" veya 6.9" iPhone** (1290×2796 ya da 1320×2868), en az 1 — pratikte 5.
-TestFlight build'inden gerçek cihazda alınacak. Önerilen sıra:
+Zorunlu: **6.9" iPhone** (1290×2796 ya da 1320×2868), en az 1 — pratikte 5.
+iPad görüntüsü **gerekmez**: hedef iPhone-only (`TARGETED_DEVICE_FAMILY = "1"`).
 
-1. Yetenek ağacı (Dersler sekmesi) — ürünün kalbi
-2. AI redline analiz sonucu — en güçlü satış argümanı
-3. Profil + ability chart (radar grafiği)
-4. Bir ders düğümü (video + ödev yükleme)
-5. Mentorlar listesi
+### Mevcut durum (2026-08-04)
 
-iPad ekran görüntüsü **gerekmez** — uygulama iPhone-only olarak gönderiliyorsa.
-(Xcode hedefi iPhone+iPad ise Apple 13" iPad görüntüsü de ister; gerekirse
-hedefi iPhone-only yapabiliriz.)
+`store_assets/ioss/` içine 5 dosya kondu ama **ikisi birebir aynı** (md5 eşit)
+→ elde 4 farklı kare var. Hepsi 1290×2796'ya ölçeklenip
+`store_assets/ios_screenshots/` altına yazıldı:
+
+| Dosya | İçerik | Yükleme durumu |
+|---|---|---|
+| `01_profil_ability_chart.png` | Profil üstü | ⚠️ tamamen boş durum |
+| `02_mentorlar.png` | Mentor listesi | ⚠️ test verisi |
+| `03_topluluk.png` | Topluluk galerisi | ⚠️ tek gönderi |
+| `04_profil_ayarlar.png` | Ayarlar (Sign Out / Delete Account) | ❌ pazarlama karesi değil |
+
+### Neden bu haliyle gönderilmemeli
+
+1. **Boyut/kalite**: dosyalar WhatsApp'tan geldiği için 946×2048'e sıkıştırılmış;
+   1290'a çıkarmak yazıları yumuşatıyor. Telefondan **AirDrop / iCloud / e-postaya
+   "gerçek boyut" ekleyerek** aktarılırsa kayıpsız 1290×2796 gelir.
+2. **Guideline 2.3.3** — ekran görüntüleri uygulamayı *kullanımda* göstermeli.
+   Şu anki karelerde "Your chart will appear here", "Your journey starts here",
+   `test` / `test2` / iki kez `Guest Artist` görünüyor. Bu, hem red riski hem de
+   mağaza sayfasında kötü ilk izlenim.
+3. **Dil uyuşmazlığı**: birincil dil Türkçe, kareler İngilizce. Türkçe
+   yerelleştirmeye Türkçe kare konmalı (Profil → Dil → Türkçe ile çekilecek).
+4. **Ürünün kalbi eksik**: yetenek ağacı ve AI redline analizi hiç yok — satışı
+   yapan iki ekran bunlar.
+
+### Yeniden çekim listesi (telefonda, Dil = Türkçe)
+
+Önce misafir değil **kayıtlı hesapla** dolu bir durum oluştur (3 çizim yükle →
+seviye analizi bitsin → bir ödev gönder → AI analizi gelsin). Sonra:
+
+1. **Yetenek ağacı** (Dersler sekmesi, birkaç düğüm açılmış halde)
+2. **AI redline analiz sonucu** (analiz metni görünür şekilde)
+3. **Profil + ability chart** (radar grafiği dolu, Level 2+, XP > 0)
+4. **Ders düğümü** (video + ödev yükleme butonu)
+5. **Mentorlar listesi** (test kayıtları temizlendikten sonra)
+
+> Mentor listesindeki `test` / `test2` / `Guest Artist` kayıtları prod veritabanında
+> duruyor. Ekran görüntüsünden bağımsız olarak, yayın öncesi bunları admin
+> panelinden temizlemek gerekir — gerçek kullanıcılar da bu listeyi görüyor.
