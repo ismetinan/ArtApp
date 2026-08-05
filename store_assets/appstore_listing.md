@@ -17,7 +17,7 @@ false). Metinlerde jeton satın almadan bahsedilmiyor — bahsedilirse Apple
 | **Subtitle** (30) | `AI destekli çizim koçu` |
 | **Primary Category** | Education |
 | **Secondary Category** | Graphics & Design |
-| **Content Rights** | "Contains, shows, or accesses third-party content" → **Hayır** (YouTube videoları uygulama dışında, kendi barındırdığımız içerik yok) |
+| **Content Rights** | "Contains, shows, or accesses third-party content" → **Evet**, sonra "gerekli haklara sahibim" kutusunu işaretle. Uygulama hem YouTube videolarına yönlendiriyor hem de kullanıcı çizimlerini gösteriyor → "Hayır" demek yanlış beyan olur. |
 | **Privacy Policy URL** | `https://artapp-production.up.railway.app/privacy` |
 
 EN subtitle (English (U.S.) yerelleştirmesi eklersen): `AI-powered drawing coach`
@@ -149,7 +149,7 @@ Ankette kritik cevaplar:
 | User Generated Content | **Infrequent/Mild** — kullanıcılar çizim paylaşabiliyor |
 | Moderation kontrolleri (UGC seçilince sorulur) | **Evet, var** — AI ön filtre + kullanıcı bildirimi + admin gizleme |
 | Violence, Sexual Content, Profanity, Horror, Alcohol/Drugs, Gambling | **None** |
-| Unrestricted Web Access | **Hayır** (YouTube videoları uygulama içinde gömülü oynatılıyor, serbest tarayıcı yok) |
+| Unrestricted Web Access | **Hayır** — uygulamada webview/gömülü tarayıcı yok; YouTube linkleri `url_launcher` ile sistem tarayıcısına, sabit bir adrese açılıyor. Adres çubuğu veya serbest gezinme arayüzü sunulmuyor. |
 | Made for Kids | **Hayır** |
 
 Beklenen sonuç: **12+**
