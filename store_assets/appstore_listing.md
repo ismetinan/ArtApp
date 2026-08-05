@@ -196,7 +196,17 @@ iPad görüntüsü **gerekmez**: hedef iPhone-only (`TARGETED_DEVICE_FAMILY = "1
 
 ### Yüklenecek set (2026-08-05, 2. çekim — Türkçe arayüz)
 
-`store_assets/ios_screenshots/` altında, hepsi 1290×2796 PNG.
+`store_assets/ios_screenshots/` altında **iki boyutta** hazır — App Store Connect
+her yuva için farklı boyut istiyor, yüklediğin yuvaya göre klasörü seç:
+
+| Yuva | Klasör | Boyut |
+|---|---|---|
+| 6.9" iPhone | `6.9_inch_1290x2796/` | 1290×2796 |
+| 6.5" iPhone | `6.5_inch_1284x2778/` | 1284×2778 |
+
+Yanlış klasörü yanlış yuvaya yüklersen *"The dimensions of one or more
+screenshots are wrong"* hatası gelir. Tek bir yuvayı doldurmak yeterli.
+
 Dosya adındaki numara = App Store'daki sıra. Apple arama sonuçlarında **ilk 3**
 kareyi gösteriyor, sıralama ona göre yapıldı.
 
