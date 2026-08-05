@@ -194,49 +194,38 @@ Notlar:
 Zorunlu: **6.9" iPhone** (1290×2796 ya da 1320×2868), en az 1 — pratikte 5.
 iPad görüntüsü **gerekmez**: hedef iPhone-only (`TARGETED_DEVICE_FAMILY = "1"`).
 
-### Mevcut durum (2026-08-04)
+### Yüklenecek set (2026-08-05, 2. çekim — Türkçe arayüz)
 
-`store_assets/ioss/` içine 5 dosya kondu ama **ikisi birebir aynı** (md5 eşit)
-→ elde 4 farklı kare var. Hepsi 1290×2796'ya ölçeklenip
-`store_assets/ios_screenshots/` altına yazıldı:
+`store_assets/ios_screenshots/` altında, hepsi 1290×2796 PNG.
+Dosya adındaki numara = App Store'daki sıra. Apple arama sonuçlarında **ilk 3**
+kareyi gösteriyor, sıralama ona göre yapıldı.
 
-**Yükleme sırası** (dosya adlarındaki numara = App Store'daki sıra):
-
-| Dosya | İçerik | Not |
+| # | Dosya | İçerik |
 |---|---|---|
-| `1_topluluk.png` | Topluluk galerisi | En temiz kare: gerçek çizim, test metni yok → hero |
-| `2_mentorlar.png` | Mentor listesi | UI zengin ama `test`/`test2` görünüyor |
-| `3_profil.png` | Profil + ability chart | Boş durum → en sona |
-| `4_ayarlar_YEDEK.png` | Ayarlar ekranı | **Yükleme.** Pazarlama karesi değil, sadece arşiv |
+| 1 | `1_ai_redline.png` | AI Analizi: çizim + renkli işaret noktaları + "Güçlü yönlerin" |
+| 2 | `2_yetenek_agaci.png` | Dersler: düğümler, kilitler, XP, "Önerilen" rozeti |
+| 3 | `3_ai_gelisim_noktalari.png` | AI'ın numaralı, somut önerileri (ürünün asıl değeri) |
+| 4 | `4_topluluk.png` | Topluluk galerisi |
+| 5 | `5_mentorlar.png` | Mentor listesi + stil filtreleri |
 
-Karar (2026-08-04): kullanıcı bu karelerle şimdi submit edip sonraki sürümde
-değiştirmeyi seçti. Aşağıdaki sorunlar bilinerek kabul edildi.
+**Yüklenmeyecek:**
+- `ioss/…22.44.09 (2).jpeg` — mentor profili; portfolyo görselleri yüklenmiyor,
+  altı tane kırık görsel ikonu görünüyor (bkz. aşağıdaki bug notu).
+- `ioss/…22.27.*` — 1. çekim; arayüz İngilizce ve ekranlar boş durumda.
 
-### Bilinen sorunlar (sonraki sürümde düzeltilecek)
+### Kalan bilinen eksik (kabul edildi, sonraki sürümde)
 
-1. **Boyut/kalite**: dosyalar WhatsApp'tan geldiği için 946×2048'e sıkıştırılmış;
-   1290'a çıkarmak yazıları yumuşatıyor. Telefondan **AirDrop / iCloud / e-postaya
-   "gerçek boyut" ekleyerek** aktarılırsa kayıpsız 1290×2796 gelir.
-2. **Guideline 2.3.3** — ekran görüntüleri uygulamayı *kullanımda* göstermeli.
-   Şu anki karelerde "Your chart will appear here", "Your journey starts here",
-   `test` / `test2` / iki kez `Guest Artist` görünüyor. Bu, hem red riski hem de
-   mağaza sayfasında kötü ilk izlenim.
-3. **Dil uyuşmazlığı**: birincil dil Türkçe, kareler İngilizce. Türkçe
-   yerelleştirmeye Türkçe kare konmalı (Profil → Dil → Türkçe ile çekilecek).
-4. **Ürünün kalbi eksik**: yetenek ağacı ve AI redline analizi hiç yok — satışı
-   yapan iki ekran bunlar.
+Dosyalar telefondan WhatsApp üzerinden geldiği için 946×2048'e sıkıştırılmış;
+1290'a ölçeklemek yazıları bir miktar yumuşatıyor. Bir dahaki sefere
+**AirDrop / iCloud / e-postada "Gerçek Boyut"** ile aktarılırsa kayıpsız
+1290×2796 gelir.
 
-### Yeniden çekim listesi (telefonda, Dil = Türkçe)
+### ⚠️ Ekran görüntüsünden çıkan iki gerçek sorun
 
-Önce misafir değil **kayıtlı hesapla** dolu bir durum oluştur (3 çizim yükle →
-seviye analizi bitsin → bir ödev gönder → AI analizi gelsin). Sonra:
-
-1. **Yetenek ağacı** (Dersler sekmesi, birkaç düğüm açılmış halde)
-2. **AI redline analiz sonucu** (analiz metni görünür şekilde)
-3. **Profil + ability chart** (radar grafiği dolu, Level 2+, XP > 0)
-4. **Ders düğümü** (video + ödev yükleme butonu)
-5. **Mentorlar listesi** (test kayıtları temizlendikten sonra)
-
-> Mentor listesindeki `test` / `test2` / `Guest Artist` kayıtları prod veritabanında
-> duruyor. Ekran görüntüsünden bağımsız olarak, yayın öncesi bunları admin
-> panelinden temizlemek gerekir — gerçek kullanıcılar da bu listeyi görüyor.
+1. **Mentor portfolyo görselleri yüklenmiyor.** Mentor profilinde altı kırık
+   görsel ikonu, mentor listesinde de ilk kartın avatarı kırık. `imageUrl` +
+   `authHeaders` ile çekilen görseller iOS'ta gelmiyor gibi görünüyor —
+   inceleyen kişi de bunu görecek. Araştırılmalı.
+2. **Prod veritabanında test kaydı var.** Mentor listesinde `test`, `test2` ve
+   iki kez `Guest Artist` görünüyor. Gerçek kullanıcılar da bunları görüyor;
+   yayın öncesi admin panelinden temizlenmeli.
