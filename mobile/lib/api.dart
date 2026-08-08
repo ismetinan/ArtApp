@@ -267,10 +267,13 @@ class ApiClient {
   int aiCostRedline = 1;
   int aiCostFreeAnalysis = 1;
 
-  /// Mağaza UI'ı buna göre görünür. iOS'ta satın alma henüz yok — App Store
-  /// Connect'te ürün tanımlı değil — bu yüzden sunucu açık dese de kapalı
-  /// sayılır; aksi halde boş bir mağaza ve çalışmayan "Jeton Al" akışı çıkardı.
-  bool get billingEnabled => !Platform.isIOS && _billingEnabledServer;
+  /// Mağaza UI'ı buna göre görünür. Artık iOS'ta da açık: App Store ürünleri
+  /// tanımlandı ve sunucu StoreKit 2 imzalı işlemini doğruluyor
+  /// (backend/app/services/apple_iap.py).
+  ///
+  /// Tek kapı sunucudaki BILLING_ENABLED — ürünler App Store Connect'te
+  /// hazır olmadan açılırsa boş mağaza çıkar.
+  bool get billingEnabled => _billingEnabledServer;
 
   /// Kullanıcı seviye belirleme ekranını bilerek atladı (cihaz-yerel tercih).
   /// Atlamadıysa ve chart boşsa açılışta 3-resim ekranına geri yönlendirilir.
@@ -602,10 +605,14 @@ class ApiClient {
     return j;
   }
 
-  // ---------- Play Billing ----------
+  // ---------- Satın alma (Play + App Store) ----------
 
   /// Satın almayı backend'e doğrulatır; hak sunucuda verilir.
   /// 200 dönmeden completePurchase ÇAĞRILMAMALI.
+  ///
+  /// `purchaseToken` platforma göre farklı şey taşır ve sunucu buna göre
+  /// doğrular: Android'de Play purchase token, iOS'ta StoreKit 2'nin imzalı
+  /// işlemi (JWS). İkisi de `serverVerificationData` alanından geliyor.
   Future<Map<String, dynamic>> verifyPurchase(
       String productId, String purchaseToken) async {
     final r = await http.post(
@@ -614,6 +621,7 @@ class ApiClient {
       body: jsonEncode({
         'product_id': productId,
         'purchase_token': purchaseToken,
+        'platform': Platform.isIOS ? 'ios' : 'android',
       }),
     );
     return _decode(r);

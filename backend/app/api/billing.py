@@ -26,6 +26,9 @@ def require_billing() -> None:
 class VerifyBody(BaseModel):
     product_id: str
     purchase_token: str
+    # "android" (Play purchase token) | "ios" (StoreKit 2 imzalı işlem, JWS).
+    # Varsayılan android: eski istemciler alan göndermiyor.
+    platform: str = "android"
 
 
 def _status_json(user: User) -> dict:
@@ -45,7 +48,9 @@ def verify_purchase(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    billing.process_purchase(db, user, body.product_id, body.purchase_token)
+    billing.process_purchase(
+        db, user, body.product_id, body.purchase_token, platform=body.platform
+    )
     db.commit()
     return _status_json(user)
 

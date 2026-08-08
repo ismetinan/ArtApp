@@ -61,6 +61,11 @@ class Settings(BaseSettings):
     # string). Boşken doğrulama uçları 503 döner — dev/test mock'la çalışır.
     play_service_account_json: str = ""
     android_package_name: str = "com.ismetinan.artapp"
+    # App Store: imzalı işlemin bundleId'si bununla eşleşmeli
+    ios_bundle_id: str = "com.ismetinan.artapp"
+    # Sandbox (TestFlight/test hesabı) satın almaları hak versin mi. PROD'DA
+    # KAPALI olmalı — açıkken test satın almasıyla bedava Premium alınır.
+    ios_allow_sandbox_purchases: bool = False
     ai_daily_limit_premium: int = 50
     # ESKİ MODEL: Premium'un her fatura döneminde verdiği altın jeton. Yeni
     # ekonomide Premium jeton YIĞINI değil yüksek HAFTALIK TABAN alıyor

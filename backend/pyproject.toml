@@ -21,6 +21,9 @@ dependencies = [
     "boto3>=1.34",
     "sentry-sdk[fastapi]>=2.0",
     "firebase-admin>=6.5",
+    # App Store imzalı işlem (JWS) doğrulaması — apple_iap.py
+    "cryptography>=43.0",
+    "pyjwt>=2.9",
 ]
 
 [project.optional-dependencies]

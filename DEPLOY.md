@@ -296,3 +296,51 @@ Aylık: ücretsiz kullanıcı (3 jeton/hafta) ~$0,006; Premium (25/hafta) ~$0,27
 anahtarı değil; canlı API `401 ACCESS_TOKEN_TYPE_UNSUPPORTED` döndürüyor.
 Gerçek anahtar `AIza` ile başlar (Google AI Studio → Create API key).
 **Gerekmiyor**: canlı sağlayıcı OpenRouter, Gemini modelleri de oradan geliyor.
+
+---
+
+## 12. iOS satın alma (App Store IAP)
+
+Sunucu tarafı hazır: StoreKit 2'nin **imzalı işlemi (JWS)** Apple sertifika
+zinciriyle YEREL doğrulanıyor (`app/services/apple_iap.py`). App Store Server
+API'ye çağrı ve ayrı bir in-app purchase `.p8` anahtarı **gerekmiyor** —
+doğrulama için saklanacak yeni bir sır yok.
+
+### Railway değişkenleri
+
+```
+IOS_BUNDLE_ID=com.ismetinan.artapp
+IOS_ALLOW_SANDBOX_PURCHASES=false   # PROD'DA FALSE KALMALI
+```
+
+`IOS_ALLOW_SANDBOX_PURCHASES=true` yalnız TestFlight'ta satın alma akışını
+denerken açılır; açık kalırsa sandbox satın almasıyla bedava Premium alınır.
+
+### App Store Connect adımları (sende)
+
+1. **Anlaşmalar**: Business → Agreements → **Paid Applications Agreement**'ı
+   kabul et + banka ve vergi bilgilerini gir. ⚠️ Onay birkaç gün sürebilir ve
+   bu tamamlanmadan IAP ürünleri "Ready to Submit" olmaz.
+2. **Ürünler** (kimlikler Play ile birebir aynı olmalı — sunucu aynı katalogla
+   çalışıyor, `services/billing.py`):
+   - Tüketilebilir (Consumable): `jeton_5`, `jeton_15`, `jeton_40`
+   - Otomatik yenilenen abonelik: `premium_monthly` (bir abonelik grubu içinde)
+   - Her ürüne: fiyat, yerelleştirilmiş ad/açıklama, inceleme ekran görüntüsü.
+3. **Sandbox test hesabı**: Users and Access → Sandbox Testers → ekle.
+   Test cihazında App Store'dan çıkış yapıp sandbox hesabıyla dene.
+4. **Bayrak**: sunucuda `BILLING_ENABLED=true` (Android'le ortak).
+5. **Sürüm**: IAP ürünleri ilk kez yeni bir uygulama sürümüyle birlikte
+   incelemeye gönderilir.
+
+### Telefon testi
+
+Profil → jeton çipi → mağaza → paket al (sandbox hesabıyla) → bakiye artmalı,
+`purchases` tablosunda `transactionId` ile bir satır oluşmalı. Aynı işlemin
+ikinci kez hak vermediği testlerle korunuyor.
+
+### Güvenlik
+
+Doğrulama zinciri Apple Root CA G3'e **parmak iziyle sabitlenmiş**. Sahte bir
+kök sertifikayla üretilen zincir reddediliyor (`tests/test_apple_iap.py`
+`test_forged_chain_is_rejected`) — bu kontrol olmadan sahte makbuzla bedava
+Premium alınabilirdi.

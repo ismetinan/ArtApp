@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from ..core.config import get_settings
 from ..core.messages import msg
 from ..models.tables import Purchase, User
-from . import jetons
+from . import apple_iap, jetons
 
 log = logging.getLogger(__name__)
 
@@ -146,8 +146,18 @@ def _apply_subscription(
     user.premium_until = expiry
 
 
-def process_purchase(db: Session, user: User, product_id: str, token: str) -> Purchase:
-    """Doğrular ve hakkı verir; idempotent. commit çağıranın sorumluluğunda."""
+def process_purchase(
+    db: Session, user: User, product_id: str, token: str, platform: str = "android"
+) -> Purchase:
+    """Doğrular ve hakkı verir; idempotent. commit çağıranın sorumluluğunda.
+
+    platform="ios" ise token, StoreKit 2'nin imzalı işlemi (JWS) olarak gelir ve
+    Apple zinciriyle YEREL doğrulanır (bkz. services/apple_iap.py); saklanan
+    "token" o işlemin transactionId'si olur. Geri kalan akış Play ile aynı:
+    unique token çifte hak vermeyi engeller.
+    """
+    if platform == "ios":
+        return _process_apple_purchase(db, user, product_id, token)
     if product_id in JETON_PRODUCTS:
         kind = "jeton"
     elif product_id == SUBSCRIPTION_PRODUCT:
@@ -219,3 +229,84 @@ def refresh_subscription(db: Session, user: User) -> None:
         _apply_subscription(db, user, purchase, data)
     except (PlayVerifyError, BillingConfigError, HTTPException, httpx.HTTPError):
         return
+
+
+def _process_apple_purchase(
+    db: Session, user: User, product_id: str, jws: str
+) -> Purchase:
+    """App Store satın alması: imzalı işlemi doğrula, hakkı ver (idempotent).
+
+    Play akışıyla aynı iskelet; farkı doğrulamanın ağ çağrısı değil yerel imza
+    kontrolü olması. `transactionId` Purchase.purchase_token'a yazılır — unique
+    olduğu için aynı işlem ikinci kez hak veremez.
+    """
+    if product_id in JETON_PRODUCTS:
+        kind = "jeton"
+    elif product_id == SUBSCRIPTION_PRODUCT:
+        kind = "subscription"
+    else:
+        raise HTTPException(
+            status_code=400, detail=msg("purchase_invalid", user.language)
+        )
+
+    try:
+        tx = apple_iap.verify_transaction(jws, product_id)
+    except apple_iap.AppleVerifyError as e:
+        log.warning("Apple doğrulama başarısız: %s | %s", e, apple_iap.describe(jws))
+        raise HTTPException(
+            status_code=400, detail=msg("purchase_invalid", user.language)
+        ) from e
+
+    token = tx["transaction_id"]
+    existing = db.execute(
+        select(Purchase).where(Purchase.purchase_token == token)
+    ).scalar_one_or_none()
+    if existing is not None and existing.user_id != user.id:
+        # Aynı işlem başka hesaba hak vermiş — paylaşılan makbuzla çoğaltma denemesi
+        raise HTTPException(
+            status_code=400, detail=msg("purchase_invalid", user.language)
+        )
+
+    if kind == "jeton":
+        if existing is not None:
+            return existing  # hak zaten verildi
+        purchase = Purchase(
+            user_id=user.id, product_id=product_id, purchase_token=token, kind=kind
+        )
+        db.add(purchase)
+        db.flush()
+        jetons.grant(db, user, JETON_PRODUCTS[product_id], "purchase", paid=True)
+        return purchase
+
+    # Abonelik: her yenilemede App Store yeni bir transactionId üretir, bu yüzden
+    # dönem takibi granted_expiry ile yapılır (Play'deki mantığın aynısı).
+    expiry = tx["expires_at"]
+    if expiry is None:
+        raise HTTPException(
+            status_code=400, detail=msg("purchase_invalid", user.language)
+        )
+    purchase = existing
+    if purchase is None:
+        purchase = Purchase(
+            user_id=user.id, product_id=product_id, purchase_token=token, kind=kind
+        )
+        db.add(purchase)
+        db.flush()
+    _apply_subscription_expiry(db, user, purchase, expiry)
+    return purchase
+
+
+def _apply_subscription_expiry(
+    db: Session, user: User, purchase: Purchase, expiry: datetime
+) -> None:
+    """Play'deki _apply_subscription'ın sağlayıcıdan bağımsız hâli."""
+    settings = get_settings()
+    granted = purchase.granted_expiry
+    if granted is not None and granted.tzinfo is None:
+        granted = granted.replace(tzinfo=timezone.utc)
+    if granted is None or expiry > granted:
+        monthly = 0 if settings.jeton_ai_economy_enabled else settings.premium_monthly_jetons
+        if monthly > 0:
+            jetons.grant(db, user, monthly, "premium_monthly", paid=True)
+        purchase.granted_expiry = expiry
+    user.premium_until = expiry
