@@ -7,6 +7,7 @@ import '../api.dart';
 import '../google_auth.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../push.dart';
+import 'ai_wait.dart';
 import 'auth_form.dart';
 import 'home_shell.dart';
 
@@ -284,6 +285,13 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(AppLocalizations.of(context).analyzingSubtitle),
+            const SizedBox(height: 8),
+            // En uzun bekleyiş bu (3 görsel birlikte) — dönüşümlü satır
+            // beklemeyi kısa gösteriyor, ders/analiz akışıyla da tutarlı.
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: AiWaitTips(),
+            ),
           ],
         ),
       ),

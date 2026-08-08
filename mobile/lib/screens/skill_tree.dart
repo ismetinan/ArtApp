@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'ai_wait.dart';
 import 'redline.dart';
 import 'store.dart';
 
@@ -51,26 +52,32 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
         await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600);
     if (file == null || !mounted) return;
     setState(() => _freeBusy = true);
+    AiWait.show(context); // hide() sayfa geçişinden önce, tam bir kez
+    ({RedlineResult analysis, int xpAwarded, int level, int submissionId})? result;
+    Object? error;
     try {
-      final result = await ApiClient.instance
+      result = await ApiClient.instance
           .submitFreeAnalysis(await file.readAsBytes(), file.name);
-      if (mounted) {
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => RedlineScreen(
-            image: FileImage(File(file.path)),
-            analysis: result.analysis,
-            xpAwarded: 0,
-            submissionId: result.submissionId,
-          ),
-        ));
-      }
     } catch (e) {
+      error = e;
+    }
+    if (!mounted) return;
+    AiWait.hide(context);
+    setState(() => _freeBusy = false);
+    if (error != null) {
       // Jeton yetersizse (402) ve mağaza açıksa "Jeton Al" kısayolu eklenir;
       // eski ekonomideki haftalık limit (429) düz mesaj olarak gösterilir.
-      if (mounted) showErrorWithStoreAction(context, e);
-    } finally {
-      if (mounted) setState(() => _freeBusy = false);
+      showErrorWithStoreAction(context, error);
+      return;
     }
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => RedlineScreen(
+        image: FileImage(File(file.path)),
+        analysis: result!.analysis,
+        xpAwarded: 0,
+        submissionId: result.submissionId,
+      ),
+    ));
   }
 
   int _depth(SkillNode node, Map<String, SkillNode> byId, [int guard = 0]) {
@@ -319,6 +326,8 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
 
   Future<void> _generateAssignment() async {
     setState(() => _assignmentBusy = true);
+    // Burada sayfa geçişi yok, o yüzden finally güvenli.
+    AiWait.show(context, title: AppLocalizations.of(context).aiWaitTitleAssignment);
     try {
       final text = await ApiClient.instance.generateAssignment(widget.node.id);
       if (mounted) setState(() => _assignment = text);
@@ -328,36 +337,49 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
             .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     } finally {
-      if (mounted) setState(() => _assignmentBusy = false);
+      if (mounted) {
+        AiWait.hide(context);
+        setState(() => _assignmentBusy = false);
+      }
     }
   }
 
   Future<void> _submit(ImageSource source) async {
     final file = await ImagePicker().pickImage(source: source, maxWidth: 1600);
-    if (file == null) return;
+    // Seçici async gap; dönüşte ekran hâlâ ayakta mı (bkz. _freeAnalysis)
+    if (file == null || !mounted) return;
     setState(() => _submitting = true);
+    // Bekleme modalı: AI senkron koşuyor ve 30-60 sn sürebiliyor.
+    // hide() TAM OLARAK BİR KEZ ve modal en üstteyken çağrılmalı — push
+    // döndükten sonra çağrılırsa açık olan sayfayı pop eder.
+    AiWait.show(context);
+    ({RedlineResult analysis, int xpAwarded, int level, int submissionId})? result;
+    Object? error;
     try {
-      final result = await ApiClient.instance
+      result = await ApiClient.instance
           .submitAssignment(widget.node.id, await file.readAsBytes(), file.name);
       _completedNow = true;
-      if (mounted) {
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => RedlineScreen(
-            image: FileImage(File(file.path)),
-            analysis: result.analysis,
-            xpAwarded: result.xpAwarded,
-            submissionId: result.submissionId,
-          ),
-        ));
-      }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
-      }
-    } finally {
-      if (mounted) setState(() => _submitting = false);
+      error = e;
     }
+    // Modal PopScope ile geri tuşunu kilitlediği için bu ekran await sırasında
+    // unmount olamaz; yine de savunmacı kontrol.
+    if (!mounted) return;
+    AiWait.hide(context);
+    setState(() => _submitting = false);
+    if (error != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(friendlyError(context, error))));
+      return;
+    }
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => RedlineScreen(
+        image: FileImage(File(file.path)),
+        analysis: result!.analysis,
+        xpAwarded: result.xpAwarded,
+        submissionId: result.submissionId,
+      ),
+    ));
   }
 
   @override

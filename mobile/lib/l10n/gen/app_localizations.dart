@@ -1256,6 +1256,60 @@ abstract class AppLocalizations {
   /// **'Gizlilik Politikası'**
   String get privacyTitle;
 
+  /// No description provided for @aiWaitTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çizimin inceleniyor'**
+  String get aiWaitTitle;
+
+  /// No description provided for @aiWaitTipProportions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Oranlar ve çizgi kalitesi değerlendiriliyor…'**
+  String get aiWaitTipProportions;
+
+  /// No description provided for @aiWaitTipPerspective.
+  ///
+  /// In tr, this message translates to:
+  /// **'Perspektif ve anatomiye bakılıyor…'**
+  String get aiWaitTipPerspective;
+
+  /// No description provided for @aiWaitTipLight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Işık-gölge geçişleri inceleniyor…'**
+  String get aiWaitTipLight;
+
+  /// No description provided for @aiWaitTipComposition.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kompozisyon ve renk değerlendiriliyor…'**
+  String get aiWaitTipComposition;
+
+  /// No description provided for @aiWaitTipWriting.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri bildirimin yazılıyor…'**
+  String get aiWaitTipWriting;
+
+  /// No description provided for @aiWaitStayHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu 30-60 saniye sürebilir. Çıkarsan analiz kaybolmaz — Gelişim Macerası\'na kaydedilir.'**
+  String get aiWaitStayHint;
+
+  /// No description provided for @aiWaitTitleAssignment.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödevin hazırlanıyor'**
+  String get aiWaitTitleAssignment;
+
+  /// No description provided for @aiWaitTitleLevel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seviyen belirleniyor'**
+  String get aiWaitTitleLevel;
+
   /// No description provided for @storeJetonExplainerAi.
   ///
   /// In tr, this message translates to:

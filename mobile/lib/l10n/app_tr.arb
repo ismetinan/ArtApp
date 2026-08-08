@@ -371,6 +371,16 @@
   "adminRejectLink": "Bağlantıyı reddet",
   "termsTitle": "Kullanım Koşulları",
   "privacyTitle": "Gizlilik Politikası",
+
+  "aiWaitTitle": "Çizimin inceleniyor",
+  "aiWaitTipProportions": "Oranlar ve çizgi kalitesi değerlendiriliyor…",
+  "aiWaitTipPerspective": "Perspektif ve anatomiye bakılıyor…",
+  "aiWaitTipLight": "Işık-gölge geçişleri inceleniyor…",
+  "aiWaitTipComposition": "Kompozisyon ve renk değerlendiriliyor…",
+  "aiWaitTipWriting": "Geri bildirimin yazılıyor…",
+  "aiWaitStayHint": "Bu 30-60 saniye sürebilir. Çıkarsan analiz kaybolmaz — Gelişim Macerası'na kaydedilir.",
+  "aiWaitTitleAssignment": "Ödevin hazırlanıyor",
+  "aiWaitTitleLevel": "Seviyen belirleniyor",
   "storeJetonExplainerAi": "Jetonlar AI analizleri için kullanılır. Haftada {count} ücretsiz jetonun zaten var ve her hafta {count}'e tamamlanır; buradan aldığın jetonların ise süresi dolmaz ve haftalık yenileme onlara dokunmaz. Dersler, yetenek ağacı ve mentor desteği ücretsiz — jeton yalnız AI analizini daha çok kullanmak için.",
   "@storeJetonExplainerAi": {
     "placeholders": {

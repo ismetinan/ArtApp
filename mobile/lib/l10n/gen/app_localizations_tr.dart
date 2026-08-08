@@ -683,6 +683,35 @@ class AppLocalizationsTr extends AppLocalizations {
   String get privacyTitle => 'Gizlilik Politikası';
 
   @override
+  String get aiWaitTitle => 'Çizimin inceleniyor';
+
+  @override
+  String get aiWaitTipProportions =>
+      'Oranlar ve çizgi kalitesi değerlendiriliyor…';
+
+  @override
+  String get aiWaitTipPerspective => 'Perspektif ve anatomiye bakılıyor…';
+
+  @override
+  String get aiWaitTipLight => 'Işık-gölge geçişleri inceleniyor…';
+
+  @override
+  String get aiWaitTipComposition => 'Kompozisyon ve renk değerlendiriliyor…';
+
+  @override
+  String get aiWaitTipWriting => 'Geri bildirimin yazılıyor…';
+
+  @override
+  String get aiWaitStayHint =>
+      'Bu 30-60 saniye sürebilir. Çıkarsan analiz kaybolmaz — Gelişim Macerası\'na kaydedilir.';
+
+  @override
+  String get aiWaitTitleAssignment => 'Ödevin hazırlanıyor';
+
+  @override
+  String get aiWaitTitleLevel => 'Seviyen belirleniyor';
+
+  @override
   String storeJetonExplainerAi(int count) {
     return 'Jetonlar AI analizleri için kullanılır. Haftada $count ücretsiz jetonun zaten var ve her hafta $count\'e tamamlanır; buradan aldığın jetonların ise süresi dolmaz ve haftalık yenileme onlara dokunmaz. Dersler, yetenek ağacı ve mentor desteği ücretsiz — jeton yalnız AI analizini daha çok kullanmak için.';
   }

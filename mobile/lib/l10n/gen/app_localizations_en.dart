@@ -682,6 +682,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyTitle => 'Privacy Policy';
 
   @override
+  String get aiWaitTitle => 'Reviewing your drawing';
+
+  @override
+  String get aiWaitTipProportions => 'Assessing proportions and line quality…';
+
+  @override
+  String get aiWaitTipPerspective => 'Looking at perspective and anatomy…';
+
+  @override
+  String get aiWaitTipLight => 'Examining light and shadow transitions…';
+
+  @override
+  String get aiWaitTipComposition => 'Evaluating composition and colour…';
+
+  @override
+  String get aiWaitTipWriting => 'Writing your feedback…';
+
+  @override
+  String get aiWaitStayHint =>
+      'This can take 30-60 seconds. If you leave, the analysis isn\'t lost — it\'s saved to your Progress Journey.';
+
+  @override
+  String get aiWaitTitleAssignment => 'Preparing your assignment';
+
+  @override
+  String get aiWaitTitleLevel => 'Determining your level';
+
+  @override
   String storeJetonExplainerAi(int count) {
     return 'Jetons are used for AI analyses. You already get $count free jetons a week and your balance is topped back up to $count every week; jetons you buy here never expire and the weekly top-up doesn\'t touch them. Lessons, the skill tree and mentor support are free — jetons are only for using AI analysis more.';
   }
