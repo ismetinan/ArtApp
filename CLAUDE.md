@@ -102,11 +102,27 @@ OpenRouter üzerinde koşuldu, stil tarafsızlığı GEÇTİ — bkz. `prototype
 > çağrıları `backend/app/ai/` içindeki sağlayıcı-bağımsız arayüz üzerinden gider
 > (`AI_PROVIDER` env değişkeni: `mock` | `gemini` | `openrouter`). Aktif canlı
 > sağlayıcı: **OpenRouter** (ücretsiz anahtar, OpenAI-uyumlu API, ücretsiz vision
-> modelleri; model `OPENROUTER_MODEL` ile seçilir). Gemini adaptörü kodda duruyor
-> ama devre dışı: kullanıcının Google hesabı yalnız `AQ.` formatlı anahtar üretiyor
-> ve bunlar Google tarafındaki bir hata yüzünden 401 alıyor (2026-07 itibarıyla
-> çözümsüz). Claude/OpenAI adaptörleri ileride tek dosyayla eklenir. Fine-tuning
+> modelleri; model `OPENROUTER_MODEL` ile seçilir).
+>
+> **Gemini 401'i DÜZELTİLDİ (teşhis, 2026-08-08):** Bu bir Google hatası değil,
+> yanlış kimlik bilgisi tipi. `.env`'deki `GEMINI_API_KEY` `AQ.` ile başlıyor —
+> bu bir **ephemeral token** (Live API için, kısa ömürlü), API anahtarı değil.
+> Gerçek Gemini API anahtarı `AIza` ile başlar. Canlı API `401
+> ACCESS_TOKEN_TYPE_UNSUPPORTED` döndürüyor, mesaj birebir bunu söylüyor.
+> Çözüm: Google AI Studio → "Get API key" → **Create API key** (ya da Cloud
+> Console → Credentials → API key + "Generative Language API" etkin). Yine de
+> **acil değil**: canlı sağlayıcı OpenRouter ve önerilen premium model
+> (`google/gemini-2.5-flash`) OpenRouter üzerinden gidiyor — Google anahtarı
+> hiç gerekmiyor.
+>
+> Claude/OpenAI adaptörleri ileride tek dosyayla eklenir. Fine-tuning
 > Faz 4 konusu. Prompt'lar sağlayıcı-ortak: `backend/app/ai/prompts.py`.
+>
+> **Model katmanı (Aşama 1, 2026-08-08):** `get_ai_provider(premium=...)`;
+> Premium abone `OPENROUTER_PREMIUM_MODEL`'i alır, ayar boşsa sessizce normal
+> modele düşer. Modele giden her görsel `ai/images.py` ile en uzun kenarı
+> `AI_IMAGE_MAX_EDGE` (1024) olacak şekilde küçültülüp JPEG'e çevrilir —
+> gerçek çizim üzerinde ölçüldü: **görsel token 4266 → 1118 (3,8× azalma)**.
 
 ---
 

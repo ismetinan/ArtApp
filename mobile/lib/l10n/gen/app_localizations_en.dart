@@ -154,6 +154,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get analyzeFailedTitle => 'The analysis couldn\'t be completed';
+
+  @override
+  String get analyzeRetryButton => 'Try again';
+
+  @override
   String get resultTitle => 'Assessment Result';
 
   @override

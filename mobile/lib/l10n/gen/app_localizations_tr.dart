@@ -154,6 +154,12 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get analyzeFailedTitle => 'Analiz şu an tamamlanamadı';
+
+  @override
+  String get analyzeRetryButton => 'Tekrar dene';
+
+  @override
   String get resultTitle => 'Değerlendirme Sonucu';
 
   @override

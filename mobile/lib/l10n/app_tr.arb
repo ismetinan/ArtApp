@@ -69,6 +69,8 @@
     }
   },
 
+  "analyzeFailedTitle": "Analiz şu an tamamlanamadı",
+  "analyzeRetryButton": "Tekrar dene",
   "resultTitle": "Değerlendirme Sonucu",
   "levelHeading": "{level}. Seviye",
   "@levelHeading": {

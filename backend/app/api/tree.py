@@ -199,7 +199,7 @@ async def submit_assignment(
 
     try:
         result = guard_redline(
-            await get_ai_provider().redline_analysis(
+            await get_ai_provider(premium=is_premium(user)).redline_analysis(
                 content, _node_title(node, user.language), language=user.language
             ),
             language=user.language,
@@ -427,7 +427,7 @@ async def free_analysis(
 
     try:
         result = guard_redline(
-            await get_ai_provider().redline_analysis(
+            await get_ai_provider(premium=is_premium(user)).redline_analysis(
                 content,
                 _FREE_CONTEXT.get(user.language, _FREE_CONTEXT["tr"]),
                 language=user.language,

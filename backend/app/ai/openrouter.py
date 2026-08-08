@@ -13,6 +13,7 @@ import httpx
 from pydantic import BaseModel
 
 from .base import AIProvider
+from .images import prepare_for_model
 from .prompts import MODERATION_PROMPT, assess_prompt, assignment_prompt, redline_prompt
 from .schemas import AssignmentBrief, LevelAssessment, ModerationVerdict, RedlineResult
 
@@ -20,6 +21,9 @@ _API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
 def _image_part(image: bytes) -> dict:
+    # Tek darboğaz: modele giden HER görsel buradan geçiyor (redline, seviye
+    # belirleme, moderasyon), o yüzden küçültme burada yapılıyor.
+    image = prepare_for_model(image)
     mime = "image/png" if image[:8] == b"\x89PNG\r\n\x1a\n" else "image/jpeg"
     data_url = f"data:{mime};base64,{base64.b64encode(image).decode()}"
     return {"type": "image_url", "image_url": {"url": data_url}}

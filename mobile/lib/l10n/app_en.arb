@@ -53,6 +53,8 @@
   "analyzingSubtitle": "This may take a few seconds.",
   "analyzeRetry": "{error} Retrying shortly.",
 
+  "analyzeFailedTitle": "The analysis couldn't be completed",
+  "analyzeRetryButton": "Try again",
   "resultTitle": "Assessment Result",
   "levelHeading": "Level {level}",
   "scoreDetermined": "{score}/100 — determined",

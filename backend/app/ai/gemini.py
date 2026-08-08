@@ -8,11 +8,13 @@ from google import genai
 from google.genai import types
 
 from .base import AIProvider
+from .images import prepare_for_model
 from .prompts import MODERATION_PROMPT, assess_prompt, assignment_prompt, redline_prompt
 from .schemas import AssignmentBrief, LevelAssessment, ModerationVerdict, RedlineResult
 
 
 def _image_part(image: bytes) -> types.Part:
+    image = prepare_for_model(image)  # bkz. openrouter._image_part
     mime = "image/png" if image[:8] == b"\x89PNG\r\n\x1a\n" else "image/jpeg"
     return types.Part.from_bytes(data=image, mime_type=mime)
 

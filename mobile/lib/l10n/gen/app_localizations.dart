@@ -368,6 +368,18 @@ abstract class AppLocalizations {
   /// **'{error} Birazdan tekrar denenecek.'**
   String analyzeRetry(String error);
 
+  /// No description provided for @analyzeFailedTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz şu an tamamlanamadı'**
+  String get analyzeFailedTitle;
+
+  /// No description provided for @analyzeRetryButton.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar dene'**
+  String get analyzeRetryButton;
+
   /// No description provided for @resultTitle.
   ///
   /// In tr, this message translates to:

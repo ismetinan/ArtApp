@@ -249,7 +249,17 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
     _analyze();
   }
 
+  /// Otomatik deneme sayısı. Eskiden sınır YOKTU: hata alındıkça 3 saniyede bir
+  /// sonsuza kadar tekrar deniyordu. Sunucu kalıcı olarak hata veriyorsa (kota,
+  /// bozuk anahtar) kullanıcı dönen bir spinner'a kilitleniyor ve her deneme
+  /// yeni bir AI çağrısı masrafı çıkarıyordu.
+  static const _maxAttempts = 3;
+
+  int _attempt = 0;
+  String? _error;
+
   Future<void> _analyze() async {
+    if (mounted) setState(() => _error = null);
     final payload = [
       for (final img in widget.images)
         (bytes: await img.readAsBytes(), name: img.name),
@@ -262,18 +272,70 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
         );
       }
     } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+      _attempt++;
+      final message = friendlyError(context, e);
+      if (_attempt < _maxAttempts) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context)
-                .analyzeRetry(friendlyError(context, e)))));
+            content: Text(AppLocalizations.of(context).analyzeRetry(message))));
         await Future.delayed(const Duration(seconds: 3));
         if (mounted) _analyze();
+        return;
       }
+      // Denemeler tükendi: kontrolü kullanıcıya bırak
+      setState(() => _error = message);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    // Denemeler tükendiyse spinner yerine çıkış yolu göster
+    if (_error != null) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.cloud_off, size: 56),
+                const SizedBox(height: 16),
+                Text(t.analyzeFailedTitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Text(_error!, textAlign: TextAlign.center),
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  icon: const Icon(Icons.refresh),
+                  label: Text(t.analyzeRetryButton),
+                  onPressed: () {
+                    _attempt = 0;
+                    _analyze();
+                  },
+                ),
+                const SizedBox(height: 8),
+                // Kullanıcıyı burada kilitli tutmuyoruz: seviye belirleme
+                // atlanabilir, chart sonradan da doldurulabilir.
+                TextButton(
+                  onPressed: () async {
+                    await ApiClient.instance.setOnboardingSkipped();
+                    if (context.mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const HomeShell()),
+                        (_) => false,
+                      );
+                    }
+                  },
+                  child: Text(t.skip),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: Center(
         child: Column(
@@ -281,10 +343,10 @@ class _AnalyzingScreenState extends State<AnalyzingScreen> {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 24),
-            Text(AppLocalizations.of(context).analyzingTitle,
+            Text(t.analyzingTitle,
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text(AppLocalizations.of(context).analyzingSubtitle),
+            Text(t.analyzingSubtitle),
             const SizedBox(height: 8),
             // En uzun bekleyiş bu (3 görsel birlikte) — dönüşümlü satır
             // beklemeyi kısa gösteriyor, ders/analiz akışıyla da tutarlı.

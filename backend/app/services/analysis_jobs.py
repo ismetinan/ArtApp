@@ -125,6 +125,7 @@ async def run(job_id: int, image: bytes, node_title: str | None, language: str) 
     # ai.factory üzerinden çalışıyor)
     from ..ai import get_ai_provider, guard_redline
     from ..models.tables import Submission, SkillNode, UserProgress
+    from .billing import is_premium
     from .gamification import award_xp, bump_ability
 
     with db_module.SessionLocal() as db:
@@ -134,9 +135,12 @@ async def run(job_id: int, image: bytes, node_title: str | None, language: str) 
         job.status = "running"
         db.commit()
 
+        # Premium = güçlü model (Aşama 1). Kullanıcı işin sahibi.
+        owner = db.get(User, job.user_id)
+        premium = owner is not None and is_premium(owner)
         try:
             result = guard_redline(
-                await get_ai_provider().redline_analysis(
+                await get_ai_provider(premium=premium).redline_analysis(
                     image, node_title or "", language=language
                 ),
                 language=language,

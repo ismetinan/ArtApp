@@ -89,6 +89,10 @@ class Settings(BaseSettings):
     ai_cost_assignment: int = 0
     ai_cost_redline: int = 1
     ai_cost_free_analysis: int = 1
+    # Modele gönderilmeden önce görselin en uzun kenarı bu piksele indirilir.
+    # Görsel token'ı piksel sayısıyla ölçekleniyor ve maliyetin çoğu girdi
+    # tarafında; 1024 kaliteyi düşürmeden token'ı ~2,5x azaltıyor. 0 = kapalı.
+    ai_image_max_edge: int = 1024
 
 
 @lru_cache

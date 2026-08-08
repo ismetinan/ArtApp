@@ -244,3 +244,39 @@ Bağış, kişi-kişiye hediye istisnasına dayanıyor. Üç şart: tamamen iste
 %100 alıcıya, **uygulamada hiçbir şeyi açmıyor**. Bağışa rozet, öncelik, sıralama
 etkisi veya "daha hızlı cevap" eklemek doğrudan ihlaldir ve uygulama kaldırma
 sebebi olur.
+
+---
+
+## 11. AI maliyet ve kalite katmanı (Aşama 1)
+
+### Railway değişkenleri
+
+```
+OPENROUTER_MODEL=google/gemini-2.5-flash-lite     # ücretsiz katman
+OPENROUTER_PREMIUM_MODEL=google/gemini-2.5-flash  # Premium abone
+OPENROUTER_FALLBACK_MODEL=google/gemini-2.5-flash-lite
+AI_IMAGE_MAX_EDGE=1024                            # 0 = küçültme kapalı
+```
+
+`OPENROUTER_PREMIUM_MODEL` boşsa Premium da normal modeli kullanır (sessiz
+düşüş) — yanlış yapılandırma yüzünden ödeme yapan kullanıcının analizi hiç
+çalışmamasındansa farksız çalışsın diye böyle.
+
+### Neden ücretsiz katman da paralı modele geçmeli
+
+`:free` model havuzu paylaşımlı ve rate-limit yiyor (`ai/openrouter.py`
+retry/fallback mantığı bunun için var). Jeton satılmaya başlandığında ÜCRETSİZ
+kullanıcı bile jeton harcıyor; ona "model meşgul" hatası vermek kabul edilemez.
+
+### Maliyet (ölçülmüş)
+
+Görsel küçültme sonrası gerçek bir çizimde görsel token **4266 → 1118**.
+Analiz başına yaklaşık maliyet: flash-lite ~$0,0005, flash ~$0,0025.
+Aylık: ücretsiz kullanıcı (3 jeton/hafta) ~$0,006; Premium (25/hafta) ~$0,27.
+
+### Gemini anahtarı hakkında
+
+`.env`'deki `GEMINI_API_KEY` `AQ.` ile başlıyor — bu **ephemeral token**, API
+anahtarı değil; canlı API `401 ACCESS_TOKEN_TYPE_UNSUPPORTED` döndürüyor.
+Gerçek anahtar `AIza` ile başlar (Google AI Studio → Create API key).
+**Gerekmiyor**: canlı sağlayıcı OpenRouter, Gemini modelleri de oradan geliyor.
