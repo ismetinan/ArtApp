@@ -134,6 +134,25 @@ class MentorProfile(Base):
     status: Mapped[str] = mapped_column(String(16), default="pending")  # pending|approved|rejected
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    # Kalite kapısı: başvuruda örnek çizime yazılan kritik. Admin bunu okuyup karar
+    # verir (CLAUDE.md §8 "mentor onay/kalite kontrol süreci" bunun cevabı).
+    sample_critique: Mapped[str] = mapped_column(Text, default="")
+    rules_accepted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    # Ret sonrası tekrar başvuru bekleme süresinin dayanağı
+    rejected_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    # Bağış (2026-08-08): mentora ödeme UYGULAMA DIŞI ve %100 mentora gider;
+    # Artora para akışına girmez, komisyon almaz. Apple §3.2.1 bunu üç şartla
+    # kabul ediyor: tamamen isteğe bağlı, %100 alıcıya, uygulamada HİÇBİR ŞEY
+    # AÇMIYOR. Bu yüzden bağışın kim tarafından yapıldığı hiç tutulmuyor ve
+    # sıralama/öncelik/rozet gibi hiçbir yerde etkisi yok.
+    donation_url: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    donation_platform: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    # Dolandırıcılık koruması: link admin onayından geçmeden gösterilmez
+    donation_status: Mapped[str] = mapped_column(String(16), default="pending")
 
     user: Mapped[User] = relationship()
 

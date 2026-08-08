@@ -145,14 +145,23 @@ class _RedlineScreenState extends State<RedlineScreen> {
               ApiClient.instance.mentorMarketEnabled &&
               !_requestSent) ...[
             const SizedBox(height: 16),
+            // Yeni ekonomide havuza sormak ücretsiz; bedelin yerini kotalar aldı
             JetonPaymentInfo(
-                title: t.jetonPaymentTitle, body: t.mentorPoolPaymentInfo),
+              title: ApiClient.instance.jetonAiEconomy
+                  ? t.mentorFreeTitle
+                  : t.jetonPaymentTitle,
+              body: ApiClient.instance.jetonAiEconomy
+                  ? t.mentorFreeInfo(3)
+                  : t.mentorPoolPaymentInfo,
+            ),
             const SizedBox(height: 8),
             _requestBusy
                 ? const Center(child: CircularProgressIndicator())
                 : OutlinedButton.icon(
                     icon: const Icon(Icons.support_agent),
-                    label: Text(t.mentorAsk),
+                    label: Text(ApiClient.instance.jetonAiEconomy
+                        ? t.mentorAskFree
+                        : t.mentorAsk),
                     onPressed: _askMentor,
                   ),
           ],

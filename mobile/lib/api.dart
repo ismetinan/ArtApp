@@ -142,6 +142,11 @@ class MentorInfo {
   final double? rating;
   final bool isAvailable;
 
+  /// Bağış bağlantısı — yalnız mentor profili DETAYINDA ve yalnız admin
+  /// onayından geçmişse sunucudan gelir (listede hiç gelmez). Ödeme uygulama
+  /// dışında, %100 mentora; Artora kesinti almaz ve akışa girmez.
+  final String? donationUrl, donationPlatform;
+
   MentorInfo.fromJson(Map<String, dynamic> j)
       : id = j['id'],
         userId = j['user_id'],
@@ -151,7 +156,9 @@ class MentorInfo {
         portfolioSubmissionIds = List<int>.from(j['portfolio_submission_ids'] ?? []),
         rating = (j['rating'] as num?)?.toDouble(),
         answeredCount = j['answered_count'] ?? 0,
-        isAvailable = j['is_available'] ?? true;
+        isAvailable = j['is_available'] ?? true,
+        donationUrl = j['donation_url'],
+        donationPlatform = j['donation_platform'];
 }
 
 /// Faz 2: öğrencinin mentor isteği
@@ -195,12 +202,17 @@ class MentorQueueItem {
 
 /// Faz 4 (gelir paylaşımı): mentorun birikmiş kazancı (jeton-eşdeğeri).
 /// Para çevrimi + ödeme altyapısı Faz B — şimdilik salt biriktirme/gösterim.
+/// Mentorun defter özeti. Yeni ekonomide PARA değil İTİBAR: mentorluk ücretsiz,
+/// mentora ödeme yalnız uygulama dışı bağışla ve Artora akışa girmiyor.
+/// jetonEquivalent eski ekonomi kayıtları için korunuyor.
 class EarningsInfo {
   final int jetonEquivalent, answeredCount;
+  final double? rating;
 
   EarningsInfo.fromJson(Map<String, dynamic> j)
       : jetonEquivalent = j['jeton_equivalent'] ?? 0,
-        answeredCount = j['answered_count'] ?? 0;
+        answeredCount = j['answered_count'] ?? 0,
+        rating = (j['rating'] as num?)?.toDouble();
 }
 
 class ApiClient {
@@ -215,6 +227,18 @@ class ApiClient {
 
   /// Backend'deki billing_enabled flag'i (sunucu tarafı, platformdan bağımsız).
   bool _billingEnabledServer = false;
+
+  /// Backend'deki jeton_ai_economy_enabled flag'i. Açıkken jeton = AI kullanım
+  /// birimi ve mentorluk ücretsiz; kapalıyken jeton = mentor parası (eski model).
+  /// Metinler ve bedel uyarıları buna göre seçilir.
+  bool jetonAiEconomy = false;
+
+  /// Haftalık ücretsiz jeton tabanı ("her hafta 3'e tamamlanır" bilgisi).
+  int weeklyJetonFloor = 3;
+
+  /// AI aksiyon fiyatları (redline / serbest analiz) — sunucudan gelir.
+  int aiCostRedline = 1;
+  int aiCostFreeAnalysis = 1;
 
   /// Mağaza UI'ı buna göre görünür. iOS'ta satın alma henüz yok — App Store
   /// Connect'te ürün tanımlı değil — bu yüzden sunucu açık dese de kapalı
@@ -495,6 +519,13 @@ class ApiClient {
     final r = await http.get(Uri.parse('$apiBase/profile'), headers: authHeaders);
     final j = _decode(r);
     mentorMarketEnabled = j['mentor_market_enabled'] ?? mentorMarketEnabled;
+    jetonAiEconomy = j['jeton_ai_economy'] ?? jetonAiEconomy;
+    weeklyJetonFloor = j['weekly_jeton_floor'] ?? weeklyJetonFloor;
+    final costs = j['ai_costs'];
+    if (costs is Map) {
+      aiCostRedline = costs['redline'] ?? aiCostRedline;
+      aiCostFreeAnalysis = costs['free_analysis'] ?? aiCostFreeAnalysis;
+    }
     final billing = j['billing_enabled'];
     if (billing is bool && billing != _billingEnabledServer) {
       _billingEnabledServer = billing;
@@ -543,6 +574,14 @@ class ApiClient {
         .toList();
   }
 
+  /// Tek mentorun detayı. Liste yanıtından farkı: onaylı bağış bağlantısı
+  /// yalnız burada döner (listede bilinçli yok).
+  Future<MentorInfo> getMentor(int profileId) async {
+    final r =
+        await http.get(Uri.parse('$apiBase/mentors/$profileId'), headers: authHeaders);
+    return MentorInfo.fromJson(Map<String, dynamic>.from(_decode(r)));
+  }
+
   /// Ödevi mentora gönderir: mentorProfileId verilirse seçmeli (3 jeton),
   /// verilmezse havuzdan rastgele (1 jeton).
   Future<({String mentorName, int jetonBalance})> requestMentor(
@@ -579,7 +618,13 @@ class ApiClient {
   }
 
   Future<void> applyMentor(
-      String bio, List<String> styles, List<int> portfolioIds) async {
+    String bio,
+    List<String> styles,
+    List<int> portfolioIds, {
+    String sampleCritique = '',
+    bool rulesAccepted = false,
+    String? donationUrl,
+  }) async {
     final r = await http.post(
       Uri.parse('$apiBase/mentors/apply'),
       headers: _jsonHeaders,
@@ -587,7 +632,26 @@ class ApiClient {
         'bio': bio,
         'styles': styles,
         'portfolio_submission_ids': portfolioIds,
+        'sample_critique': sampleCritique,
+        'rules_accepted': rulesAccepted,
+        'donation_url': donationUrl,
       }),
+    );
+    _decode(r);
+  }
+
+  /// Mentorun kendi profili — bağış linki durumu dahil (onaysızken de görür).
+  Future<Map<String, dynamic>> getMentorMe() async {
+    final r = await http.get(Uri.parse('$apiBase/mentor/me'), headers: authHeaders);
+    return Map<String, dynamic>.from(_decode(r));
+  }
+
+  /// Admin: bağış bağlantısını onaylar/reddeder (başvuru onayından ayrı).
+  Future<void> decideDonationLink(int profileId, bool approve) async {
+    final decision = approve ? 'approve' : 'reject';
+    final r = await http.post(
+      Uri.parse('$apiBase/admin/mentor-profiles/$profileId/donation/$decision'),
+      headers: authHeaders,
     );
     _decode(r);
   }
@@ -608,10 +672,9 @@ class ApiClient {
         .toList();
   }
 
-  /// Faz 4: mentorun birikmiş kazancı (jeton-eşdeğeri). Yalnız onaylı mentor.
-  Future<EarningsInfo> getMentorEarnings() async {
-    final r =
-        await http.get(Uri.parse('$apiBase/mentor/earnings'), headers: authHeaders);
+  /// Mentorun defter özeti (cevaplanan istek + puan). Yalnız onaylı mentor.
+  Future<EarningsInfo> getMentorStats() async {
+    final r = await http.get(Uri.parse('$apiBase/mentor/stats'), headers: authHeaders);
     return EarningsInfo.fromJson(Map<String, dynamic>.from(_decode(r)));
   }
 

@@ -494,6 +494,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get requestStatusExpired => 'Süresi doldu — jetonun iade edildi';
 
   @override
+  String get requestStatusExpiredFree =>
+      'Süresi doldu — tekrar gönderebilirsin';
+
+  @override
   String get rateFeedback => 'Puanla';
 
   @override
@@ -551,6 +555,158 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get mentorEarningsSoon =>
       'Ödeme altyapısı yakında — kazançların şimdiden birikiyor.';
+
+  @override
+  String get jetonAiTitle => 'Jeton nedir?';
+
+  @override
+  String jetonAiBody(int count, int floor) {
+    return 'Her AI analizi $count jeton harcar. Haftada $floor ücretsiz jetonun var; biriktirmez, her hafta $floor\'e tamamlanır. Ders videoları, yetenek ağacı ve mentor desteği her zaman ücretsiz.';
+  }
+
+  @override
+  String jetonWeeklyResetHint(int count) {
+    return 'Ücretsiz jetonların her hafta $count\'e tamamlanır.';
+  }
+
+  @override
+  String jetonBalanceAi(int count) {
+    return '$count jeton';
+  }
+
+  @override
+  String jetonPurchasedBalance(int count) {
+    return '$count satın alınmış';
+  }
+
+  @override
+  String get mentorFreeTitle => 'Mentor desteği ücretsiz';
+
+  @override
+  String mentorFreeInfo(int count) {
+    return 'Mentora sormak jeton harcamaz. Adil kalması için: aynı mentora 24 saatte bir soru sorabilir, aynı anda en fazla $count açık isteğin olabilir.';
+  }
+
+  @override
+  String get mentorAskFree => 'Havuza sor — ücretsiz';
+
+  @override
+  String get mentorAskDirectFree => 'Bu mentora sor — ücretsiz';
+
+  @override
+  String get donationTitle => 'Bu mentora destek ol';
+
+  @override
+  String get donationBody =>
+      'Mentorluk ücretsiz. İstersen mentora doğrudan destek olabilirsin — gönderdiğin tutarın tamamı mentora gider, Artora hiçbir kesinti almaz.';
+
+  @override
+  String get donationOptionalNote =>
+      'Bağış tamamen isteğe bağlı. Uygulamada hiçbir şeyi açmaz, kimseye öncelik vermez ve geri bildirim almak için gerekli değildir.';
+
+  @override
+  String get donationButton => 'Destek ol';
+
+  @override
+  String get donationLeaveTitle => 'Uygulamadan çıkılıyor';
+
+  @override
+  String donationLeaveBody(String platform) {
+    return '$platform sayfasına yönlendirileceksin. Ödeme Artora üzerinden geçmez; Artora bu işlemin tarafı değildir ve sorumluluk kabul etmez.';
+  }
+
+  @override
+  String get donationLeaveConfirm => 'Devam et';
+
+  @override
+  String get mentorRulesTitle => 'Mentor kuralları';
+
+  @override
+  String get mentorRulesBody =>
+      '• Geri bildirim her zaman yapıcı olur, asla aşağılayıcı değil.\n• Öğrenci kendi stili içinde değerlendirilir.\n• Geri bildirim için ödeme talep edilemez; bağış yalnız isteğe bağlı bir teşekkürdür.\n• Öğrenci çizimleri platform dışında paylaşılamaz, başka amaçla kullanılamaz.\n• Metin alanlarına IBAN veya kart bilgisi yazılamaz.';
+
+  @override
+  String get mentorRulesAccept =>
+      'Mentor kurallarını okudum ve kabul ediyorum.';
+
+  @override
+  String get mentorSampleCritiqueLabel => 'Örnek kritik';
+
+  @override
+  String mentorSampleCritiqueHint(int count) {
+    return 'Kendi çizimlerinden birini seçip ona yapıcı, teknik bir kritik yaz (en az $count karakter). Başvurunu bu metne göre değerlendiriyoruz.';
+  }
+
+  @override
+  String get mentorDonationLinkLabel => 'Bağış bağlantın (opsiyonel)';
+
+  @override
+  String get mentorDonationLinkHint =>
+      'Kreosus, Shopier, Papara, Patreon, Ko-fi veya Buy Me a Coffee bağlantısı. Onaydan sonra profilinde görünür.';
+
+  @override
+  String get mentorDonationPending => 'Bağış bağlantın onay bekliyor.';
+
+  @override
+  String get mentorDonationApproved => 'Bağış bağlantın profilinde görünüyor.';
+
+  @override
+  String get mentorDonationRejected => 'Bağış bağlantın onaylanmadı.';
+
+  @override
+  String get mentorStatsTitle => 'İtibarın';
+
+  @override
+  String mentorStatsRating(String rating) {
+    return 'Puan: $rating';
+  }
+
+  @override
+  String get mentorStatsNoRating => 'Henüz puan yok';
+
+  @override
+  String get adminSampleCritique => 'Örnek kritik';
+
+  @override
+  String get adminDonationLink => 'Bağış bağlantısı';
+
+  @override
+  String get adminApproveLink => 'Bağlantıyı onayla';
+
+  @override
+  String get adminRejectLink => 'Bağlantıyı reddet';
+
+  @override
+  String get termsTitle => 'Kullanım Koşulları';
+
+  @override
+  String get privacyTitle => 'Gizlilik Politikası';
+
+  @override
+  String storeJetonExplainerAi(int count) {
+    return 'Jetonlar AI analizleri için kullanılır. Haftada $count ücretsiz jetonun zaten var ve her hafta $count\'e tamamlanır; buradan aldığın jetonların ise süresi dolmaz ve haftalık yenileme onlara dokunmaz. Dersler, yetenek ağacı ve mentor desteği ücretsiz — jeton yalnız AI analizini daha çok kullanmak için.';
+  }
+
+  @override
+  String get storeJetonSectionAi => 'Jeton paketleri';
+
+  @override
+  String storeJetonPackAi(int count) {
+    return '$count jeton';
+  }
+
+  @override
+  String get storePremiumPerkAi1 =>
+      'Daha güçlü AI modeli — daha ayrıntılı ve hızlı analiz';
+
+  @override
+  String storePremiumPerkAi2(int count) {
+    return 'Haftada $count jeton';
+  }
+
+  @override
+  String get storePremiumPerkAi3 =>
+      'Dersler ve mentor desteği zaten ücretsiz — Premium AI tarafını güçlendirir';
 
   @override
   String get storeTitle => 'Altın Jeton Mağazası';

@@ -112,6 +112,49 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Şu an müsait mentor yok — jetonun harcanmadı, biraz sonra tekrar dene.",
         "en": "No mentor is available right now — your jeton wasn't spent, try again soon.",
     },
+    # --- Jeton = AI ekonomisi (2026-08-08) ---
+    # AI harcaması için ayrı çift: eski jeton_insufficient mentor isteği metnidir
+    # ("bu istek"), canlı Android'de kullanılıyor ve dokunulmuyor.
+    "jeton_insufficient_ai": {
+        "tr": "Bu analiz için {cost} jeton gerekiyor. Haftalık ücretsiz jetonlarının yenilenmesini bekleyebilir ya da mağazadan jeton alabilirsin.",
+        "en": "This analysis costs {cost} jeton(s). You can wait for your weekly free jetons to renew, or buy jetons in the store.",
+    },
+    "jeton_insufficient_no_store": {
+        "tr": "Bu analiz için {cost} jeton gerekiyor. Ücretsiz jetonların her hafta yenileniyor.",
+        "en": "This analysis costs {cost} jeton(s). Your free jetons renew every week.",
+    },
+    "too_many_open_requests": {
+        "tr": "Aynı anda en fazla {count} açık mentor isteğin olabilir. Mevcut isteklerinden biri cevaplanınca yenisini gönderebilirsin.",
+        "en": "You can have at most {count} open mentor requests at a time. Once one of them is answered you can send another.",
+    },
+    "mentor_cooldown": {
+        "tr": "Bu mentora 24 saat içinde tekrar soru soramazsın. Başka bir mentor seçebilir ya da havuza sorabilirsin.",
+        "en": "You can't ask this mentor again within 24 hours. You can pick another mentor or ask the pool.",
+    },
+    "mentor_busy": {
+        "tr": "Bu mentorun kutusu şu an dolu. Daha sonra tekrar dene ya da havuza sor.",
+        "en": "This mentor's inbox is full right now. Try again later or ask the pool.",
+    },
+    "donation_url_invalid": {
+        "tr": "Bağış bağlantısı desteklenen platformlardan biri olmalı: Kreosus, Shopier, Papara, Patreon, Ko-fi, Buy Me a Coffee.",
+        "en": "The donation link must be from a supported platform: Kreosus, Shopier, Papara, Patreon, Ko-fi, Buy Me a Coffee.",
+    },
+    "no_payment_details_in_text": {
+        "tr": "Metin alanlarına IBAN veya kart bilgisi yazılamaz. Ödeme almak için bağış bağlantısı alanını kullan.",
+        "en": "IBAN or card details can't be written in text fields. Use the donation link field to receive support.",
+    },
+    "sample_critique_too_short": {
+        "tr": "Örnek kritik en az {count} karakter olmalı — mentorluk kalitesini böyle değerlendiriyoruz.",
+        "en": "Your sample critique must be at least {count} characters — this is how we assess mentoring quality.",
+    },
+    "mentor_rules_not_accepted": {
+        "tr": "Başvurmak için mentor kurallarını kabul etmen gerekiyor.",
+        "en": "You need to accept the mentor rules before applying.",
+    },
+    "reapply_too_soon": {
+        "tr": "Başvurun reddedildikten sonra {days} gün beklemen gerekiyor. Bu sürede portfolyonu güçlendirebilirsin.",
+        "en": "You need to wait {days} days after a rejected application. Use the time to strengthen your portfolio.",
+    },
     "mentor_request_exists": {
         "tr": "Bu ödev için zaten aktif bir mentor isteğin var.",
         "en": "You already have an active mentor request for this assignment.",
@@ -221,6 +264,15 @@ _CATALOG: dict[str, dict[str, str]] = {
     "push_request_refunded_body": {
         "tr": "Mentor isteğin zamanında cevaplanamadı — {count} jeton hesabına geri yattı.",
         "en": "Your mentor request wasn't answered in time — {count} jeton(s) were returned to you.",
+    },
+    # Ücretsiz mentorlukta iade edilecek jeton yok — bu yüzden ayrı çift
+    "push_request_expired_title": {
+        "tr": "Mentor isteğin zaman aşımına uğradı",
+        "en": "Your mentor request timed out",
+    },
+    "push_request_expired_body": {
+        "tr": "Mentor isteğin zamanında cevaplanamadı. Dilersen tekrar gönderebilirsin.",
+        "en": "Your mentor request wasn't answered in time. Feel free to send it again.",
     },
     "push_application_approved_title": {
         "tr": "Mentor başvurun onaylandı 🎉",

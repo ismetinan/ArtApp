@@ -66,11 +66,37 @@ atlama + öneriyle karşılandı, derinleştirme Faz 4'le birlikte değerlendiri
 Faz 0 doğrulaması TAMAMLANDI (2026-07-18): 8 gerçek çizimle (manga/realist/karikatür)
 OpenRouter üzerinde koşuldu, stil tarafsızlığı GEÇTİ — bkz. `prototype/FAZ0_RAPOR.md`.**
 
-> Ücretlendirme kararı (2026-07-19): **hibrit model** — dersler her katmanda ücretsiz
-> (içerik YouTube; ders paywall'u bilinçli reddedildi). Gelir: jeton paketleri
-> (`jeton_5/15/40`, tüketilebilir IAP) + `premium_monthly` aboneliği (ayda 10 hediye
-> jeton + günlük AI kotası 10→50). Doğrulama sunucuda (`services/billing.py`,
-> Play Developer API); mentor gelir paylaşımı hâlâ açık konu.
+> **Ekonomi kararı (2026-08-08) — jeton = AI, mentorluk ücretsiz + bağış.**
+> Eski model (jeton = mentor parası, altın/ücretsiz ayrımı, mentor gelir paylaşımı)
+> **terk edildi**: mentora para ödemek ödeme aracılığı lisansı, mentor sözleşmesi,
+> stopaj, IBAN/KYC toplama ve chargeback telafisi demekti. Yeni model:
+>
+> - **Jeton = AI kullanım birimi.** Haftada `WEEKLY_JETON_FLOOR` (3) ücretsiz;
+>   **birikmez**, her hafta tabana tamamlanır. Satın alınan jetonun süresi dolmaz.
+>   Fiyatlar: redline 1, serbest analiz 1, seviye belirleme 0, ödev üretimi 0.
+> - **Premium = hız + kalite, hacim değil**: güçlü/paralı AI modeli
+>   (`OPENROUTER_PREMIUM_MODEL`) + yüksek haftalık taban (25). Aylık jeton yığını
+>   **vermez** — "birikmez" kuralını delerdi.
+> - **Mentorluk tamamen ücretsiz.** Spam'i para değil kota tutuyor: aynı anda
+>   3 açık istek, aynı mentora 24 saatte bir, mentor başına 5 açık istek tavanı.
+> - **Mentora para = uygulama dışı, %100 mentora giden isteğe bağlı bağış.**
+>   Artora komisyon almaz, para akışına girmez. Apple §3.2.1'in üç şartı
+>   pazarlıksız: tamamen isteğe bağlı, %100 alıcıya, **uygulamada hiçbir şeyi
+>   açmıyor** (rozet/öncelik/sıralama etkisi YOK). Link beyaz listeli + admin
+>   onaylı (`services/donations.py`); serbest metinde IBAN yasak.
+> - **Jeton hukuken "elektronik para" olmamalı**: nakde çevrilemez, kullanıcılar
+>   arası devredilemez, yalnız uygulama içinde geçerli. Bu üç kural bozulmamalı
+>   ("arkadaşına jeton hediye et" gibi bir özellik ikincisini kırar).
+>
+> Tümü `JETON_AI_ECONOMY_ENABLED` bayrağı arkasında; kapalıyken davranış eski
+> modelle birebir aynı. **iOS'ta AÇMA** — `billingEnabled` iOS'ta zorla false
+> (mağaza yok), açılırsa kullanıcı haftalık taban bitince kilitlenir. iOS IAP
+> tamamlanana kadar yalnız Android. Detay: DEPLOY.md §10.
+>
+> Ücretlendirme (2026-07-19'dan devam): dersler her katmanda ücretsiz (içerik
+> YouTube; ders paywall'u bilinçli reddedildi). Gelir: jeton paketleri
+> (`jeton_5/15/40`, tüketilebilir IAP) + `premium_monthly` aboneliği. Doğrulama
+> sunucuda (`services/billing.py`, Play Developer API).
 
 > AI sağlayıcı kararı (güncel 2026-07-15): Anthropic anahtarı henüz yok. Tüm AI
 > çağrıları `backend/app/ai/` içindeki sağlayıcı-bağımsız arayüz üzerinden gider
@@ -200,12 +226,21 @@ Bu akışın çıktısı doğrudan Bölüm 2'deki "Seviye Belirleme" adımını 
 
 ## 8. AÇIK SORULAR (Kullanıcının netleştirmesi gereken)
 
-- Jeton fiyatlandırması ve mentor gelir paylaşım oranı henüz belirlenmedi.
+- ~~Mentor gelir paylaşım oranı~~ → ÇÖZÜLDÜ (2026-08-08): **gelir paylaşımı yok.**
+  Mentorluk ücretsiz; mentora ödeme yalnız uygulama dışı, %100 mentora giden
+  isteğe bağlı bağışla. Artora komisyon almıyor ve para akışına girmiyor.
+- Jeton **fiyatlandırması** (paket başına TL) hâlâ belirlenmedi. Belirlemeden önce
+  `OPENROUTER_PREMIUM_MODEL` paralı bir modele geçmeli ve gerçek token maliyeti
+  ölçülmeli; fiyat maliyet + mağaza kesintisi (%15-30) üzerine kurulmalı.
 - ~~İçerik müfredatı hazır değil~~ → ÇÖZÜLDÜ (2026-07-15): kullanıcı kaynakları
   `art_sources.md`'de derledi; 7 eksende 16 düğümlük ağaç `backend/app/data/skill_tree.py`
   ile seed'leniyor. Eksik: `temel-oranlar` kaynağı + bozuk bir playlist linki (bkz.
   art_sources.md "Açık noktalar").
-- Mentor onay/kalite kontrol süreci (kim mentor olabilir, nasıl doğrulanır) tanımlanmadı.
+- ~~Mentor onay/kalite kontrol süreci~~ → ÇÖZÜLDÜ (2026-08-08): başvuru uygulama
+  içinde kalıyor (portfolyo kullanıcının kendi galerisinden — en güçlü sinyal) ve
+  **örnek kritik testi** eklendi: aday kendi çizimine en az 200 karakterlik yapıcı
+  bir kritik yazıyor, admin kararını buna bakarak veriyor. Mentor kurallarının
+  kabulü zorunlu; ret sonrası 14 gün tekrar başvuru beklemesi var.
 - Ability Chart eksenleri (2026-07-15): anatomi, perspektif, ışık-gölge, oran,
   çizgi kalitesi, kompozisyon, renk — 7 eksen. Skor hesaplama mantığının ince ayarı açık.
 - "Gelişim Macerası" galerisindeki gizlilik ayarının varsayılan değeri (herkese açık mı, özel mi) belirlenmeli.

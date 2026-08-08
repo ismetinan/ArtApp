@@ -8,8 +8,9 @@ from ..api.deps import get_current_user
 from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityScore, Submission, User
+from ..core.config import get_settings
 from ..services.gamification import XP_PER_LEVEL
-from ..services.quota import consume_ai_quota
+from ..services.quota import spend_ai
 from ..services.storage import UploadError, read_upload, save_drawing
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,9 @@ async def assess_level(
     """Onboarding 2-4. ekranlar: 3 çizim yükle → başlangıç seviyesi belirle."""
     if len(files) != 3:
         raise HTTPException(status_code=422, detail=msg("need_three_drawings", user.language))
-    consume_ai_quota(db, user)
+    # Seviye belirleme yeni ekonomide ücretsiz (ai_cost_assess_level=0): bu akış
+    # onboarding'in ta kendisi, ilk deneyimi bedelle karşılamak dönüşümü öldürür.
+    spend_ai(db, user, get_settings().ai_cost_assess_level, "ai_assess_level")
 
     images: list[bytes] = []
     for f in files:

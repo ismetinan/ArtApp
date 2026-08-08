@@ -34,12 +34,12 @@ class _MentorPanelScreenState extends State<MentorPanelScreen> {
       }).catchError((_) {});
     }
     _future = ApiClient.instance.getMentorQueue();
-    _earnings = ApiClient.instance.getMentorEarnings();
+    _earnings = ApiClient.instance.getMentorStats();
   }
 
   void _reload() => setState(() {
         _future = ApiClient.instance.getMentorQueue();
-        _earnings = ApiClient.instance.getMentorEarnings(); // cevap sonrası tazele
+        _earnings = ApiClient.instance.getMentorStats(); // cevap sonrası tazele
       });
 
   @override
@@ -175,28 +175,46 @@ class _EarningsCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(t.mentorEarningsTitle,
+                      // Yeni ekonomide mentorluk ücretsiz → panelde PARA değil
+                      // İTİBAR gösterilir (cevaplanan istek + puan). Eski
+                      // ekonomide jeton-eşdeğeri kazanç metni korunur.
+                      Text(
+                          ApiClient.instance.jetonAiEconomy
+                              ? t.mentorStatsTitle
+                              : t.mentorEarningsTitle,
                           style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: scheme.onPrimaryContainer)),
                       const SizedBox(height: 2),
                       Text(
-                        t.mentorEarningsUnit(e.jetonEquivalent),
+                        ApiClient.instance.jetonAiEconomy
+                            ? t.mentorEarningsAnswered(e.answeredCount)
+                            : t.mentorEarningsUnit(e.jetonEquivalent),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: scheme.onPrimaryContainer,
                             fontWeight: FontWeight.bold),
                       ),
-                      Text(
-                        t.mentorEarningsAnswered(e.answeredCount),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: scheme.onPrimaryContainer),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        t.mentorEarningsSoon,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: scheme.onPrimaryContainer,
-                            fontStyle: FontStyle.italic),
-                      ),
+                      if (ApiClient.instance.jetonAiEconomy)
+                        Text(
+                          e.rating == null
+                              ? t.mentorStatsNoRating
+                              : t.mentorStatsRating(e.rating!.toStringAsFixed(1)),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: scheme.onPrimaryContainer),
+                        )
+                      else ...[
+                        Text(
+                          t.mentorEarningsAnswered(e.answeredCount),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: scheme.onPrimaryContainer),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          t.mentorEarningsSoon,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: scheme.onPrimaryContainer,
+                              fontStyle: FontStyle.italic),
+                        ),
+                      ],
                     ],
                   ),
                 ),

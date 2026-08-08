@@ -20,7 +20,7 @@ from ..models.tables import (
 )
 from ..services.billing import is_premium
 from ..services.gamification import award_xp, bump_ability
-from ..services.quota import consume_ai_quota
+from ..services.quota import spend_ai
 from ..services.storage import UploadError, read_upload, save_drawing
 
 logger = logging.getLogger(__name__)
@@ -149,7 +149,8 @@ async def generate_assignment(
     if row is not None:
         return {"assignment": row.text}
 
-    consume_ai_quota(db, user)
+    # Ücretsiz (ai_cost_assignment=0): metin üretimi ucuz ve zaten önbellekli.
+    spend_ai(db, user, get_settings().ai_cost_assignment, "ai_assignment")
     try:
         brief = await get_ai_provider().assignment_brief(
             _node_title(node, user.language),
@@ -185,7 +186,8 @@ async def submit_assignment(
     by_id = {n.id: n for n in nodes}
     if _node_status(node, completed, scores, by_id)[0] == "locked":
         raise HTTPException(status_code=403, detail=msg("node_locked", user.language))
-    consume_ai_quota(db, user)
+    # Çekirdek döngü: redline analizi jetonla (yeni ekonomide 1 jeton).
+    spend_ai(db, user, get_settings().ai_cost_redline, "ai_redline")
 
     try:
         content = await read_upload(file)
@@ -241,9 +243,13 @@ async def free_analysis(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Ders dışı bitmiş bir çizimin analizi. Ücretsiz katman: haftada 1;
-    Premium: yalnız günlük AI kotası sınırlar (müşteri isteği, 2026-07-19)."""
-    if not is_premium(user):
+    """Ders dışı bitmiş bir çizimin analizi.
+
+    ESKİ ekonomi: ücretsiz katman haftada 1, Premium'u yalnız günlük kota sınırlar.
+    YENİ ekonomi: haftalık pencere KALDIRILIR — kıtlığı jeton tabanı zaten
+    yaratıyor, iki ayrı kısıtı üst üste bindirmek kullanıcıya iki kez ceza olur."""
+    settings = get_settings()
+    if not settings.jeton_ai_economy_enabled and not is_premium(user):
         cutoff = datetime.now(timezone.utc) - FREE_ANALYSIS_WINDOW
         recent = db.execute(
             select(Submission.id).where(
@@ -256,7 +262,7 @@ async def free_analysis(
             raise HTTPException(
                 status_code=429, detail=msg("free_analysis_limit", user.language)
             )
-    consume_ai_quota(db, user)
+    spend_ai(db, user, settings.ai_cost_free_analysis, "ai_free_analysis")
 
     try:
         content = await read_upload(file)

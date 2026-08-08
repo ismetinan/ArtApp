@@ -110,7 +110,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () => _showLevelRoadmap(context, p),
                   ),
                   Wrap(spacing: 8, children: [
-                    if (ApiClient.instance.mentorMarketEnabled) ...[
+                    if (ApiClient.instance.jetonAiEconomy) ...[
+                      // Yeni ekonomi: jeton = AI kullanım birimi. Tek toplam
+                      // bakiye gösterilir; ücretsiz/satın alınmış ayrımı
+                      // kullanıcı için değil iç muhasebe için var.
+                      ActionChip(
+                        label: Text(
+                            t.jetonBalanceAi((p['jeton_balance'] ?? 0) as int)),
+                        avatar: const Icon(Icons.toll, size: 18),
+                        onPressed: () => _showJetonInfo(context, p),
+                      ),
+                      if (((p['gold_jeton_balance'] ?? 0) as int) > 0)
+                        Chip(
+                          label: Text(t.jetonPurchasedBalance(
+                              (p['gold_jeton_balance'] ?? 0) as int)),
+                          avatar: const Icon(Icons.paid,
+                              size: 18, color: goldJetonColor),
+                        ),
+                    ] else if (ApiClient.instance.mentorMarketEnabled) ...[
                       // Ücretsiz jeton (toplam - altın): havuz mentoru için
                       ActionChip(
                         label: Text(t.jetonBalance(
@@ -338,6 +355,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 subtitle: Text(t.sendFeedbackBody),
                 onTap: () => _sendFeedback(context),
               ),
+              // Yasal metinler sistem tarayıcısında açılır (webview yok).
+              // App Store, EULA'nın uygulama içinden erişilebilir olmasını ister.
+              ListTile(
+                leading: const Icon(Icons.gavel_outlined),
+                title: Text(t.termsTitle),
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () => _openLegal(context, '/terms'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.privacy_tip_outlined),
+                title: Text(t.privacyTitle),
+                trailing: const Icon(Icons.open_in_new, size: 18),
+                onTap: () => _openLegal(context, '/privacy'),
+              ),
               ListTile(
                 leading: const Icon(Icons.logout),
                 title: Text(t.signOut),
@@ -358,6 +389,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
     );
+  }
+
+  /// Yasal sayfayı sistem tarayıcısında açar (backend'den servis ediliyor).
+  Future<void> _openLegal(BuildContext context, String path) async {
+    final t = AppLocalizations.of(context);
+    try {
+      await launchUrl(Uri.parse('$apiBase$path'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.errorUnexpected)));
+      }
+    }
   }
 
   Future<void> _sendFeedback(BuildContext context) async {
@@ -419,6 +464,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  /// Jeton bilgilendirmesi: ne olduğu + haftalık tabana tamamlanma kuralı.
+  /// Mağaza açıksa oradan satın almaya da götürür (iOS'ta mağaza yok, o zaman
+  /// yalnız bilgilendirme kalır — çıkmaz sokak butonu göstermiyoruz).
+  Future<void> _showJetonInfo(BuildContext context, Map<String, dynamic> p) async {
+    final t = AppLocalizations.of(context);
+    final api = ApiClient.instance;
+    final buy = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.jetonAiTitle, style: Theme.of(ctx).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text(t.jetonAiBody(api.aiCostRedline, api.weeklyJetonFloor)),
+              if (api.billingEnabled) ...[
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.storefront),
+                    label: Text(t.storeBuyJetons),
+                    onPressed: () => Navigator.pop(ctx, true),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+    if (buy == true && context.mounted) await _openStore(context, p);
   }
 
   Future<void> _openStore(BuildContext context, Map<String, dynamic> p) async {
@@ -594,17 +676,49 @@ class MentorApplyScreen extends StatefulWidget {
   State<MentorApplyScreen> createState() => _MentorApplyScreenState();
 }
 
+/// Backend'deki MIN_SAMPLE_CRITIQUE ile aynı.
+const _minSampleCritique = 200;
+
 class _MentorApplyScreenState extends State<MentorApplyScreen> {
   final _bio = TextEditingController();
+  final _critique = TextEditingController();
+  final _donation = TextEditingController();
   final Set<String> _styles = {};
   final Set<int> _portfolio = {};
   bool _busy = false;
+  bool _rulesAccepted = false;
+
+  @override
+  void dispose() {
+    _bio.dispose();
+    _critique.dispose();
+    _donation.dispose();
+    super.dispose();
+  }
+
+  /// Yeni ekonomide gönderilebilir mi? Sunucu da aynı kuralları uyguluyor —
+  /// buradaki kontrol yalnız kullanıcıyı boşa gidip gelmekten kurtarıyor.
+  bool get _canSubmit {
+    if (_busy) return false;
+    if (!ApiClient.instance.jetonAiEconomy) return true;
+    return _rulesAccepted &&
+        _bio.text.trim().isNotEmpty &&
+        _styles.isNotEmpty &&
+        _critique.text.trim().length >= _minSampleCritique;
+  }
 
   Future<void> _submit() async {
     setState(() => _busy = true);
     try {
-      await ApiClient.instance
-          .applyMentor(_bio.text.trim(), _styles.toList(), _portfolio.toList());
+      final donation = _donation.text.trim();
+      await ApiClient.instance.applyMentor(
+        _bio.text.trim(),
+        _styles.toList(),
+        _portfolio.toList(),
+        sampleCritique: _critique.text.trim(),
+        rulesAccepted: _rulesAccepted,
+        donationUrl: donation.isEmpty ? null : donation,
+      );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
@@ -628,6 +742,7 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
           TextField(
             controller: _bio,
             maxLines: 3,
+            onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: t.mentorBioLabel,
               border: const OutlineInputBorder(),
@@ -649,6 +764,66 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
                 ),
             ],
           ),
+          if (ApiClient.instance.jetonAiEconomy) ...[
+            const SizedBox(height: 20),
+            // Kalite kapısı: admin kararı asıl bu metne bakılarak veriliyor
+            Text(t.mentorSampleCritiqueLabel,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(t.mentorSampleCritiqueHint(_minSampleCritique),
+                style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _critique,
+              maxLines: 6,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                counterText:
+                    '${_critique.text.trim().length} / $_minSampleCritique',
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(t.mentorDonationLinkLabel,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text(t.mentorDonationLinkHint,
+                style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _donation,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'https://',
+              ),
+            ),
+            const SizedBox(height: 20),
+            Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t.mentorRulesTitle,
+                        style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 8),
+                    Text(t.mentorRulesBody,
+                        style: Theme.of(context).textTheme.bodySmall),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      value: _rulesAccepted,
+                      title: Text(t.mentorRulesAccept),
+                      onChanged: (v) =>
+                          setState(() => _rulesAccepted = v ?? false),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           if (widget.gallery.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(t.mentorPortfolioPick,
@@ -697,7 +872,8 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
           _busy
               ? const Center(child: CircularProgressIndicator())
               : FilledButton(
-                  onPressed: _submit, child: Text(t.mentorApplySubmit)),
+                  onPressed: _canSubmit ? _submit : null,
+                  child: Text(t.mentorApplySubmit)),
         ],
       ),
     );
@@ -781,7 +957,10 @@ class _MyRequestsSectionState extends State<_MyRequestsSection> {
                         Text(
                           switch (r.status) {
                             'answered' => t.requestStatusAnswered,
-                            'expired' => t.requestStatusExpired,
+                            // Ücretsiz mentorlukta iade edilecek jeton yok
+                            'expired' => ApiClient.instance.jetonAiEconomy
+                                ? t.requestStatusExpiredFree
+                                : t.requestStatusExpired,
                             _ => t.requestStatusAssigned,
                           },
                           style: Theme.of(context).textTheme.bodySmall,

@@ -127,15 +127,21 @@ def _subscription_expiry(data: dict) -> datetime:
 def _apply_subscription(
     db: Session, user: User, purchase: Purchase, data: dict
 ) -> None:
-    """premium_until'i uzatır; yeni fatura dönemiyse aylık jetonu bir kez verir."""
+    """premium_until'i uzatır; yeni fatura dönemiyse aylık jetonu bir kez verir.
+
+    Yeni ekonomide (jeton_ai_economy_enabled) aylık jeton YIĞINI verilmez —
+    Premium'un karşılığı yüksek haftalık taban (weekly_jeton_floor_premium) +
+    güçlü AI modeli. Yığın verilseydi Premium jetonu stoklardı ve "birikmez"
+    kuralı delinirdi. Dönem takibi (granted_expiry) yine ilerler."""
+    settings = get_settings()
     expiry = _subscription_expiry(data)
     granted = purchase.granted_expiry
     if granted is not None and granted.tzinfo is None:
         granted = granted.replace(tzinfo=timezone.utc)
     if granted is None or expiry > granted:
-        jetons.grant(
-            db, user, get_settings().premium_monthly_jetons, "premium_monthly", paid=True
-        )
+        monthly = 0 if settings.jeton_ai_economy_enabled else settings.premium_monthly_jetons
+        if monthly > 0:  # grant() 0/negatif miktarda ValueError atar
+            jetons.grant(db, user, monthly, "premium_monthly", paid=True)
         purchase.granted_expiry = expiry
     user.premium_until = expiry
 

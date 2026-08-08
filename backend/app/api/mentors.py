@@ -24,7 +24,7 @@ from ..models.tables import (
     Submission,
     User,
 )
-from ..services import earnings, jetons, moderation
+from ..services import donations, earnings, jetons, moderation
 from ..services.push import send_push
 
 REQUEST_TIMEOUT = timedelta(hours=48)
@@ -54,12 +54,23 @@ def _expire_stale(db: Session, requests: list[MentorshipRequest]) -> None:
         if r.status == "assigned" and assigned is not None and assigned < cutoff:
             r.status = "expired"
             student = db.get(User, r.student_id)
-            if student is not None:
+            if student is None:
+                continue
+            # Yeni ekonomide mentorluk ücretsiz (jeton_cost=0): iade edilecek bir
+            # şey yok ve "1 jeton iade edildi" bildirimi yanlış olur.
+            if r.jeton_cost > 0:
                 jetons.refund(db, student, r)
                 send_push(
                     student,
                     msg("push_request_refunded_title", student.language),
                     msg("push_request_refunded_body", student.language, count=r.jeton_cost),
+                    data={"route": "my_requests"},
+                )
+            else:
+                send_push(
+                    student,
+                    msg("push_request_expired_title", student.language),
+                    msg("push_request_expired_body", student.language),
                     data={"route": "my_requests"},
                 )
 
@@ -83,9 +94,14 @@ def _mentor_stats(db: Session, user_ids: list[int]) -> dict[int, tuple[float | N
     return {mid: (float(avg) if avg is not None else None, count) for mid, avg, count in rows}
 
 
-def _profile_json(p: MentorProfile, display_name: str, stats: tuple[float | None, int]) -> dict:
+def _profile_json(
+    p: MentorProfile,
+    display_name: str,
+    stats: tuple[float | None, int],
+    include_donation: bool = False,
+) -> dict:
     avg, answered = stats
-    return {
+    out = {
         "id": p.id,
         "user_id": p.user_id,
         "display_name": display_name,
@@ -96,6 +112,14 @@ def _profile_json(p: MentorProfile, display_name: str, stats: tuple[float | None
         "rating": round(avg, 1) if avg is not None else None,
         "answered_count": answered,
     }
+    # Bağış linki YALNIZ mentor profili detayında ve YALNIZ admin onayından
+    # geçmişse döner. Listede bilinçli yok: liste kartında para vurgusu
+    # mentorluğu "ücretli hizmet" gibi gösterir ve Apple §3.2.1'in "hiçbir şeyi
+    # açmıyor / tamamen isteğe bağlı" çerçevesini zayıflatır.
+    if include_donation and p.donation_url and p.donation_status == "approved":
+        out["donation_url"] = p.donation_url
+        out["donation_platform"] = p.donation_platform
+    return out
 
 
 # ---------- Öğrenci tarafı ----------
@@ -145,11 +169,77 @@ def get_mentor(
         raise HTTPException(status_code=404, detail=msg("mentor_not_found", user.language))
     owner = db.get(User, profile.user_id)
     stats = _mentor_stats(db, [profile.user_id]).get(profile.user_id, (None, 0))
-    return _profile_json(profile, owner.display_name if owner else "", stats)
+    return _profile_json(
+        profile, owner.display_name if owner else "", stats, include_donation=True
+    )
 
 
-POOL_COST = 1  # havuzdan rastgele mentor
-DIRECT_COST = 3  # seçmeli mentorluk (Faz 3, CLAUDE.md §2.5)
+POOL_COST = 1  # havuzdan rastgele mentor (ESKİ ekonomi)
+DIRECT_COST = 3  # seçmeli mentorluk (ESKİ ekonomi, Faz 3, CLAUDE.md §2.5)
+
+# YENİ ekonomi: mentorluk ücretsiz. Spam'i para değil kota tutuyor (2026-08-08).
+MAX_OPEN_REQUESTS = 3  # bir öğrencinin aynı anda açık istek sayısı
+MENTOR_COOLDOWN = timedelta(hours=24)  # aynı öğrenci → aynı mentor
+MENTOR_INBOX_CAP = 5  # bir mentorun aynı anda taşıyabileceği açık istek
+
+
+def _open_request_count(db: Session, student_id: int) -> int:
+    return int(
+        db.execute(
+            select(func.count(MentorshipRequest.id)).where(
+                MentorshipRequest.student_id == student_id,
+                MentorshipRequest.status == "assigned",
+            )
+        ).scalar_one()
+    )
+
+
+def _expire_stale_for_student(db: Session, student_id: int) -> None:
+    """Öğrencinin açık isteklerinde tembel zaman aşımını çalıştırır.
+
+    Kota kontrolünden ÖNCE şart: zaman aşımı yalnız erişim anında işliyor ve
+    sadece 3 uçtan tetikleniyordu. Bu olmadan 48 saati geçmiş ama hâlâ 'assigned'
+    görünen MAX_OPEN_REQUESTS kadar istek öğrenciyi kalıcı olarak kilitler.
+    Yan fayda: iki taraf da ekranı açmazsa jetonun hiç iade edilmemesi hatası da
+    burada kapanıyor."""
+    stale = db.execute(
+        select(MentorshipRequest).where(
+            MentorshipRequest.student_id == student_id,
+            MentorshipRequest.status == "assigned",
+        )
+    ).scalars().all()
+    _expire_stale(db, stale)
+
+
+def _cooldown_mentor_ids(db: Session, student_id: int) -> set[int]:
+    """Son MENTOR_COOLDOWN içinde bu öğrenciden istek almış mentor user_id'leri."""
+    cutoff = datetime.now(timezone.utc) - MENTOR_COOLDOWN
+    rows = db.execute(
+        select(MentorshipRequest.mentor_id).where(
+            MentorshipRequest.student_id == student_id,
+            MentorshipRequest.mentor_id.is_not(None),
+            MentorshipRequest.created_at >= cutoff,
+        )
+    ).scalars().all()
+    return {m for m in rows if m is not None}
+
+
+def _full_inbox_mentor_ids(db: Session) -> set[int]:
+    """Açık istek sayısı MENTOR_INBOX_CAP'e ulaşmış mentor user_id'leri.
+
+    Mentorluk ücretsizleşince tek mentorun sınırsız istekle dolması gerçek bir
+    risk; ayrıca 'seçmeli de bedavaysa herkes popüler mentora gider' sorununun
+    cevabı da bu — dolan mentor havuz adaylığından düşer, öğrenci havuza yönelir."""
+    rows = db.execute(
+        select(MentorshipRequest.mentor_id, func.count(MentorshipRequest.id))
+        .where(
+            MentorshipRequest.status == "assigned",
+            MentorshipRequest.mentor_id.is_not(None),
+        )
+        .group_by(MentorshipRequest.mentor_id)
+        .having(func.count(MentorshipRequest.id) >= MENTOR_INBOX_CAP)
+    ).all()
+    return {mentor_id for mentor_id, _ in rows if mentor_id is not None}
 
 
 class MentorRequestBody(BaseModel):
@@ -168,8 +258,13 @@ async def create_mentor_request(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Ödevi mentora gönderir: havuzdan rastgele (1 jeton) ya da mentor_id ile
-    doğrudan seçilen mentora (3 jeton)."""
+    """Ödevi mentora gönderir: havuzdan rastgele ya da mentor_id ile seçmeli.
+
+    ESKİ ekonomi: havuz 1 jeton, seçmeli 3 altın jeton.
+    YENİ ekonomi: ikisi de ÜCRETSİZ; kötüye kullanımı üç kota tutuyor —
+    aynı anda MAX_OPEN_REQUESTS açık istek, aynı mentora MENTOR_COOLDOWN'da bir,
+    mentor başına MENTOR_INBOX_CAP açık istek."""
+    free_mentorship = get_settings().jeton_ai_economy_enabled
     submission = db.get(Submission, submission_id)
     if submission is None or submission.user_id != user.id:
         raise HTTPException(
@@ -177,6 +272,23 @@ async def create_mentor_request(
         )
     # Önleyici filtre: bir insana (mentora) gidecek görsel önce güvenlik kontrolünden geçer
     await moderation.ensure_safe(db, user, submission)
+
+    cooldown_ids: set[int] = set()
+    full_inbox_ids: set[int] = set()
+    if free_mentorship:
+        # Sıra önemli: önce süresi geçmişleri düş, sonra say (bkz. yardımcı docstring)
+        _expire_stale_for_student(db, user.id)
+        db.commit()
+        if _open_request_count(db, user.id) >= MAX_OPEN_REQUESTS:
+            raise HTTPException(
+                status_code=409,
+                detail=msg(
+                    "too_many_open_requests", user.language, count=MAX_OPEN_REQUESTS
+                ),
+            )
+        cooldown_ids = _cooldown_mentor_ids(db, user.id)
+        full_inbox_ids = _full_inbox_mentor_ids(db)
+
     active = db.execute(
         select(MentorshipRequest).where(
             MentorshipRequest.submission_id == submission_id,
@@ -200,8 +312,17 @@ async def create_mentor_request(
             raise HTTPException(
                 status_code=409, detail=msg("mentor_unavailable", user.language)
             )
-        cost = DIRECT_COST
-        gold_only = True  # seçmeli mentor yalnız altın (gelir-destekli) jetonla
+        # Seçmelide mentor belli → kotalar doğrudan kontrol edilebilir
+        if mentor_profile.user_id in cooldown_ids:
+            raise HTTPException(
+                status_code=409, detail=msg("mentor_cooldown", user.language)
+            )
+        if mentor_profile.user_id in full_inbox_ids:
+            raise HTTPException(
+                status_code=409, detail=msg("mentor_busy", user.language)
+            )
+        cost = 0 if free_mentorship else DIRECT_COST
+        gold_only = not free_mentorship  # eski model: seçmeli yalnız altınla
     else:
         candidates = db.execute(
             select(MentorProfile).where(
@@ -210,12 +331,19 @@ async def create_mentor_request(
                 MentorProfile.user_id != user.id,  # kendi ödevine kendisi atanmasın
             )
         ).scalars().all()
+        # Havuzda mentor SONRADAN rastgele atanıyor, bu yüzden kotalar önceden
+        # kontrol edilemez — aday listesinden ÇIKARMA olarak uygulanır.
+        candidates = [
+            c
+            for c in candidates
+            if c.user_id not in cooldown_ids and c.user_id not in full_inbox_ids
+        ]
         if not candidates:
             raise HTTPException(
                 status_code=409, detail=msg("no_mentor_available", user.language)
             )
         mentor_profile = random.choice(candidates)
-        cost = POOL_COST
+        cost = 0 if free_mentorship else POOL_COST
         gold_only = False  # havuz: önce-ücretsiz (ücretsiz jetonla da sorulabilir)
 
     now = datetime.now(timezone.utc)
@@ -229,7 +357,8 @@ async def create_mentor_request(
     )
     db.add(request)
     db.flush()  # request.id, transaction kaydına girsin
-    jetons.spend(db, user, cost, request, gold_only=gold_only)  # yetersizse 402, commit yok
+    if cost > 0:  # yeni ekonomide mentorluk ücretsiz → harcama yok
+        jetons.spend(db, user, cost, request, gold_only=gold_only)  # yetersizse 402
     db.commit()
 
     mentor_user = db.get(User, mentor_profile.user_id)
@@ -305,10 +434,19 @@ def rate_request(
 # ---------- Mentor tarafı ----------
 
 
+MIN_SAMPLE_CRITIQUE = 200  # karakter — kalite kapısı
+MENTOR_REAPPLY_COOLDOWN = timedelta(days=14)
+
+
 class ApplyBody(BaseModel):
     bio: str = Field("", max_length=2000)
     styles: list[str] = Field(default_factory=list, max_length=10)
     portfolio_submission_ids: list[int] = Field(default_factory=list, max_length=12)
+    # Kalite kapısı + bağış linki (yeni ekonomi). Eski istemciler bu alanları
+    # göndermez; o yüzden varsayılanlı ve yalnız bayrak açıkken zorunlu.
+    sample_critique: str = Field("", max_length=5000)
+    rules_accepted: bool = False
+    donation_url: str | None = Field(None, max_length=300)
 
 
 @router.post("/mentors/apply", dependencies=[Depends(require_mentor_market)])
@@ -319,6 +457,34 @@ async def apply_mentor(
 ):
     """Mentor başvurusu. Reddedilmişse günceller ve yeniden değerlendirmeye alır;
     bekleyen/onaylı başvuru varsa 409."""
+    new_economy = get_settings().jeton_ai_economy_enabled
+    if new_economy:
+        if not body.rules_accepted:
+            raise HTTPException(
+                status_code=422, detail=msg("mentor_rules_not_accepted", user.language)
+            )
+        if len(body.sample_critique.strip()) < MIN_SAMPLE_CRITIQUE:
+            raise HTTPException(
+                status_code=422,
+                detail=msg(
+                    "sample_critique_too_short", user.language, count=MIN_SAMPLE_CRITIQUE
+                ),
+            )
+    try:
+        donations.ensure_no_payment_details(body.bio, body.sample_critique)
+    except donations.PaymentDetailsInTextError:
+        raise HTTPException(
+            status_code=422, detail=msg("no_payment_details_in_text", user.language)
+        )
+    try:
+        donation_url, donation_platform = donations.normalize_donation_url(
+            body.donation_url
+        )
+    except donations.DonationUrlError:
+        raise HTTPException(
+            status_code=422, detail=msg("donation_url_invalid", user.language)
+        )
+
     for sid in body.portfolio_submission_ids:
         s = db.get(Submission, sid)
         if s is None or s.user_id != user.id:
@@ -335,12 +501,35 @@ async def apply_mentor(
         raise HTTPException(
             status_code=409, detail=msg("mentor_apply_exists", user.language)
         )
+    # Ret sonrası bekleme: eskiden reddedilen profil sınırsız tekrar başvurabiliyordu
+    if new_economy and existing is not None and existing.status == "rejected":
+        rejected = existing.rejected_at
+        if rejected is not None:
+            if rejected.tzinfo is None:  # sqlite naive döner
+                rejected = rejected.replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) - rejected < MENTOR_REAPPLY_COOLDOWN:
+                raise HTTPException(
+                    status_code=409,
+                    detail=msg(
+                        "reapply_too_soon",
+                        user.language,
+                        days=MENTOR_REAPPLY_COOLDOWN.days,
+                    ),
+                )
 
     profile = existing or MentorProfile(user_id=user.id)
     profile.bio = body.bio
     profile.styles = body.styles
     profile.portfolio_submission_ids = body.portfolio_submission_ids
     profile.status = "pending"
+    profile.sample_critique = body.sample_critique
+    if body.rules_accepted:
+        profile.rules_accepted_at = datetime.now(timezone.utc)
+    # Bağış linki değiştiyse yeniden onaya düşer — onaysız link gösterilmez
+    if donation_url != profile.donation_url:
+        profile.donation_url = donation_url
+        profile.donation_platform = donation_platform
+        profile.donation_status = "pending" if donation_url else "rejected"
     if existing is None:
         db.add(profile)
     # Portfolyo eserleri vitrine çıkar — herkes görebilmeli
@@ -362,6 +551,12 @@ def mentor_me(user: User = Depends(get_current_user), db: Session = Depends(get_
         "is_available": profile.is_available,
         "bio": profile.bio,
         "styles": profile.styles,
+        "sample_critique": profile.sample_critique,
+        # Mentor kendi linkini her zaman görür (onay beklerken de) — öğrenciye
+        # yalnız onaylıysa gösterilir
+        "donation_url": profile.donation_url,
+        "donation_platform": profile.donation_platform,
+        "donation_status": profile.donation_status,
     }
 
 
@@ -428,10 +623,26 @@ def mentor_queue(user: User = Depends(get_current_user), db: Session = Depends(g
     return {"requests": out}
 
 
+@router.get("/mentor/stats", dependencies=[Depends(require_mentor_market)])
+def mentor_stats(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Mentorun defter özeti: cevaplanan istek sayısı + puan (itibar).
+
+    Yeni ekonomide para yok — mentora ödeme uygulama dışı isteğe bağlı bağışla
+    ve %100 mentora gidiyor, Artora akışa girmiyor (bkz. /terms)."""
+    _approved_profile(db, user)
+    out = earnings.summary(db, user.id)
+    rating, answered = _mentor_stats(db, [user.id]).get(user.id, (None, 0))
+    out["rating"] = rating
+    out["answered_requests"] = answered
+    out["jeton_ai_economy"] = get_settings().jeton_ai_economy_enabled
+    return out
+
+
 @router.get("/mentor/earnings", dependencies=[Depends(require_mentor_market)])
 def mentor_earnings(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Mentorun birikmiş kazancı (jeton-eşdeğeri). Ödeme altyapısı Faz B —
-    şimdilik salt biriktirme/gösterim."""
+    """DEPRECATED — /mentor/stats'ın eski adı. Eski istemciler kırılmasın diye bir
+    sürüm daha duruyor. Gövde BİLİNÇLİ olarak eski şekliyle aynı kalıyor (yalnız
+    earnings.summary): geriye dönük uç, yeni alanların taşındığı yer değil."""
     _approved_profile(db, user)
     return earnings.summary(db, user.id)
 
@@ -502,10 +713,42 @@ def list_applications(
                 "styles": p.styles,
                 "portfolio_submission_ids": p.portfolio_submission_ids,
                 "created_at": p.created_at.isoformat(),
+                # Kalite kapısı: admin kararını asıl buna bakarak verir
+                "sample_critique": p.sample_critique,
+                "rules_accepted": p.rules_accepted_at is not None,
+                # Bağış linki ayrı onaylanır (ayrı uç) — başvuru onayı linki onaylamaz
+                "donation_url": p.donation_url,
+                "donation_platform": p.donation_platform,
+                "donation_status": p.donation_status,
             }
             for p, name in rows
         ]
     }
+
+
+@router.post(
+    "/admin/mentor-profiles/{profile_id}/donation/{decision}",
+    dependencies=[Depends(require_mentor_market)],
+)
+def decide_donation_link(
+    profile_id: int,
+    decision: str,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Bağış bağlantısını onaylar/reddeder. Başvuru onayından AYRI: link sonradan
+    da değiştirilebiliyor ve her değişiklik yeniden onaya düşüyor. Onaysız link
+    mentor profilinde hiç gösterilmez (bkz. _profile_json)."""
+    if decision not in ("approve", "reject"):
+        raise HTTPException(status_code=404, detail="Not Found")
+    profile = db.get(MentorProfile, profile_id)
+    if profile is None:
+        raise HTTPException(
+            status_code=404, detail=msg("application_not_found", admin.language)
+        )
+    profile.donation_status = "approved" if decision == "approve" else "rejected"
+    db.commit()
+    return {"id": profile.id, "donation_status": profile.donation_status}
 
 
 @router.post(
@@ -526,6 +769,8 @@ def decide_application(
             status_code=404, detail=msg("application_not_found", admin.language)
         )
     profile.status = "approved" if decision == "approve" else "rejected"
+    if decision == "reject":
+        profile.rejected_at = datetime.now(timezone.utc)  # tekrar başvuru beklemesi
     db.commit()
     applicant = db.get(User, profile.user_id)
     if applicant is not None:

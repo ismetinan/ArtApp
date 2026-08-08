@@ -944,6 +944,12 @@ abstract class AppLocalizations {
   /// **'Süresi doldu — jetonun iade edildi'**
   String get requestStatusExpired;
 
+  /// No description provided for @requestStatusExpiredFree.
+  ///
+  /// In tr, this message translates to:
+  /// **'Süresi doldu — tekrar gönderebilirsin'**
+  String get requestStatusExpiredFree;
+
   /// No description provided for @rateFeedback.
   ///
   /// In tr, this message translates to:
@@ -1039,6 +1045,252 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ödeme altyapısı yakında — kazançların şimdiden birikiyor.'**
   String get mentorEarningsSoon;
+
+  /// No description provided for @jetonAiTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Jeton nedir?'**
+  String get jetonAiTitle;
+
+  /// No description provided for @jetonAiBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her AI analizi {count} jeton harcar. Haftada {floor} ücretsiz jetonun var; biriktirmez, her hafta {floor}\'e tamamlanır. Ders videoları, yetenek ağacı ve mentor desteği her zaman ücretsiz.'**
+  String jetonAiBody(int count, int floor);
+
+  /// No description provided for @jetonWeeklyResetHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ücretsiz jetonların her hafta {count}\'e tamamlanır.'**
+  String jetonWeeklyResetHint(int count);
+
+  /// No description provided for @jetonBalanceAi.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} jeton'**
+  String jetonBalanceAi(int count);
+
+  /// No description provided for @jetonPurchasedBalance.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} satın alınmış'**
+  String jetonPurchasedBalance(int count);
+
+  /// No description provided for @mentorFreeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor desteği ücretsiz'**
+  String get mentorFreeTitle;
+
+  /// No description provided for @mentorFreeInfo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentora sormak jeton harcamaz. Adil kalması için: aynı mentora 24 saatte bir soru sorabilir, aynı anda en fazla {count} açık isteğin olabilir.'**
+  String mentorFreeInfo(int count);
+
+  /// No description provided for @mentorAskFree.
+  ///
+  /// In tr, this message translates to:
+  /// **'Havuza sor — ücretsiz'**
+  String get mentorAskFree;
+
+  /// No description provided for @mentorAskDirectFree.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu mentora sor — ücretsiz'**
+  String get mentorAskDirectFree;
+
+  /// No description provided for @donationTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu mentora destek ol'**
+  String get donationTitle;
+
+  /// No description provided for @donationBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentorluk ücretsiz. İstersen mentora doğrudan destek olabilirsin — gönderdiğin tutarın tamamı mentora gider, Artora hiçbir kesinti almaz.'**
+  String get donationBody;
+
+  /// No description provided for @donationOptionalNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağış tamamen isteğe bağlı. Uygulamada hiçbir şeyi açmaz, kimseye öncelik vermez ve geri bildirim almak için gerekli değildir.'**
+  String get donationOptionalNote;
+
+  /// No description provided for @donationButton.
+  ///
+  /// In tr, this message translates to:
+  /// **'Destek ol'**
+  String get donationButton;
+
+  /// No description provided for @donationLeaveTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulamadan çıkılıyor'**
+  String get donationLeaveTitle;
+
+  /// No description provided for @donationLeaveBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'{platform} sayfasına yönlendirileceksin. Ödeme Artora üzerinden geçmez; Artora bu işlemin tarafı değildir ve sorumluluk kabul etmez.'**
+  String donationLeaveBody(String platform);
+
+  /// No description provided for @donationLeaveConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Devam et'**
+  String get donationLeaveConfirm;
+
+  /// No description provided for @mentorRulesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor kuralları'**
+  String get mentorRulesTitle;
+
+  /// No description provided for @mentorRulesBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'• Geri bildirim her zaman yapıcı olur, asla aşağılayıcı değil.\n• Öğrenci kendi stili içinde değerlendirilir.\n• Geri bildirim için ödeme talep edilemez; bağış yalnız isteğe bağlı bir teşekkürdür.\n• Öğrenci çizimleri platform dışında paylaşılamaz, başka amaçla kullanılamaz.\n• Metin alanlarına IBAN veya kart bilgisi yazılamaz.'**
+  String get mentorRulesBody;
+
+  /// No description provided for @mentorRulesAccept.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentor kurallarını okudum ve kabul ediyorum.'**
+  String get mentorRulesAccept;
+
+  /// No description provided for @mentorSampleCritiqueLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnek kritik'**
+  String get mentorSampleCritiqueLabel;
+
+  /// No description provided for @mentorSampleCritiqueHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kendi çizimlerinden birini seçip ona yapıcı, teknik bir kritik yaz (en az {count} karakter). Başvurunu bu metne göre değerlendiriyoruz.'**
+  String mentorSampleCritiqueHint(int count);
+
+  /// No description provided for @mentorDonationLinkLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağış bağlantın (opsiyonel)'**
+  String get mentorDonationLinkLabel;
+
+  /// No description provided for @mentorDonationLinkHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kreosus, Shopier, Papara, Patreon, Ko-fi veya Buy Me a Coffee bağlantısı. Onaydan sonra profilinde görünür.'**
+  String get mentorDonationLinkHint;
+
+  /// No description provided for @mentorDonationPending.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağış bağlantın onay bekliyor.'**
+  String get mentorDonationPending;
+
+  /// No description provided for @mentorDonationApproved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağış bağlantın profilinde görünüyor.'**
+  String get mentorDonationApproved;
+
+  /// No description provided for @mentorDonationRejected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağış bağlantın onaylanmadı.'**
+  String get mentorDonationRejected;
+
+  /// No description provided for @mentorStatsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İtibarın'**
+  String get mentorStatsTitle;
+
+  /// No description provided for @mentorStatsRating.
+  ///
+  /// In tr, this message translates to:
+  /// **'Puan: {rating}'**
+  String mentorStatsRating(String rating);
+
+  /// No description provided for @mentorStatsNoRating.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz puan yok'**
+  String get mentorStatsNoRating;
+
+  /// No description provided for @adminSampleCritique.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnek kritik'**
+  String get adminSampleCritique;
+
+  /// No description provided for @adminDonationLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağış bağlantısı'**
+  String get adminDonationLink;
+
+  /// No description provided for @adminApproveLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantıyı onayla'**
+  String get adminApproveLink;
+
+  /// No description provided for @adminRejectLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantıyı reddet'**
+  String get adminRejectLink;
+
+  /// No description provided for @termsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanım Koşulları'**
+  String get termsTitle;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gizlilik Politikası'**
+  String get privacyTitle;
+
+  /// No description provided for @storeJetonExplainerAi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Jetonlar AI analizleri için kullanılır. Haftada {count} ücretsiz jetonun zaten var ve her hafta {count}\'e tamamlanır; buradan aldığın jetonların ise süresi dolmaz ve haftalık yenileme onlara dokunmaz. Dersler, yetenek ağacı ve mentor desteği ücretsiz — jeton yalnız AI analizini daha çok kullanmak için.'**
+  String storeJetonExplainerAi(int count);
+
+  /// No description provided for @storeJetonSectionAi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Jeton paketleri'**
+  String get storeJetonSectionAi;
+
+  /// No description provided for @storeJetonPackAi.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} jeton'**
+  String storeJetonPackAi(int count);
+
+  /// No description provided for @storePremiumPerkAi1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha güçlü AI modeli — daha ayrıntılı ve hızlı analiz'**
+  String get storePremiumPerkAi1;
+
+  /// No description provided for @storePremiumPerkAi2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftada {count} jeton'**
+  String storePremiumPerkAi2(int count);
+
+  /// No description provided for @storePremiumPerkAi3.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dersler ve mentor desteği zaten ücretsiz — Premium AI tarafını güçlendirir'**
+  String get storePremiumPerkAi3;
 
   /// No description provided for @storeTitle.
   ///

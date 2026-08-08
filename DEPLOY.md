@@ -178,3 +178,69 @@ tanımlama menüleri ancak billing izni içeren bir sürüm yüklendikten sonra 
 
 Not: abonelik yenilemeleri Pub/Sub'sız, uygulama açılışında lazy doğrulanır;
 iptal edilen abonelik dönem sonunda kendiliğinden düşer.
+
+---
+
+## 10. Jeton = AI ekonomisi (`JETON_AI_ECONOMY_ENABLED`)
+
+2026-08-08 kararı: jeton artık **AI kullanım birimi**, mentorluk **ücretsiz**,
+mentora ödeme yalnız **uygulama dışı bağış** (bkz. CLAUDE.md ekonomi kararı).
+Tamamı tek bayrak arkasında; kapalıyken davranış eski modelle birebir aynı.
+
+### ⚠️ iOS'ta AÇMA
+
+`mobile/lib/api.dart` içinde `billingEnabled = !Platform.isIOS && ...` — iOS'ta
+mağaza yok. Bayrak iOS'ta açılırsa kullanıcı haftalık tabanı bitirince jeton
+alamaz ve **kilitlenir**. Sıra şu olmalı:
+
+1. iOS 1.0'ı **eski modelle** yayına al (AI ücretsiz + günlük kota).
+2. Bayrağı **yalnız Android'de** aç, ölç.
+3. iOS IAP tamamlandığında (App Store Connect ürünleri + `services/billing.py`'a
+   Apple makbuz doğrulaması) iOS'ta da aç.
+
+### Railway değişkenleri
+
+```
+JETON_AI_ECONOMY_ENABLED=true
+WEEKLY_JETON_FLOOR=3            # ücretsiz haftalık taban (birikmez)
+WEEKLY_JETON_FLOOR_PREMIUM=25
+AI_COST_REDLINE=1               # ödev analizi
+AI_COST_FREE_ANALYSIS=1         # serbest çizim analizi
+AI_COST_ASSESS_LEVEL=0          # onboarding — ücretsiz kalmalı
+AI_COST_ASSIGNMENT=0            # ödev üretimi (metin, önbellekli)
+OPENROUTER_PREMIUM_MODEL=...    # ⚠️ aşağıya bak
+```
+
+### ⚠️ Jeton satmadan önce paralı modele geç
+
+`OPENROUTER_PREMIUM_MODEL` boşken Premium da ücretsiz modeli kullanır. Ücretsiz
+havuz paylaşımlı ve rate-limit yiyor (`app/ai/openrouter.py` retry/fallback
+mantığı bunun için var). AI'ı paraya bağladığın anda çalışması bir taahhüt olur;
+para ödeyen kullanıcı "model meşgul" hatası alırsa iade ister. Jeton fiyatını
+gerçek token maliyeti + mağaza kesintisi (%15-30) üzerine kur.
+
+### Migration
+
+`alembic upgrade head` → `b4e17c9a3d20` (mentor_profiles'a bağış + kalite kapısı
+kolonları). Tamamı additive, veri göçü yok.
+
+### Bayrak açıldıktan sonra el testi
+
+1. Misafir gir → 3 jeton. Ödev yükle → 2 → 1 → 0. 4.'de **402** + (Android'de)
+   "Jeton Al" aksiyonu.
+2. Profil → jeton çipine dokun → "Jeton nedir?" bilgilendirmesi.
+3. Bakiye 0'ken mentora sor → **çalışmalı** (mentorluk ücretsiz).
+4. Aynı mentora tekrar sor → 24 saat uyarısı. 4 ayrı çizimle 4. istek →
+   "en fazla 3 açık istek" uyarısı.
+5. Mentor başvurusu → örnek kritik 200 karakterin altındayken buton kapalı.
+6. Bağış: mentor linkini girer → admin panelinden **bağlantıyı onayla** →
+   mentor profilinde bağış kartı çıkar → dokun → çıkış onayı → sistem
+   tarayıcısı. Mentor **listesinde** bağış görünmemeli.
+7. `/terms` ve `/privacy` açılıyor; Profil'in altındaki bağlantılar çalışıyor.
+
+### Apple §3.2.1 — bozulmaması gerekenler
+
+Bağış, kişi-kişiye hediye istisnasına dayanıyor. Üç şart: tamamen isteğe bağlı,
+%100 alıcıya, **uygulamada hiçbir şeyi açmıyor**. Bağışa rozet, öncelik, sıralama
+etkisi veya "daha hızlı cevap" eklemek doğrudan ihlaldir ve uygulama kaldırma
+sebebi olur.

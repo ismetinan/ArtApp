@@ -41,8 +41,9 @@ def get_submission_image(
 
 @router.get("/profile")
 def get_profile(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Haftalık ücretsiz jeton damlası (tembel): ≥7 gün geçtiyse bir kez damlar.
-    if jetons.maybe_grant_weekly_free(db, user):
+    # Haftalık ücretsiz jeton (tembel): ≥7 gün geçtiyse bir kez işler. Aktif
+    # ekonomiye göre ya damlar (eski) ya tabana tamamlar (yeni) — bkz. jetons.py.
+    if jetons.maybe_grant_weekly(db, user):
         db.commit()
     scores = db.execute(
         select(AbilityScore).where(AbilityScore.user_id == user.id)
@@ -69,6 +70,21 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         # Seçmeli mentor yalnız altınla; eski istemci bu alanı yok sayar (uyumlu).
         "gold_jeton_balance": user.jeton_paid_balance,
         "mentor_market_enabled": get_settings().mentor_market_enabled,
+        # Aktif ekonomi: açıkken jeton = AI kullanım birimi ve mentorluk ücretsiz.
+        # Flutter buna bakarak jeton metinlerini ve mentor bedeli uyarılarını seçer.
+        "jeton_ai_economy": get_settings().jeton_ai_economy_enabled,
+        # Haftalık ücretsiz jeton tabanı (yeni ekonomi) — "her hafta 3'e tamamlanır"
+        # bilgilendirmesi istemcide sabit yazılmasın diye sunucudan gelir.
+        "weekly_jeton_floor": (
+            get_settings().weekly_jeton_floor_premium
+            if billing_service.is_premium(user)
+            else get_settings().weekly_jeton_floor
+        ),
+        # AI aksiyon fiyatları — istemci "1 jeton" yazısını buradan alır.
+        "ai_costs": {
+            "redline": get_settings().ai_cost_redline,
+            "free_analysis": get_settings().ai_cost_free_analysis,
+        },
         # Topluluğa paylaşım seviye kapısı: Flutter switch'i buna göre kilitler
         "community_share_min_level": get_settings().community_share_min_level,
         # Beta admini: Flutter buna bakarak başvuru onay panelini gösterir

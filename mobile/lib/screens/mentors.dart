@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'store.dart';
+
+/// Backend'deki MAX_OPEN_REQUESTS ile aynı — yalnız bilgilendirme metninde.
+const _maxOpenRequests = 3;
 
 /// Mentorlar sekmesi (CLAUDE.md §7.5): stil filtresi + mentor kartları.
 /// mentor_market_enabled kapalıysa Faz 1 placeholder'ı gösterilir.
@@ -213,8 +217,27 @@ class MentorProfileScreen extends StatefulWidget {
 }
 
 class _MentorProfileScreenState extends State<MentorProfileScreen> {
-  MentorInfo get mentor => widget.mentor;
+  /// Liste yanıtı bağış alanlarını BİLİNÇLİ olarak taşımıyor (yalnız detay ucu
+  /// döndürüyor), bu yüzden detay ayrıca çekilir. Gelene kadar liste verisi
+  /// gösterilir — ekran boş kalmaz.
+  MentorInfo? _detail;
+  MentorInfo get mentor => _detail ?? widget.mentor;
   bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDetail();
+  }
+
+  Future<void> _loadDetail() async {
+    try {
+      final full = await ApiClient.instance.getMentor(widget.mentor.id);
+      if (mounted) setState(() => _detail = full);
+    } catch (_) {
+      // Detay çekilemezse liste verisiyle devam — bağış kartı görünmez, o kadar.
+    }
+  }
 
   /// Kullanıcının ödevlerini listeler; seçilen çizim bu mentora 3 jetonla gider.
   Future<void> _askMentor() async {
@@ -343,11 +366,34 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
             const SizedBox(height: 12),
             Text(mentor.bio),
           ],
+          // Bağış kartı bio'dan hemen SONRA, ödeme bloğundan önce: iOS'ta
+          // billingEnabled false olduğu için aşağıdaki blok hiç çizilmiyor,
+          // bağış kartının oradan bağımsız olması gerekiyor.
+          if (mentor.donationUrl != null) ...[
+            const SizedBox(height: 16),
+            _DonationCard(
+              url: mentor.donationUrl!,
+              platform: mentor.donationPlatform ?? '',
+            ),
+          ],
           const SizedBox(height: 16),
-          // Seçmeli mentorluk altın jetonla ödenir; mağaza kapalıyken (iOS)
-          // altın jeton edinmenin yolu yok, o yüzden butonu hiç göstermiyoruz.
-          // Havuza sorma akışı redline ekranından ücretsiz jetonla çalışıyor.
-          if (ApiClient.instance.billingEnabled) ...[
+          if (ApiClient.instance.jetonAiEconomy) ...[
+            // Yeni ekonomi: mentorluk ücretsiz, kotalar bedelin yerini aldı
+            JetonPaymentInfo(
+              title: t.mentorFreeTitle,
+              body: t.mentorFreeInfo(_maxOpenRequests),
+            ),
+            const SizedBox(height: 8),
+            _busy
+                ? const Center(child: CircularProgressIndicator())
+                : FilledButton.icon(
+                    icon: const Icon(Icons.support_agent),
+                    label: Text(t.mentorAskDirectFree),
+                    onPressed: mentor.isAvailable ? _askMentor : null,
+                  ),
+          ] else if (ApiClient.instance.billingEnabled) ...[
+            // Eski ekonomi: seçmeli mentorluk altın jetonla ödenir; mağaza
+            // kapalıyken (iOS) altın edinmenin yolu yok, butonu göstermiyoruz.
             JetonPaymentInfo(
                 title: t.jetonPaymentTitle, body: t.mentorDirectPaymentInfo),
             const SizedBox(height: 8),
@@ -383,6 +429,104 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Mentora destek (bağış) kartı.
+///
+/// Apple §3.2.1, kişi-kişiye hediyeye üç şartla izin veriyor ve bu widget
+/// üçünü de korumak zorunda:
+///  1. Tamamen isteğe bağlı — metin bunu açıkça söylüyor, hiçbir akış bunu
+///     zorunlu kılmıyor ve geri bildirim almak için gerekmiyor.
+///  2. Tutarın %100'ü mentora gidiyor — Artora kesinti almıyor, ödeme
+///     uygulamadan geçmiyor.
+///  3. Uygulamada HİÇBİR ŞEY açmıyor — destekçi rozeti, öncelik, sıralama
+///     etkisi, "daha hızlı cevap" gibi bir karşılığı YOK. Buraya böyle bir
+///     ödül eklemek doğrudan kural ihlalidir.
+///
+/// Ödeme uygulama içinde değil: link sistem tarayıcısında açılır
+/// (LaunchMode.externalApplication — webview kullanmıyoruz).
+class _DonationCard extends StatelessWidget {
+  const _DonationCard({required this.url, required this.platform});
+
+  final String url;
+  final String platform;
+
+  Future<void> _open(BuildContext context) async {
+    final t = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.donationLeaveTitle),
+        content: Text(t.donationLeaveBody(platform)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.donationLeaveConfirm),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(t.errorUnexpected)));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(Icons.volunteer_activism, size: 18, color: scheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(t.donationTitle,
+                    style: Theme.of(context).textTheme.titleSmall),
+              ),
+            ]),
+            const SizedBox(height: 8),
+            Text(t.donationBody, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(
+              t.donationOptionalNote,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: Text(platform.isEmpty
+                    ? t.donationButton
+                    : '${t.donationButton} · $platform'),
+                onPressed: () => _open(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,6 +7,20 @@ Alan alan aşağıdaki metinleri gir. Karakter sınırları başlıklarda yazıy
 false). Metinlerde jeton satın almadan bahsedilmiyor — bahsedilirse Apple
 "tanımlı ürün yok" diye sorar.
 
+⚠️ **Aşağıdaki metinler ESKİ ekonomiyi anlatıyor ve iOS 1.0 bilinçli olarak eski
+modelle gidiyor** (jeton = mentor parası, AI günlük kotayla ücretsiz;
+`JETON_AI_ECONOMY_ENABLED=false`). Bayrak iOS'ta açıldığında (iOS IAP sonrası)
+şu iki cümle **yanlış** hale gelir ve yeni sürümde düzeltilmelidir:
+
+- §2 Description: *"Yapay zekâ analizi ücretsiz ve günlük kotayla sınırsıza yakın"*
+  → yeni modelde haftada 3 ücretsiz jeton, fazlası satın alınıyor.
+- §2 Description: *"AI yetmezse jetonunla ödevini gerçek bir mentora gönder"*
+  → yeni modelde mentorluk tamamen ücretsiz, jeton yalnız AI için.
+
+Ayrıca bayrak açıldığında **App Privacy'ye `Purchases` eklenmeli** ve
+**EULA alanına `https://artapp-production.up.railway.app/terms`** girilmelidir
+(bağış kuralları ve jetonun nakde çevrilemezliği orada beyan ediliyor).
+
 ---
 
 ## 1. App Information (sürümden bağımsız)
@@ -19,6 +33,7 @@ false). Metinlerde jeton satın almadan bahsedilmiyor — bahsedilirse Apple
 | **Secondary Category** | Graphics & Design |
 | **Content Rights** | "Contains, shows, or accesses third-party content" → **Evet**, sonra "gerekli haklara sahibim" kutusunu işaretle. Uygulama hem YouTube videolarına yönlendiriyor hem de kullanıcı çizimlerini gösteriyor → "Hayır" demek yanlış beyan olur. |
 | **Privacy Policy URL** | `https://artapp-production.up.railway.app/privacy` |
+| **EULA** (App Store Connect → App Information, opsiyonel alan) | `https://artapp-production.up.railway.app/terms` — jeton kuralları (nakde çevrilemez/devredilemez), bağış şartları ve mentor yükümlülükleri burada. Jeton satışı iOS'ta açıldığında **zorunlu** hale gelir. |
 
 EN subtitle (English (U.S.) yerelleştirmesi eklersen): `AI-powered drawing coach`
 

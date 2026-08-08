@@ -494,6 +494,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestStatusExpired => 'Expired — your jeton was refunded';
 
   @override
+  String get requestStatusExpiredFree => 'Expired — you can send it again';
+
+  @override
   String get rateFeedback => 'Rate';
 
   @override
@@ -551,6 +554,158 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mentorEarningsSoon =>
       'Payouts coming soon — your earnings are already accruing.';
+
+  @override
+  String get jetonAiTitle => 'What is a jeton?';
+
+  @override
+  String jetonAiBody(int count, int floor) {
+    return 'Every AI analysis costs $count jeton. You get $floor free jetons a week; they don\'t stack — each week your balance is topped back up to $floor. Lesson videos, the skill tree and mentor support are always free.';
+  }
+
+  @override
+  String jetonWeeklyResetHint(int count) {
+    return 'Your free jetons are topped up to $count every week.';
+  }
+
+  @override
+  String jetonBalanceAi(int count) {
+    return '$count jetons';
+  }
+
+  @override
+  String jetonPurchasedBalance(int count) {
+    return '$count purchased';
+  }
+
+  @override
+  String get mentorFreeTitle => 'Mentor support is free';
+
+  @override
+  String mentorFreeInfo(int count) {
+    return 'Asking a mentor costs no jetons. To keep it fair: you can ask the same mentor once every 24 hours, and have at most $count open requests at a time.';
+  }
+
+  @override
+  String get mentorAskFree => 'Ask the pool — free';
+
+  @override
+  String get mentorAskDirectFree => 'Ask this mentor — free';
+
+  @override
+  String get donationTitle => 'Support this mentor';
+
+  @override
+  String get donationBody =>
+      'Mentoring is free. If you\'d like, you can support the mentor directly — 100% of what you send goes to them, and Artora takes no cut.';
+
+  @override
+  String get donationOptionalNote =>
+      'Donations are entirely optional. They unlock nothing in the app, give no one priority, and are not required to receive feedback.';
+
+  @override
+  String get donationButton => 'Support';
+
+  @override
+  String get donationLeaveTitle => 'Leaving the app';
+
+  @override
+  String donationLeaveBody(String platform) {
+    return 'You\'ll be taken to $platform. The payment does not go through Artora; Artora is not a party to this transaction and accepts no liability.';
+  }
+
+  @override
+  String get donationLeaveConfirm => 'Continue';
+
+  @override
+  String get mentorRulesTitle => 'Mentor rules';
+
+  @override
+  String get mentorRulesBody =>
+      '• Feedback is always constructive, never demeaning.\n• Students are assessed within their own style.\n• You may not request payment for feedback; donations are an optional thank-you only.\n• Student drawings may not be shared outside the platform or used for any other purpose.\n• IBAN or card details may not be written in text fields.';
+
+  @override
+  String get mentorRulesAccept => 'I have read and accept the mentor rules.';
+
+  @override
+  String get mentorSampleCritiqueLabel => 'Sample critique';
+
+  @override
+  String mentorSampleCritiqueHint(int count) {
+    return 'Pick one of your own drawings and write a constructive, technical critique of it (at least $count characters). We assess your application on this text.';
+  }
+
+  @override
+  String get mentorDonationLinkLabel => 'Your donation link (optional)';
+
+  @override
+  String get mentorDonationLinkHint =>
+      'A Kreosus, Shopier, Papara, Patreon, Ko-fi or Buy Me a Coffee link. It appears on your profile once approved.';
+
+  @override
+  String get mentorDonationPending => 'Your donation link is awaiting review.';
+
+  @override
+  String get mentorDonationApproved =>
+      'Your donation link is live on your profile.';
+
+  @override
+  String get mentorDonationRejected => 'Your donation link wasn\'t approved.';
+
+  @override
+  String get mentorStatsTitle => 'Your reputation';
+
+  @override
+  String mentorStatsRating(String rating) {
+    return 'Rating: $rating';
+  }
+
+  @override
+  String get mentorStatsNoRating => 'No rating yet';
+
+  @override
+  String get adminSampleCritique => 'Sample critique';
+
+  @override
+  String get adminDonationLink => 'Donation link';
+
+  @override
+  String get adminApproveLink => 'Approve link';
+
+  @override
+  String get adminRejectLink => 'Reject link';
+
+  @override
+  String get termsTitle => 'Terms of Service';
+
+  @override
+  String get privacyTitle => 'Privacy Policy';
+
+  @override
+  String storeJetonExplainerAi(int count) {
+    return 'Jetons are used for AI analyses. You already get $count free jetons a week and your balance is topped back up to $count every week; jetons you buy here never expire and the weekly top-up doesn\'t touch them. Lessons, the skill tree and mentor support are free — jetons are only for using AI analysis more.';
+  }
+
+  @override
+  String get storeJetonSectionAi => 'Jeton packs';
+
+  @override
+  String storeJetonPackAi(int count) {
+    return '$count jetons';
+  }
+
+  @override
+  String get storePremiumPerkAi1 =>
+      'A stronger AI model — more detailed and faster analysis';
+
+  @override
+  String storePremiumPerkAi2(int count) {
+    return '$count jetons a week';
+  }
+
+  @override
+  String get storePremiumPerkAi3 =>
+      'Lessons and mentor support are already free — Premium boosts the AI side';
 
   @override
   String get storeTitle => 'Gold Jeton Store';

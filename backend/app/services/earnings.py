@@ -1,10 +1,15 @@
-"""Mentor kazanç defteri (Faz 4 — gelir paylaşımı, Faz A: ödemesiz biriktirme).
+"""Mentor defteri.
 
-Mentor bir isteği cevapladığında (answered — terminal, iadesi yok) kazancı öğrencinin
-harcadığı jeton_cost kadar JETON-EŞDEĞERİ olarak deftere işlenir. Para çevrimi +
-paylaşım oranı Faz B'de payout anında uygulanır. request_id unique olduğundan aynı
-istek iki kez kredi veremez. commit çağıranın sorumluluğunda (cevap + kredi tek
-transaction'da kalsın diye — jetons.py deseniyle aynı).
+Mentor bir isteği cevapladığında (answered — terminal, iadesi yok) bir satır
+işlenir. request_id unique olduğundan aynı istek iki kez kredi veremez. commit
+çağıranın sorumluluğunda (cevap + kredi tek transaction'da kalsın diye —
+jetons.py deseniyle aynı).
+
+2026-08-08 kararıyla defter PARA defteri değil İTİBAR defteri: mentorluk
+ücretsiz, mentora ödeme yalnız uygulama dışı isteğe bağlı bağışla oluyor ve
+Artora para akışına hiç girmiyor. Dolayısıyla `paid_equivalent` (nakde
+çevrilebilir kısım) yeni ekonomide daima 0 ve hiçbir nakit yükümlülüğü
+doğurmuyor. Sütunlar geçmiş kayıtlar ve eski ekonomi yolu için korunuyor.
 """
 
 from sqlalchemy import func, select
@@ -33,9 +38,11 @@ def credit(db: Session, mentor_id: int, request: MentorshipRequest) -> None:
 
 
 def summary(db: Session, mentor_id: int) -> dict:
-    """mentor_id → toplam kazanç. jeton_equivalent: tüm kazanç (havuz=1, seçmeli=3);
-    paid_equivalent: bunun gelir-destekli (nakde çevrilebilir) kısmı — Faz B payout'u
-    yalnız bunu baz alır. answered_count: kayıt sayısı."""
+    """mentor_id → defter özeti.
+
+    answered_count: cevaplanan istek sayısı — yeni ekonomide mentorun asıl
+    göstergesi bu (itibar). jeton_equivalent/paid_equivalent eski ekonomi
+    kayıtları için korunuyor; yeni kayıtlarda ikisi de 0."""
     total, paid, count = db.execute(
         select(
             func.coalesce(func.sum(MentorEarning.jeton_equivalent), 0),

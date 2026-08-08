@@ -200,7 +200,12 @@ class _StoreScreenState extends State<StoreScreen> {
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    JetonPaymentInfo(body: t.storeGoldExplainer),
+                    JetonPaymentInfo(
+                      body: ApiClient.instance.jetonAiEconomy
+                          ? t.storeJetonExplainerAi(
+                              ApiClient.instance.weeklyJetonFloor)
+                          : t.storeGoldExplainer,
+                    ),
                     const SizedBox(height: 16),
                     _PremiumCard(
                       product: _products[subscriptionProduct],
@@ -210,7 +215,10 @@ class _StoreScreenState extends State<StoreScreen> {
                       onSubscribe: () => _buy(subscriptionProduct),
                     ),
                     const SizedBox(height: 24),
-                    Text(t.storeJetonSection,
+                    Text(
+                        ApiClient.instance.jetonAiEconomy
+                            ? t.storeJetonSectionAi
+                            : t.storeJetonSection,
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     for (final entry in jetonProducts.entries)
@@ -266,11 +274,19 @@ class _PremiumCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            for (final perk in [
-              t.storePremiumPerk1(10),
-              t.storePremiumPerk2,
-              t.storePremiumPerk3,
-            ])
+            // Yeni ekonomide Premium'un karşılığı: güçlü model + yüksek haftalık
+            // taban. Jeton YIĞINI vermiyor — "birikmez" kuralını delerdi.
+            for (final perk in ApiClient.instance.jetonAiEconomy
+                ? [
+                    t.storePremiumPerkAi1,
+                    t.storePremiumPerkAi2(ApiClient.instance.weeklyJetonFloor),
+                    t.storePremiumPerkAi3,
+                  ]
+                : [
+                    t.storePremiumPerk1(10),
+                    t.storePremiumPerk2,
+                    t.storePremiumPerk3,
+                  ])
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
@@ -321,7 +337,9 @@ class _JetonCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.paid, color: goldJetonColor),
-        title: Text(t.storeJetonPack(count)),
+        title: Text(ApiClient.instance.jetonAiEconomy
+            ? t.storeJetonPackAi(count)
+            : t.storeJetonPack(count)),
         subtitle: product == null ? null : Text(product!.price),
         trailing: FilledButton.tonal(
           onPressed: (product == null || busy) ? null : onBuy,

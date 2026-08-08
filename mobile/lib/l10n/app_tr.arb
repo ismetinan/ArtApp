@@ -260,6 +260,7 @@
   "requestStatusAssigned": "Mentor inceliyor",
   "requestStatusAnswered": "Cevaplandı",
   "requestStatusExpired": "Süresi doldu — jetonun iade edildi",
+  "requestStatusExpiredFree": "Süresi doldu — tekrar gönderebilirsin",
   "rateFeedback": "Puanla",
   "ratedThanks": "Teşekkürler, puanın kaydedildi!",
   "mentorSearchHint": "Mentor ara (ad veya bio)...",
@@ -291,6 +292,106 @@
     }
   },
   "mentorEarningsSoon": "Ödeme altyapısı yakında — kazançların şimdiden birikiyor.",
+
+  "jetonAiTitle": "Jeton nedir?",
+  "jetonAiBody": "Her AI analizi {count} jeton harcar. Haftada {floor} ücretsiz jetonun var; biriktirmez, her hafta {floor}'e tamamlanır. Ders videoları, yetenek ağacı ve mentor desteği her zaman ücretsiz.",
+  "@jetonAiBody": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "floor": {"type": "int"}
+    }
+  },
+  "jetonWeeklyResetHint": "Ücretsiz jetonların her hafta {count}'e tamamlanır.",
+  "@jetonWeeklyResetHint": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "jetonBalanceAi": "{count} jeton",
+  "@jetonBalanceAi": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "jetonPurchasedBalance": "{count} satın alınmış",
+  "@jetonPurchasedBalance": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mentorFreeTitle": "Mentor desteği ücretsiz",
+  "mentorFreeInfo": "Mentora sormak jeton harcamaz. Adil kalması için: aynı mentora 24 saatte bir soru sorabilir, aynı anda en fazla {count} açık isteğin olabilir.",
+  "@mentorFreeInfo": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mentorAskFree": "Havuza sor — ücretsiz",
+  "mentorAskDirectFree": "Bu mentora sor — ücretsiz",
+
+  "donationTitle": "Bu mentora destek ol",
+  "donationBody": "Mentorluk ücretsiz. İstersen mentora doğrudan destek olabilirsin — gönderdiğin tutarın tamamı mentora gider, Artora hiçbir kesinti almaz.",
+  "donationOptionalNote": "Bağış tamamen isteğe bağlı. Uygulamada hiçbir şeyi açmaz, kimseye öncelik vermez ve geri bildirim almak için gerekli değildir.",
+  "donationButton": "Destek ol",
+  "donationLeaveTitle": "Uygulamadan çıkılıyor",
+  "donationLeaveBody": "{platform} sayfasına yönlendirileceksin. Ödeme Artora üzerinden geçmez; Artora bu işlemin tarafı değildir ve sorumluluk kabul etmez.",
+  "@donationLeaveBody": {
+    "placeholders": {
+      "platform": {"type": "String"}
+    }
+  },
+  "donationLeaveConfirm": "Devam et",
+
+  "mentorRulesTitle": "Mentor kuralları",
+  "mentorRulesBody": "• Geri bildirim her zaman yapıcı olur, asla aşağılayıcı değil.\n• Öğrenci kendi stili içinde değerlendirilir.\n• Geri bildirim için ödeme talep edilemez; bağış yalnız isteğe bağlı bir teşekkürdür.\n• Öğrenci çizimleri platform dışında paylaşılamaz, başka amaçla kullanılamaz.\n• Metin alanlarına IBAN veya kart bilgisi yazılamaz.",
+  "mentorRulesAccept": "Mentor kurallarını okudum ve kabul ediyorum.",
+  "mentorSampleCritiqueLabel": "Örnek kritik",
+  "mentorSampleCritiqueHint": "Kendi çizimlerinden birini seçip ona yapıcı, teknik bir kritik yaz (en az {count} karakter). Başvurunu bu metne göre değerlendiriyoruz.",
+  "@mentorSampleCritiqueHint": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mentorDonationLinkLabel": "Bağış bağlantın (opsiyonel)",
+  "mentorDonationLinkHint": "Kreosus, Shopier, Papara, Patreon, Ko-fi veya Buy Me a Coffee bağlantısı. Onaydan sonra profilinde görünür.",
+  "mentorDonationPending": "Bağış bağlantın onay bekliyor.",
+  "mentorDonationApproved": "Bağış bağlantın profilinde görünüyor.",
+  "mentorDonationRejected": "Bağış bağlantın onaylanmadı.",
+  "mentorStatsTitle": "İtibarın",
+  "mentorStatsRating": "Puan: {rating}",
+  "@mentorStatsRating": {
+    "placeholders": {
+      "rating": {"type": "String"}
+    }
+  },
+  "mentorStatsNoRating": "Henüz puan yok",
+  "adminSampleCritique": "Örnek kritik",
+  "adminDonationLink": "Bağış bağlantısı",
+  "adminApproveLink": "Bağlantıyı onayla",
+  "adminRejectLink": "Bağlantıyı reddet",
+  "termsTitle": "Kullanım Koşulları",
+  "privacyTitle": "Gizlilik Politikası",
+  "storeJetonExplainerAi": "Jetonlar AI analizleri için kullanılır. Haftada {count} ücretsiz jetonun zaten var ve her hafta {count}'e tamamlanır; buradan aldığın jetonların ise süresi dolmaz ve haftalık yenileme onlara dokunmaz. Dersler, yetenek ağacı ve mentor desteği ücretsiz — jeton yalnız AI analizini daha çok kullanmak için.",
+  "@storeJetonExplainerAi": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "storeJetonSectionAi": "Jeton paketleri",
+  "storeJetonPackAi": "{count} jeton",
+  "@storeJetonPackAi": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "storePremiumPerkAi1": "Daha güçlü AI modeli — daha ayrıntılı ve hızlı analiz",
+  "storePremiumPerkAi2": "Haftada {count} jeton",
+  "@storePremiumPerkAi2": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "storePremiumPerkAi3": "Dersler ve mentor desteği zaten ücretsiz — Premium AI tarafını güçlendirir",
 
   "storeTitle": "Altın Jeton Mağazası",
   "storeGoldExplainer": "Altın jetonlar gerçek satın alımdır. Seçmeli (öncelikli) mentorluk için gereklidir ve mentorlara ödenen kazancın kaynağıdır. Havuz mentoru + AI analizi için her hafta hediye edilen ücretsiz jetonlar yeter; altın jetonu yalnız seçmeli mentorluk veya ekstra ücretsiz jeton istersen al.",

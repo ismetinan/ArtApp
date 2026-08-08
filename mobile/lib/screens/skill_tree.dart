@@ -65,7 +65,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
         ));
       }
     } catch (e) {
-      // Haftalık limitte (429) billing açıksa mağaza kısayolu göster
+      // Jeton yetersizse (402) ve mağaza açıksa "Jeton Al" kısayolu eklenir;
+      // eski ekonomideki haftalık limit (429) düz mesaj olarak gösterilir.
       if (mounted) showErrorWithStoreAction(context, e);
     } finally {
       if (mounted) setState(() => _freeBusy = false);

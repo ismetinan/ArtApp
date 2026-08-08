@@ -67,6 +67,18 @@ class _ApplicationsTabState extends State<_ApplicationsTab> {
     }
   }
 
+  /// Bağış bağlantısı kararı — başvuru kararından ayrı, listeyi tazeler.
+  Future<void> _decideDonation(Map<String, dynamic> app, bool approve) async {
+    try {
+      await ApiClient.instance.decideDonationLink(app['id'] as int, approve);
+      if (mounted) _refresh();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
@@ -118,6 +130,42 @@ class _ApplicationsTabState extends State<_ApplicationsTab> {
                                   visualDensity: VisualDensity.compact),
                           ],
                         ),
+                      ],
+                      // Kalite kapısı: kararın asıl dayanağı bu metin
+                      if ((app['sample_critique'] as String? ?? '')
+                          .isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text(t.adminSampleCritique,
+                            style: Theme.of(context).textTheme.labelLarge),
+                        const SizedBox(height: 4),
+                        Text(app['sample_critique'] as String,
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                      // Bağış bağlantısı AYRI onaylanır: başvuruyu onaylamak
+                      // linki onaylamaz (link sonradan da değiştirilebiliyor).
+                      if ((app['donation_url'] as String? ?? '')
+                          .isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                            '${t.adminDonationLink} · '
+                            '${app['donation_platform'] ?? '?'} · '
+                            '${app['donation_status'] ?? '?'}',
+                            style: Theme.of(context).textTheme.labelLarge),
+                        const SizedBox(height: 4),
+                        Text(app['donation_url'] as String,
+                            style: Theme.of(context).textTheme.bodySmall),
+                        const SizedBox(height: 4),
+                        Row(children: [
+                          OutlinedButton(
+                            onPressed: () => _decideDonation(app, false),
+                            child: Text(t.adminRejectLink),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton(
+                            onPressed: () => _decideDonation(app, true),
+                            child: Text(t.adminApproveLink),
+                          ),
+                        ]),
                       ],
                       if (portfolio.isNotEmpty) ...[
                         const SizedBox(height: 12),
