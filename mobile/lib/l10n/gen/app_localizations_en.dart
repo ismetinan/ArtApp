@@ -520,6 +520,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Upload a lesson assignment first — after the analysis you can send it to a mentor from here.';
 
   @override
+  String shareLevelLockedHint(int level) {
+    return 'Sharing to the community unlocks at level $level. For now your drawings stay private to you; as you progress through the lessons you can make them public.';
+  }
+
+  @override
   String get jetonPaymentTitle => 'How payment works';
 
   @override

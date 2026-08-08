@@ -7,6 +7,9 @@ os.environ["AI_PROVIDER"] = "mock"
 # Hız limiti testlerde kapalı (test başına yüzlerce istek atılır);
 # test_security.py kendi testinde bilinçli olarak açar
 os.environ["RATE_LIMIT_ENABLED"] = "false"
+# Topluluk paylaşımı seviye kapısı testlerde kapalı (fikstürler seviye-1 misafir
+# hesaplarıyla paylaşır); test_gallery.py gate testi bilinçli olarak 3'e çeker
+os.environ["COMMUNITY_SHARE_MIN_LEVEL"] = "0"
 
 
 @pytest.fixture()

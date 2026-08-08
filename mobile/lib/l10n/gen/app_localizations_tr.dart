@@ -520,6 +520,11 @@ class AppLocalizationsTr extends AppLocalizations {
       'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.';
 
   @override
+  String shareLevelLockedHint(int level) {
+    return 'Topluluğa paylaşım $level. seviyede açılır. Şimdilik çizimlerin sende özel duruyor; derslerinle ilerledikçe herkese açabilirsin.';
+  }
+
+  @override
   String get jetonPaymentTitle => 'Ödeme nasıl işler?';
 
   @override

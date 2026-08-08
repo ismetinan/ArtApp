@@ -69,6 +69,8 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         # Seçmeli mentor yalnız altınla; eski istemci bu alanı yok sayar (uyumlu).
         "gold_jeton_balance": user.jeton_paid_balance,
         "mentor_market_enabled": get_settings().mentor_market_enabled,
+        # Topluluğa paylaşım seviye kapısı: Flutter switch'i buna göre kilitler
+        "community_share_min_level": get_settings().community_share_min_level,
         # Beta admini: Flutter buna bakarak başvuru onay panelini gösterir
         "is_admin": user.is_admin,
         "billing_enabled": get_settings().billing_enabled,
@@ -112,6 +114,15 @@ async def update_privacy(
     submission = db.get(Submission, submission_id)
     if submission is None or submission.user_id != user.id:
         raise HTTPException(status_code=404, detail=msg("submission_not_found", user.language))
+    # Seviye kapısı: yalnız belirli seviyeye ulaşanlar topluluğa paylaşabilir
+    # (ciddiyetsiz/alakasız yüklemeleri azaltır — müşteri isteği). Özele çekmek
+    # (is_public=False) her seviyede serbest.
+    min_level = get_settings().community_share_min_level
+    if body.is_public and user.level < min_level:
+        raise HTTPException(
+            status_code=403,
+            detail=msg("share_level_locked", user.language, level=min_level),
+        )
     # Moderasyonla gizlenen içerik sahibi tarafından yeniden açılamaz (UGC politikası)
     if body.is_public and submission.moderation_hidden:
         raise HTTPException(

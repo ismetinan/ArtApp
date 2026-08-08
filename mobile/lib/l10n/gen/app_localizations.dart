@@ -992,6 +992,12 @@ abstract class AppLocalizations {
   /// **'Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.'**
   String get mentorNoDrawings;
 
+  /// No description provided for @shareLevelLockedHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Topluluğa paylaşım {level}. seviyede açılır. Şimdilik çizimlerin sende özel duruyor; derslerinle ilerledikçe herkese açabilirsin.'**
+  String shareLevelLockedHint(int level);
+
   /// No description provided for @jetonPaymentTitle.
   ///
   /// In tr, this message translates to:

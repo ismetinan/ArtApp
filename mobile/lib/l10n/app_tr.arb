@@ -268,6 +268,12 @@
   "mentorGoldRequestHint": "Altın (öncelikli) istek — detaylı geri bildirim beklenir",
   "mentorPickDrawing": "Hangi çizimini göndereceksin?",
   "mentorNoDrawings": "Önce bir ders ödevini yüklemen gerekiyor — analiz sonrası buradan mentora gönderebilirsin.",
+  "shareLevelLockedHint": "Topluluğa paylaşım {level}. seviyede açılır. Şimdilik çizimlerin sende özel duruyor; derslerinle ilerledikçe herkese açabilirsin.",
+  "@shareLevelLockedHint": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
   "jetonPaymentTitle": "Ödeme nasıl işler?",
   "mentorPoolPaymentInfo": "Havuz isteği 1 jeton. Önce ücretsiz jetonların harcanır; ücretsiz jetonun kalmadıysa altın jetondan düşülür. İsteğin havuzdaki rastgele müsait bir mentora gider.",
   "mentorDirectPaymentInfo": "Seçmeli mentorluk 3 altın jeton. Yalnız satın alınan altın jetonlar geçerlidir — ücretsiz (haftalık hediye) jetonlar burada kullanılamaz. Bunun nedeni, ödemenin bir kısmının doğrudan seçtiğin mentora gitmesi; bu yüzden gerçek bir ödemeden gelmesi gerekir.",

@@ -180,6 +180,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Bu çizim topluluk kuralları gereği kaldırıldı ve yeniden paylaşılamaz. Bir hata olduğunu düşünüyorsan bize yaz.",
         "en": "This drawing was removed under the community guidelines and can't be shared again. If you think this is a mistake, contact us.",
     },
+    "share_level_locked": {
+        "tr": "Topluluğa paylaşım {level}. seviyede açılıyor. Derslerinle ilerledikçe çizimlerini herkese açabileceksin — çizimlerin şu an sende özel olarak duruyor.",
+        "en": "Sharing to the community unlocks at level {level}. As you progress through the lessons you'll be able to make your drawings public — for now they stay private to you.",
+    },
     "free_analysis_limit": {
         "tr": "Bu haftaki serbest analiz hakkını kullandın — haftaya yenilenir. Premium'da serbest analiz sınırsız.",
         "en": "You've used this week's free analysis — it renews next week. Free analysis is unlimited with Premium.",

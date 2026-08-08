@@ -68,6 +68,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   for (final k in labels.keys) k: serverChart[k] ?? 0,
                 };
           final gallery = p['gelisim_macerasi'] as List;
+          // Topluluğa paylaşım seviye kapısı (backend enforce eder; burada UI
+          // olarak kilitleyip nedenini açıklıyoruz).
+          final shareMinLevel = (p['community_share_min_level'] ?? 3) as int;
+          final canShare = (p['level'] as int) >= shareMinLevel;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -229,12 +233,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             )),
                     trailing: Switch(
                       value: item['is_public'] as bool,
-                      onChanged: (v) async {
-                        await ApiClient.instance
-                            .setPrivacy(item['submission_id'] as int, v);
-                        setState(
-                            () => _future = ApiClient.instance.getProfile());
-                      },
+                      // Seviye kapısı: paylaşabilecek seviyede değilse (ve zaten
+                      // herkese açık değilse) switch kilitli.
+                      onChanged: (!canShare && item['is_public'] != true)
+                          ? null
+                          : (v) async {
+                              try {
+                                await ApiClient.instance.setPrivacy(
+                                    item['submission_id'] as int, v);
+                                if (!context.mounted) return;
+                                setState(() =>
+                                    _future = ApiClient.instance.getProfile());
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(friendlyError(context, e))),
+                                  );
+                                }
+                              }
+                            },
                     ),
                   ),
                 ),
@@ -242,7 +260,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    t.privacyKeyHint,
+                    canShare
+                        ? t.privacyKeyHint
+                        : t.shareLevelLockedHint(shareMinLevel),
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),

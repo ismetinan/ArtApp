@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     # Faz 4: her 7 günde bir verilen ÜCRETSİZ jeton damlası (yalnız havuz mentoru
     # için harcanır). Altın satışını baltalamamak için bilinçli düşük tutulur.
     weekly_free_jetons: int = 1
+    # Topluluk galerisine paylaşım için gereken minimum seviye. Yeni/ciddiyetsiz
+    # hesapların alakasız görsel yüklemesini engeller (müşteri isteği, 2026-08-08).
+    community_share_min_level: int = 3
 
 
 @lru_cache

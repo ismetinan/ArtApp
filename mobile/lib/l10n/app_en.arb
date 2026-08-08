@@ -168,6 +168,7 @@
   "mentorGoldRequestHint": "Gold (priority) request — detailed feedback expected",
   "mentorPickDrawing": "Which drawing do you want to send?",
   "mentorNoDrawings": "Upload a lesson assignment first — after the analysis you can send it to a mentor from here.",
+  "shareLevelLockedHint": "Sharing to the community unlocks at level {level}. For now your drawings stay private to you; as you progress through the lessons you can make them public.",
   "jetonPaymentTitle": "How payment works",
   "mentorPoolPaymentInfo": "A pool request costs 1 jeton. Your free jetons are spent first; if you have none left, it comes out of your gold jetons. The request goes to a random available mentor in the pool.",
   "mentorDirectPaymentInfo": "Selective mentoring costs 3 gold jetons. Only purchased gold jetons work here — free (weekly gift) jetons can't be used. That's because part of this payment goes directly to the mentor you picked, so it has to come from a real purchase.",
