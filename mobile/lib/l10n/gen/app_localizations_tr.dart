@@ -706,6 +706,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu 30-60 saniye sürebilir. Çıkarsan analiz kaybolmaz — Gelişim Macerası\'na kaydedilir.';
 
   @override
+  String get recoveredPickRetry =>
+      'Seçtiğin fotoğraf uygulama arka planda kapatıldığı için gönderilemedi. Dersi açıp tekrar dener misin?';
+
+  @override
+  String get recoveredAnalysisSaved =>
+      'Analizin tamamlandı ama uygulama kapandığı için gösterilemedi. Sonucu Profil → Gelişim Macerası\'nda bulabilirsin — tekrar yüklemene gerek yok.';
+
+  @override
   String get aiWaitTitleAssignment => 'Ödevin hazırlanıyor';
 
   @override

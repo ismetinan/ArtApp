@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../pending_analysis.dart';
 import 'ai_wait.dart';
 import 'redline.dart';
 import 'store.dart';
@@ -21,15 +22,74 @@ class SkillTreeScreen extends StatefulWidget {
   State<SkillTreeScreen> createState() => _SkillTreeScreenState();
 }
 
-class _SkillTreeScreenState extends State<SkillTreeScreen> {
+class _SkillTreeScreenState extends State<SkillTreeScreen>
+    with WidgetsBindingObserver {
   late Future<({List<SkillNode> nodes, String? recommendedNodeId})> _future;
   Locale? _lastLocale;
   bool _freeBusy = false;
+  bool _recovering = false;
 
   @override
   void initState() {
     super.initState();
     _future = ApiClient.instance.getTree();
+    // Android seçici/analiz sırasında uygulamayı öldürdüyse kurtarma
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _recoverPending());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _recoverPending();
+  }
+
+  /// Yarım kalmış analizi kurtarır (bkz. lib/pending_analysis.dart).
+  ///
+  /// - `picking`: seçici sırasında ölmüşüz → fotoğrafı geri al, kullanıcıya
+  ///   sessizce kaybettirme.
+  /// - `uploading`: analiz sunucuda tamamlanıp kaydedilmiş olabilir → kullanıcıyı
+  ///   tekrar jeton harcamaya bırakmadan sonucun nerede olduğunu söyle.
+  Future<void> _recoverPending() async {
+    if (_recovering || _freeBusy) return;
+    final pending = await PendingAnalysis.read();
+    if (pending == null || !mounted) return;
+    _recovering = true;
+    try {
+      if (pending.stage == PendingAnalysis.stagePicking) {
+        final file = await PendingAnalysis.recoverLostImage();
+        await PendingAnalysis.clear();
+        if (file == null || !mounted) return;
+        if (pending.nodeId == PendingAnalysis.freeAnalysisNode) {
+          await _sendFreeAnalysis(file);
+        } else {
+          // Düğüm ekranı yeniden kurulamadığı için serbest analiz olarak
+          // sürdürmek yanlış olurdu; kullanıcıya seçimini kaybetmediğini
+          // söyleyip tekrar denemesini istiyoruz.
+          if (mounted) {
+            final t = AppLocalizations.of(context);
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(t.recoveredPickRetry)));
+          }
+        }
+        return;
+      }
+      // stageUploading
+      await PendingAnalysis.clear();
+      if (!mounted) return;
+      final t = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(t.recoveredAnalysisSaved),
+        duration: const Duration(seconds: 8),
+      ));
+    } finally {
+      _recovering = false;
+    }
   }
 
   @override
@@ -48,10 +108,23 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
 
   /// Serbest çizim analizi: ders dışı bitmiş bir işi yükle → redline al.
   Future<void> _freeAnalysis() async {
+    await PendingAnalysis.mark(
+        PendingAnalysis.freeAnalysisNode, PendingAnalysis.stagePicking);
     final file =
         await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600);
-    if (file == null || !mounted) return;
+    if (file == null || !mounted) {
+      await PendingAnalysis.clear();
+      return;
+    }
+    await _sendFreeAnalysis(file);
+  }
+
+  Future<void> _sendFreeAnalysis(XFile file) async {
+    if (!mounted) return;
     setState(() => _freeBusy = true);
+    await PendingAnalysis.mark(
+        PendingAnalysis.freeAnalysisNode, PendingAnalysis.stageUploading);
+    if (!mounted) return; // mark() async gap
     AiWait.show(context); // hide() sayfa geçişinden önce, tam bir kez
     ({RedlineResult analysis, int xpAwarded, int level, int submissionId})? result;
     Object? error;
@@ -61,6 +134,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen> {
     } catch (e) {
       error = e;
     }
+    await PendingAnalysis.clear();
     if (!mounted) return;
     AiWait.hide(context);
     setState(() => _freeBusy = false);
@@ -345,10 +419,24 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
   }
 
   Future<void> _submit(ImageSource source) async {
+    // Seçiciyi açmadan ÖNCE işaretle: Android kamera/galeri sırasında Artora'yı
+    // öldürebiliyor, o durumda dönüşte bu bayrak sayesinde fotoğrafı kurtarıyoruz.
+    await PendingAnalysis.mark(widget.node.id, PendingAnalysis.stagePicking);
     final file = await ImagePicker().pickImage(source: source, maxWidth: 1600);
     // Seçici async gap; dönüşte ekran hâlâ ayakta mı (bkz. _freeAnalysis)
-    if (file == null || !mounted) return;
+    if (file == null || !mounted) {
+      await PendingAnalysis.clear(); // kullanıcı vazgeçti
+      return;
+    }
+    await _sendAssignment(file);
+  }
+
+  /// Dosya elde edildikten sonraki kısım — kurtarma akışı da buraya giriyor.
+  Future<void> _sendAssignment(XFile file) async {
+    if (!mounted) return;
     setState(() => _submitting = true);
+    await PendingAnalysis.mark(widget.node.id, PendingAnalysis.stageUploading);
+    if (!mounted) return; // mark() async gap
     // Bekleme modalı: AI senkron koşuyor ve 30-60 sn sürebiliyor.
     // hide() TAM OLARAK BİR KEZ ve modal en üstteyken çağrılmalı — push
     // döndükten sonra çağrılırsa açık olan sayfayı pop eder.
@@ -364,6 +452,8 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
     }
     // Modal PopScope ile geri tuşunu kilitlediği için bu ekran await sırasında
     // unmount olamaz; yine de savunmacı kontrol.
+    // Sonuç elimizde (ya da hata alındı) — kurtarma bayrağı artık gereksiz
+    await PendingAnalysis.clear();
     if (!mounted) return;
     AiWait.hide(context);
     setState(() => _submitting = false);

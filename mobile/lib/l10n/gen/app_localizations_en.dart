@@ -704,6 +704,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'This can take 30-60 seconds. If you leave, the analysis isn\'t lost — it\'s saved to your Progress Journey.';
 
   @override
+  String get recoveredPickRetry =>
+      'The photo you picked couldn\'t be sent because the app was closed in the background. Could you open the lesson and try again?';
+
+  @override
+  String get recoveredAnalysisSaved =>
+      'Your analysis finished but couldn\'t be shown because the app closed. You\'ll find it under Profile → Progress Journey — no need to upload again.';
+
+  @override
   String get aiWaitTitleAssignment => 'Preparing your assignment';
 
   @override

@@ -1298,6 +1298,18 @@ abstract class AppLocalizations {
   /// **'Bu 30-60 saniye sürebilir. Çıkarsan analiz kaybolmaz — Gelişim Macerası\'na kaydedilir.'**
   String get aiWaitStayHint;
 
+  /// No description provided for @recoveredPickRetry.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçtiğin fotoğraf uygulama arka planda kapatıldığı için gönderilemedi. Dersi açıp tekrar dener misin?'**
+  String get recoveredPickRetry;
+
+  /// No description provided for @recoveredAnalysisSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analizin tamamlandı ama uygulama kapandığı için gösterilemedi. Sonucu Profil → Gelişim Macerası\'nda bulabilirsin — tekrar yüklemene gerek yok.'**
+  String get recoveredAnalysisSaved;
+
   /// No description provided for @aiWaitTitleAssignment.
   ///
   /// In tr, this message translates to:
