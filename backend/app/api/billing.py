@@ -19,6 +19,8 @@ router = APIRouter(prefix="/billing", tags=["billing"])
 
 
 def require_billing() -> None:
+    # Uçlar tek bayrakla açılır; hangi platformun MAĞAZAYI göstereceğini
+    # /profile'daki ios_billing_enabled belirler.
     if not get_settings().billing_enabled:
         raise HTTPException(status_code=404, detail="Not Found")
 

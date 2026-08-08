@@ -63,6 +63,11 @@ class Settings(BaseSettings):
     android_package_name: str = "com.ismetinan.artapp"
     # App Store: imzalı işlemin bundleId'si bununla eşleşmeli
     ios_bundle_id: str = "com.ismetinan.artapp"
+    # iOS mağazası AYRI bayrak: Play'de satış açılırken App Store ürünleri
+    # henüz hazır olmayabilir. Aynı bayrağı paylaşsalardı iOS'ta fiyatsız,
+    # düğmeleri ölü bir mağaza açılırdı (StoreKit ürün olmadan da "available"
+    # döner) — hem kötü deneyim hem App Store inceleme riski.
+    ios_billing_enabled: bool = False
     # Sandbox (TestFlight/test hesabı) satın almaları hak versin mi. PROD'DA
     # KAPALI olmalı — açıkken test satın almasıyla bedava Premium alınır.
     ios_allow_sandbox_purchases: bool = False

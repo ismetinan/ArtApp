@@ -267,13 +267,15 @@ class ApiClient {
   int aiCostRedline = 1;
   int aiCostFreeAnalysis = 1;
 
-  /// Mağaza UI'ı buna göre görünür. Artık iOS'ta da açık: App Store ürünleri
-  /// tanımlandı ve sunucu StoreKit 2 imzalı işlemini doğruluyor
-  /// (backend/app/services/apple_iap.py).
-  ///
-  /// Tek kapı sunucudaki BILLING_ENABLED — ürünler App Store Connect'te
-  /// hazır olmadan açılırsa boş mağaza çıkar.
-  bool get billingEnabled => _billingEnabledServer;
+  /// Backend'deki ios_billing_enabled — App Store mağazası ayrı kapı.
+  bool _iosBillingEnabledServer = false;
+
+  /// Mağaza UI'ı buna göre görünür. Platform başına AYRI bayrak: Play'de satış
+  /// açılırken App Store ürünleri henüz hazır olmayabilir ve StoreKit ürün
+  /// tanımlı olmasa da "available" döndüğü için iOS'ta fiyatsız, düğmeleri ölü
+  /// bir mağaza açılırdı. Sunucu iOS'u ayrıca açana kadar orada kapalı kalır.
+  bool get billingEnabled =>
+      Platform.isIOS ? _iosBillingEnabledServer : _billingEnabledServer;
 
   /// Kullanıcı seviye belirleme ekranını bilerek atladı (cihaz-yerel tercih).
   /// Atlamadıysa ve chart boşsa açılışta 3-resim ekranına geri yönlendirilir.
@@ -306,6 +308,7 @@ class ApiClient {
     darkMode = prefs.getBool('dark_mode') ?? false;
     mentorMarketEnabled = prefs.getBool('mentor_market') ?? false;
     _billingEnabledServer = prefs.getBool('billing') ?? false;
+    _iosBillingEnabledServer = prefs.getBool('billing_ios') ?? false;
     onboardingSkipped = prefs.getBool('onboarding_skipped') ?? false;
   }
 
@@ -596,11 +599,19 @@ class ApiClient {
       aiCostRedline = costs['redline'] ?? aiCostRedline;
       aiCostFreeAnalysis = costs['free_analysis'] ?? aiCostFreeAnalysis;
     }
+    // İki bayrak BAĞIMSIZ kalıcılaştırılır: yalnız Android bayrağı değişince
+    // yazsaydık, iOS mağazası açıldığında (Android sabitken) tercih diske
+    // hiç yazılmaz ve uygulama sonraki açılışta eski değerle başlardı.
     final billing = j['billing_enabled'];
+    final iosBilling = j['ios_billing_enabled'];
+    final prefs = await SharedPreferences.getInstance();
     if (billing is bool && billing != _billingEnabledServer) {
       _billingEnabledServer = billing;
-      final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('billing', billing);
+    }
+    if (iosBilling is bool && iosBilling != _iosBillingEnabledServer) {
+      _iosBillingEnabledServer = iosBilling;
+      await prefs.setBool('billing_ios', iosBilling);
     }
     return j;
   }

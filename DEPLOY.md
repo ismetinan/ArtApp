@@ -311,7 +311,14 @@ doğrulama için saklanacak yeni bir sır yok.
 ```
 IOS_BUNDLE_ID=com.ismetinan.artapp
 IOS_ALLOW_SANDBOX_PURCHASES=false   # PROD'DA FALSE KALMALI
+IOS_BILLING_ENABLED=false           # App Store ürünleri hazır olunca true
 ```
+
+⚠️ **Neden ayrı bayrak:** `BILLING_ENABLED` Play satışını açar; iOS mağazası
+`IOS_BILLING_ENABLED` ile ayrı açılır. Tek bayrak olsaydı Play'de satışı
+açtığın anda iOS'ta da mağaza görünürdü — StoreKit, ürün tanımlı olmasa bile
+"available" döndüğü için kullanıcı **fiyatsız, düğmeleri ölü** bir mağaza
+görürdü. Hem kötü deneyim hem App Store inceleme riski.
 
 `IOS_ALLOW_SANDBOX_PURCHASES=true` yalnız TestFlight'ta satın alma akışını
 denerken açılır; açık kalırsa sandbox satın almasıyla bedava Premium alınır.

@@ -96,6 +96,9 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         # Beta admini: Flutter buna bakarak başvuru onay panelini gösterir
         "is_admin": user.is_admin,
         "billing_enabled": get_settings().billing_enabled,
+        # iOS mağazası ayrı kapı: App Store ürünleri hazır olmadan açılırsa
+        # kullanıcı fiyatsız/ölü bir mağaza görür.
+        "ios_billing_enabled": get_settings().ios_billing_enabled,
         "is_premium": billing_service.is_premium(user),
         "premium_until": user.premium_until.isoformat() if user.premium_until else None,
         # Faz 2: mentor rolü — Flutter buna bakarak paneli gösterir
