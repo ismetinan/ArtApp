@@ -1,17 +1,15 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
-import '../main.dart';
 import 'admin_panel.dart';
 import 'auth_form.dart';
+import 'journey.dart';
 import 'mentor_panel.dart';
 import 'onboarding.dart';
-import 'redline.dart';
+import 'settings.dart';
 import 'store.dart';
 
 /// Profil sekmesi: seviye rozeti + tıklanabilir Ability Chart + Gelişim Macerası
@@ -51,8 +49,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
-                child: Text(AppLocalizations.of(context)
-                    .profileLoadError('${snapshot.error}')));
+              child: Text(
+                AppLocalizations.of(
+                  context,
+                ).profileLoadError('${snapshot.error}'),
+              ),
+            );
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -64,14 +66,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final labels = axisLabels(t);
           final chart = serverChart.isEmpty
               ? serverChart
-              : {
-                  for (final k in labels.keys) k: serverChart[k] ?? 0,
-                };
+              : {for (final k in labels.keys) k: serverChart[k] ?? 0};
           final gallery = p['gelisim_macerasi'] as List;
-          // Topluluğa paylaşım seviye kapısı (backend enforce eder; burada UI
-          // olarak kilitleyip nedenini açıklıyoruz).
-          final shareMinLevel = (p['community_share_min_level'] ?? 3) as int;
-          final canShare = (p['level'] as int) >= shareMinLevel;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -86,81 +82,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () async {
                       final upgraded = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
-                            builder: (_) =>
-                                const AuthFormScreen(mode: AuthMode.upgrade)),
+                          builder: (_) =>
+                              const AuthFormScreen(mode: AuthMode.upgrade),
+                        ),
                       );
                       if (upgraded == true) {
                         setState(
-                            () => _future = ApiClient.instance.getProfile());
+                          () => _future = ApiClient.instance.getProfile(),
+                        );
                       }
                     },
                   ),
                 ),
               const SizedBox(height: 8),
-              Row(children: [
-                const CircleAvatar(radius: 32, child: Icon(Icons.person, size: 32)),
-                const SizedBox(width: 16),
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(p['display_name'],
-                      style: Theme.of(context).textTheme.titleLarge),
-                  // Dokununca ileri seviyelerin yol haritası açılır (müşteri isteği)
-                  ActionChip(
-                    label: Text(t.levelBadge(p['level'] as int, p['xp'] as int)),
-                    avatar: const Icon(Icons.military_tech, size: 18),
-                    onPressed: () => _showLevelRoadmap(context, p),
+              Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 32,
+                    child: Icon(Icons.person, size: 32),
                   ),
-                  Wrap(spacing: 8, children: [
-                    if (ApiClient.instance.jetonAiEconomy) ...[
-                      // Yeni ekonomi: jeton = AI kullanım birimi. Tek toplam
-                      // bakiye gösterilir; ücretsiz/satın alınmış ayrımı
-                      // kullanıcı için değil iç muhasebe için var.
-                      ActionChip(
-                        label: Text(
-                            t.jetonBalanceAi((p['jeton_balance'] ?? 0) as int)),
-                        avatar: const Icon(Icons.toll, size: 18),
-                        onPressed: () => _showJetonInfo(context, p),
-                      ),
-                      if (((p['gold_jeton_balance'] ?? 0) as int) > 0)
-                        Chip(
-                          label: Text(t.jetonPurchasedBalance(
-                              (p['gold_jeton_balance'] ?? 0) as int)),
-                          avatar: const Icon(Icons.paid,
-                              size: 18, color: goldJetonColor),
+                  const SizedBox(width: 16),
+                  // Expanded şart: içerideki Wrap'in sarabilmesi için genişlik
+                  // kısıtı gerekiyor. Yoksa uzun ad + jeton + Premium rozeti
+                  // yan yana taşıp satırı kırıyor (render overflow).
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          p['display_name'],
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                    ] else if (ApiClient.instance.mentorMarketEnabled) ...[
-                      // Ücretsiz jeton (toplam - altın): havuz mentoru için
-                      ActionChip(
-                        label: Text(t.jetonBalance(
-                            (((p['jeton_balance'] ?? 0) as int) -
-                                    ((p['gold_jeton_balance'] ?? 0) as int))
-                                .clamp(0, 1 << 31))),
-                        avatar: const Icon(Icons.toll, size: 18),
-                        onPressed: ApiClient.instance.billingEnabled
-                            ? () => _openStore(context, p)
-                            : null,
-                      ),
-                      // Altın jeton: satın alınan; seçmeli mentor için. Mağazaya götürür.
-                      ActionChip(
-                        label: Text(t.goldJetonBalance(
-                            (p['gold_jeton_balance'] ?? 0) as int)),
-                        avatar: const Icon(Icons.paid,
-                            size: 18, color: goldJetonColor),
-                        onPressed: ApiClient.instance.billingEnabled
-                            ? () => _openStore(context, p)
-                            : null,
-                      ),
-                    ],
-                    if (p['is_premium'] == true)
-                      Chip(
-                        label: Text(t.premiumBadge),
-                        avatar: const Icon(Icons.workspace_premium, size: 18),
-                      ),
-                  ]),
-                ]),
-              ]),
+                        // Dokununca ileri seviyelerin yol haritası açılır (müşteri isteği)
+                        ActionChip(
+                          label: Text(
+                            t.levelBadge(p['level'] as int, p['xp'] as int),
+                          ),
+                          avatar: const Icon(Icons.military_tech, size: 18),
+                          onPressed: () => _showLevelRoadmap(context, p),
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            if (ApiClient.instance.jetonAiEconomy) ...[
+                              // Yeni ekonomi: jeton = AI kullanım birimi. Tek toplam
+                              // bakiye gösterilir; ücretsiz/satın alınmış ayrımı
+                              // kullanıcı için değil iç muhasebe için var.
+                              ActionChip(
+                                label: Text(
+                                  t.jetonBalanceAi(
+                                    (p['jeton_balance'] ?? 0) as int,
+                                  ),
+                                ),
+                                avatar: const Icon(Icons.toll, size: 18),
+                                onPressed: () => _showJetonInfo(context, p),
+                              ),
+                              if (((p['gold_jeton_balance'] ?? 0) as int) > 0)
+                                Chip(
+                                  label: Text(
+                                    t.jetonPurchasedBalance(
+                                      (p['gold_jeton_balance'] ?? 0) as int,
+                                    ),
+                                  ),
+                                  avatar: const Icon(
+                                    Icons.paid,
+                                    size: 18,
+                                    color: goldJetonColor,
+                                  ),
+                                ),
+                            ] else if (ApiClient
+                                .instance
+                                .mentorMarketEnabled) ...[
+                              // Ücretsiz jeton (toplam - altın): havuz mentoru için
+                              ActionChip(
+                                label: Text(
+                                  t.jetonBalance(
+                                    (((p['jeton_balance'] ?? 0) as int) -
+                                            ((p['gold_jeton_balance'] ?? 0)
+                                                as int))
+                                        .clamp(0, 1 << 31),
+                                  ),
+                                ),
+                                avatar: const Icon(Icons.toll, size: 18),
+                                onPressed: ApiClient.instance.billingEnabled
+                                    ? () => _openStore(context, p)
+                                    : null,
+                              ),
+                              // Altın jeton: satın alınan; seçmeli mentor için. Mağazaya götürür.
+                              ActionChip(
+                                label: Text(
+                                  t.goldJetonBalance(
+                                    (p['gold_jeton_balance'] ?? 0) as int,
+                                  ),
+                                ),
+                                avatar: const Icon(
+                                  Icons.paid,
+                                  size: 18,
+                                  color: goldJetonColor,
+                                ),
+                                onPressed: ApiClient.instance.billingEnabled
+                                    ? () => _openStore(context, p)
+                                    : null,
+                              ),
+                            ],
+                            if (p['is_premium'] == true)
+                              Chip(
+                                label: Text(t.premiumBadge),
+                                avatar: const Icon(
+                                  Icons.workspace_premium,
+                                  size: 18,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
-              Text(t.abilityChartTitle,
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                t.abilityChartTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               Text(t.abilityChartHint),
               const SizedBox(height: 8),
               if (chart.isEmpty)
@@ -168,133 +212,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Card(
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 4),
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     title: Text(t.chartEmpty),
                     subtitle: Text(t.chartEmptyCta),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const PickImagesScreen())),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PickImagesScreen(),
+                      ),
+                    ),
                   ),
                 )
               else
                 AspectRatio(
                   aspectRatio: 1,
                   child: AbilityChart(
-                      scores: chart,
-                      labels: labels,
-                      onAxisTap: widget.onAxisTap),
+                    scores: chart,
+                    labels: labels,
+                    onAxisTap: widget.onAxisTap,
+                  ),
                 ),
               const SizedBox(height: 8),
               // Oranların yazılı hali (wireframe-02'deki opsiyonel liste)
               for (final e in chart.entries)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(children: [
-                    SizedBox(width: 110, child: Text(labels[e.key] ?? e.key)),
-                    Expanded(
-                      child: LinearProgressIndicator(value: e.value / 100),
-                    ),
-                    SizedBox(
+                  child: Row(
+                    children: [
+                      SizedBox(width: 110, child: Text(labels[e.key] ?? e.key)),
+                      Expanded(
+                        child: LinearProgressIndicator(value: e.value / 100),
+                      ),
+                      SizedBox(
                         width: 52,
-                        child: Text('  ${t.scoreOutOf(e.value)}',
-                            textAlign: TextAlign.right)),
-                  ]),
+                        child: Text(
+                          '  ${t.scoreOutOf(e.value)}',
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               const SizedBox(height: 24),
-              Text(t.journeyTitle,
-                  style: Theme.of(context).textTheme.titleMedium),
-              Text(t.journeyHint),
-              const SizedBox(height: 8),
-              if (gallery.isEmpty)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(t.journeyEmpty),
+              // Gelişim Macerası artık kutucuk: uzun liste kendi sayfasında
+              // (müşteri isteği, 2026-08-08). Profil ekranı "kim olduğun ve
+              // nerede olduğun" ekranı olarak kaldı.
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.auto_stories_outlined),
+                  title: Text(t.journeyTitle),
+                  subtitle: Text(
+                    gallery.isEmpty
+                        ? t.journeyEmpty
+                        : t.journeyCount(gallery.length),
                   ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const JourneyScreen()),
+                    );
+                    // Gizlilik anahtarı değişmiş olabilir
+                    if (context.mounted) {
+                      setState(() => _future = ApiClient.instance.getProfile());
+                    }
+                  },
                 ),
-              for (final item in gallery)
-                Card(
-                  child: ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.network(
-                        ApiClient.instance
-                            .imageUrl(item['submission_id'] as int),
-                        headers: ApiClient.instance.authHeaders,
-                        width: 48,
-                        height: 48,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Icon(Icons.image),
-                      ),
-                    ),
-                    title: Text(item['node_id'] ?? t.homeworkFallback),
-                    subtitle: Text(
-                      (item['ai_result']?['overall_comment_tr'] ?? '') as String,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onTap: item['ai_result'] == null
-                        ? null
-                        : () => Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => RedlineScreen(
-                                image: NetworkImage(
-                                  ApiClient.instance.imageUrl(
-                                      item['submission_id'] as int),
-                                  headers: ApiClient.instance.authHeaders,
-                                ),
-                                analysis: RedlineResult.fromJson(
-                                    Map<String, dynamic>.from(
-                                        item['ai_result'] as Map)),
-                                submissionId: item['submission_id'] as int,
-                              ),
-                            )),
-                    trailing: Switch(
-                      value: item['is_public'] as bool,
-                      // Seviye kapısı: paylaşabilecek seviyede değilse (ve zaten
-                      // herkese açık değilse) switch kilitli.
-                      onChanged: (!canShare && item['is_public'] != true)
-                          ? null
-                          : (v) async {
-                              try {
-                                await ApiClient.instance.setPrivacy(
-                                    item['submission_id'] as int, v);
-                                if (!context.mounted) return;
-                                setState(() =>
-                                    _future = ApiClient.instance.getProfile());
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(friendlyError(context, e))),
-                                  );
-                                }
-                              }
-                            },
-                    ),
-                  ),
-                ),
-              if (gallery.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    canShare
-                        ? t.privacyKeyHint
-                        : t.shareLevelLockedHint(shareMinLevel),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
+              ),
               if (ApiClient.instance.mentorMarketEnabled) ...[
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
                 _MentorSection(
                   mentor: p['mentor'] as Map<String, dynamic>?,
                   gallery: gallery,
                   onChanged: () =>
                       setState(() => _future = ApiClient.instance.getProfile()),
                 ),
-                const SizedBox(height: 16),
-                const _MyRequestsSection(),
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.forum_outlined),
+                    title: Text(t.myRequestsTitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const MyRequestsScreen(),
+                      ),
+                    ),
+                  ),
+                ),
                 if (p['is_admin'] == true) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Card(
                     child: ListTile(
                       leading: const Icon(Icons.admin_panel_settings_outlined),
@@ -303,84 +311,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (_) => const AdminPanelScreen()),
+                          builder: (_) => const AdminPanelScreen(),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ],
-              const SizedBox(height: 24),
-              // Dil seçici: UI + backend hata mesajları + AI çıktı dili
-              Text(t.languageTitle,
-                  style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
-              SegmentedButton<String>(
-                segments: [
-                  ButtonSegment(value: 'tr', label: Text(t.languageTurkish)),
-                  ButtonSegment(value: 'en', label: Text(t.languageEnglish)),
-                ],
-                selected: {ApiClient.instance.language},
-                onSelectionChanged: (selection) async {
-                  final code = selection.first;
-                  try {
-                    await ApiClient.instance.setLanguage(code);
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(friendlyError(context, e))));
-                    }
-                  }
-                  // Backend'e yazılamasa bile yerel tercih geçerli — UI hemen döner
-                  appLocale.value = Locale(code);
-                },
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.settings_outlined),
+                  title: Text(t.settingsTitle),
+                  subtitle: Text(t.settingsBody),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                    );
+                    if (context.mounted) setState(() {});
+                  },
+                ),
               ),
-              const SizedBox(height: 16),
-              // Karanlık tema anahtarı: yalnız cihaz-yerel tercih, sunucuya yazılmaz
-              SwitchListTile(
-                secondary: const Icon(Icons.dark_mode_outlined),
-                title: Text(t.darkModeTitle),
-                subtitle: Text(t.darkModeSubtitle),
-                value: ApiClient.instance.darkMode,
-                onChanged: (value) async {
-                  await ApiClient.instance.setDarkMode(value);
-                  appThemeMode.value = value ? ThemeMode.dark : ThemeMode.light;
-                  setState(() {});
-                },
-              ),
+              // Hesap işlemleri EN ALTTA ve ayrılmış (müşteri isteği): geri
+              // dönüşü olmayan aksiyonlar kazara dokunulacak yerde durmamalı.
               const SizedBox(height: 32),
-              // Beta geri bildirim kanalı: hazır şablonla e-posta uygulamasını açar
-              ListTile(
-                leading: const Icon(Icons.feedback_outlined),
-                title: Text(t.feedbackButton),
-                subtitle: Text(t.sendFeedbackBody),
-                onTap: () => _sendFeedback(context),
-              ),
-              // Yasal metinler sistem tarayıcısında açılır (webview yok).
-              // App Store, EULA'nın uygulama içinden erişilebilir olmasını ister.
-              ListTile(
-                leading: const Icon(Icons.gavel_outlined),
-                title: Text(t.termsTitle),
-                trailing: const Icon(Icons.open_in_new, size: 18),
-                onTap: () => _openLegal(context, '/terms'),
+              const Divider(),
+              Text(
+                t.accountSectionTitle,
+                style: Theme.of(context).textTheme.labelLarge,
               ),
               ListTile(
-                leading: const Icon(Icons.privacy_tip_outlined),
-                title: Text(t.privacyTitle),
-                trailing: const Icon(Icons.open_in_new, size: 18),
-                onTap: () => _openLegal(context, '/privacy'),
-              ),
-              ListTile(
+                contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.logout),
                 title: Text(t.signOut),
                 onTap: () => _confirmSignOut(context),
               ),
               // Play Store şartı: hesap silme uygulama içinden erişilebilir olmalı
               ListTile(
-                leading: Icon(Icons.delete_forever,
-                    color: Theme.of(context).colorScheme.error),
-                title: Text(t.deleteAccount,
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.error)),
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  Icons.delete_forever,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                title: Text(
+                  t.deleteAccount,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
                 subtitle: Text(t.deleteAccountBody),
                 onTap: () => _confirmDelete(context),
               ),
@@ -389,41 +366,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
     );
-  }
-
-  /// Yasal sayfayı sistem tarayıcısında açar (backend'den servis ediliyor).
-  Future<void> _openLegal(BuildContext context, String path) async {
-    final t = AppLocalizations.of(context);
-    try {
-      await launchUrl(Uri.parse('$apiBase$path'),
-          mode: LaunchMode.externalApplication);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(t.errorUnexpected)));
-      }
-    }
-  }
-
-  Future<void> _sendFeedback(BuildContext context) async {
-    final t = AppLocalizations.of(context);
-    final info = await PackageInfo.fromPlatform();
-    final uri = Uri(
-      scheme: 'mailto',
-      path: 'ismet17inan@gmail.com',
-      query: Uri(queryParameters: {
-        'subject': t.feedbackMailSubject,
-        'body': t.feedbackMailBody('${info.version}+${info.buildNumber}'),
-      }).query,
-    );
-    try {
-      await launchUrl(uri);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(t.errorUnexpected)));
-      }
-    }
   }
 
   void _showLevelRoadmap(BuildContext context, Map<String, dynamic> p) {
@@ -439,7 +381,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           shrinkWrap: true,
           padding: const EdgeInsets.all(16),
           children: [
-            Text(t.levelRoadmapTitle, style: Theme.of(ctx).textTheme.titleMedium),
+            Text(
+              t.levelRoadmapTitle,
+              style: Theme.of(ctx).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             for (var lvl = 1; lvl <= maxLevel; lvl++)
               ListTile(
@@ -448,9 +393,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   lvl < current
                       ? Icons.check_circle
                       : lvl == current
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_off,
-                  color: lvl <= current ? Theme.of(ctx).colorScheme.primary : null,
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: lvl <= current
+                      ? Theme.of(ctx).colorScheme.primary
+                      : null,
                 ),
                 title: Text(t.levelRoadmapEntry(lvl, (lvl - 1) * perLevel)),
                 trailing: lvl == current
@@ -469,7 +416,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// Jeton bilgilendirmesi: ne olduğu + haftalık tabana tamamlanma kuralı.
   /// Mağaza açıksa oradan satın almaya da götürür (iOS'ta mağaza yok, o zaman
   /// yalnız bilgilendirme kalır — çıkmaz sokak butonu göstermiyoruz).
-  Future<void> _showJetonInfo(BuildContext context, Map<String, dynamic> p) async {
+  Future<void> _showJetonInfo(
+    BuildContext context,
+    Map<String, dynamic> p,
+  ) async {
     final t = AppLocalizations.of(context);
     final api = ApiClient.instance;
     final buy = await showModalBottomSheet<bool>(
@@ -530,10 +480,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         content: Text(body),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t.cancel),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(t.signOut)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.signOut),
+          ),
         ],
       ),
     );
@@ -555,11 +508,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         content: Text(AppLocalizations.of(context).deleteConfirmBody),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(AppLocalizations.of(context).cancel)),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(context).cancel),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(AppLocalizations.of(context).continueButton)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(AppLocalizations.of(context).continueButton),
+          ),
         ],
       ),
     );
@@ -571,11 +526,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         content: Text(AppLocalizations.of(context).deleteConfirm2Body),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(AppLocalizations.of(context).cancel)),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(AppLocalizations.of(context).cancel),
+          ),
           FilledButton.tonal(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(AppLocalizations.of(context).deleteFinalButton)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(AppLocalizations.of(context).deleteFinalButton),
+          ),
         ],
       ),
     );
@@ -590,8 +547,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     }
   }
@@ -619,8 +577,11 @@ class _MentorSection extends StatelessWidget {
   final Map<String, dynamic>? mentor;
   final List gallery;
   final VoidCallback onChanged;
-  const _MentorSection(
-      {required this.mentor, required this.gallery, required this.onChanged});
+  const _MentorSection({
+    required this.mentor,
+    required this.gallery,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -633,10 +594,13 @@ class _MentorSection extends StatelessWidget {
           leading: const Icon(Icons.school),
           title: Text(t.mentorPanelTitle),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => MentorPanelScreen(
-                initialAvailable: (mentor?['is_available'] ?? true) as bool),
-          )),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => MentorPanelScreen(
+                initialAvailable: (mentor?['is_available'] ?? true) as bool,
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -654,11 +618,14 @@ class _MentorSection extends StatelessWidget {
         leading: const Icon(Icons.school_outlined),
         title: Text(t.becomeMentor),
         subtitle: Text(
-            status == 'rejected' ? t.mentorApplyRejected : t.becomeMentorBody),
+          status == 'rejected' ? t.mentorApplyRejected : t.becomeMentorBody,
+        ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () async {
           final applied = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(builder: (_) => MentorApplyScreen(gallery: gallery)),
+            MaterialPageRoute(
+              builder: (_) => MentorApplyScreen(gallery: gallery),
+            ),
           );
           if (applied == true) onChanged();
         },
@@ -722,8 +689,9 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -749,8 +717,10 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(t.mentorStylesLabel,
-              style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            t.mentorStylesLabel,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -759,19 +729,24 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
                 FilterChip(
                   label: Text(e.value),
                   selected: _styles.contains(e.key),
-                  onSelected: (sel) => setState(() =>
-                      sel ? _styles.add(e.key) : _styles.remove(e.key)),
+                  onSelected: (sel) => setState(
+                    () => sel ? _styles.add(e.key) : _styles.remove(e.key),
+                  ),
                 ),
             ],
           ),
           if (ApiClient.instance.jetonAiEconomy) ...[
             const SizedBox(height: 20),
             // Kalite kapısı: admin kararı asıl bu metne bakılarak veriliyor
-            Text(t.mentorSampleCritiqueLabel,
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              t.mentorSampleCritiqueLabel,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 4),
-            Text(t.mentorSampleCritiqueHint(_minSampleCritique),
-                style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              t.mentorSampleCritiqueHint(_minSampleCritique),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _critique,
@@ -784,11 +759,15 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(t.mentorDonationLinkLabel,
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              t.mentorDonationLinkLabel,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 4),
-            Text(t.mentorDonationLinkHint,
-                style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              t.mentorDonationLinkHint,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _donation,
@@ -806,11 +785,15 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(t.mentorRulesTitle,
-                        style: Theme.of(context).textTheme.titleSmall),
+                    Text(
+                      t.mentorRulesTitle,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
-                    Text(t.mentorRulesBody,
-                        style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      t.mentorRulesBody,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     CheckboxListTile(
                       contentPadding: EdgeInsets.zero,
                       controlAffinity: ListTileControlAffinity.leading,
@@ -826,8 +809,10 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
           ],
           if (widget.gallery.isNotEmpty) ...[
             const SizedBox(height: 16),
-            Text(t.mentorPortfolioPick,
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              t.mentorPortfolioPick,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             GridView.count(
               crossAxisCount: 3,
@@ -844,26 +829,33 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
                           ? _portfolio.remove(sid)
                           : _portfolio.add(sid);
                     }),
-                    child: Stack(fit: StackFit.expand, children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          ApiClient.instance
-                              .imageUrl(item['submission_id'] as int),
-                          headers: ApiClient.instance.authHeaders,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => const Icon(Icons.image),
-                        ),
-                      ),
-                      if (_portfolio.contains(item['submission_id'] as int))
-                        const Align(
-                          alignment: Alignment.topRight,
-                          child: Padding(
-                            padding: EdgeInsets.all(4),
-                            child: Icon(Icons.check_circle, color: Colors.green),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            ApiClient.instance.imageUrl(
+                              item['submission_id'] as int,
+                            ),
+                            headers: ApiClient.instance.authHeaders,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => const Icon(Icons.image),
                           ),
                         ),
-                    ]),
+                        if (_portfolio.contains(item['submission_id'] as int))
+                          const Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
               ],
             ),
@@ -873,7 +865,8 @@ class _MentorApplyScreenState extends State<MentorApplyScreen> {
               ? const Center(child: CircularProgressIndicator())
               : FilledButton(
                   onPressed: _canSubmit ? _submit : null,
-                  child: Text(t.mentorApplySubmit)),
+                  child: Text(t.mentorApplySubmit),
+                ),
         ],
       ),
     );
@@ -904,14 +897,16 @@ class _MyRequestsSectionState extends State<_MyRequestsSection> {
     try {
       await ApiClient.instance.rateMentorRequest(r.id, rating);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context).ratedThanks)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).ratedThanks)),
+        );
       }
       _reload();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
       }
     }
   }
@@ -927,8 +922,10 @@ class _MyRequestsSectionState extends State<_MyRequestsSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(t.myRequestsTitle,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              t.myRequestsTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             for (final r in requests)
               Card(
@@ -937,62 +934,65 @@ class _MyRequestsSectionState extends State<_MyRequestsSection> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: [
-                        Icon(
-                          switch (r.status) {
+                      Row(
+                        children: [
+                          Icon(switch (r.status) {
                             'answered' => Icons.check_circle,
                             'expired' => Icons.timer_off,
                             _ => Icons.pending_outlined,
-                          },
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            '${r.nodeId ?? t.homeworkFallback}'
-                            '${r.mentorDisplayName != null ? ' • ${r.mentorDisplayName}' : ''}',
-                            style: Theme.of(context).textTheme.titleSmall,
+                          }, size: 18),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              '${r.nodeId ?? t.homeworkFallback}'
+                              '${r.mentorDisplayName != null ? ' • ${r.mentorDisplayName}' : ''}',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
                           ),
-                        ),
-                        Text(
-                          switch (r.status) {
+                          Text(switch (r.status) {
                             'answered' => t.requestStatusAnswered,
                             // Ücretsiz mentorlukta iade edilecek jeton yok
-                            'expired' => ApiClient.instance.jetonAiEconomy
-                                ? t.requestStatusExpiredFree
-                                : t.requestStatusExpired,
+                            'expired' =>
+                              ApiClient.instance.jetonAiEconomy
+                                  ? t.requestStatusExpiredFree
+                                  : t.requestStatusExpired,
                             _ => t.requestStatusAssigned,
-                          },
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ]),
+                          }, style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
                       if (r.status == 'answered') ...[
                         const SizedBox(height: 8),
-                        Text(t.mentorFeedbackTitle,
-                            style: Theme.of(context).textTheme.bodySmall),
+                        Text(
+                          t.mentorFeedbackTitle,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                         Text(r.feedbackText),
                         const SizedBox(height: 4),
                         if (r.rating == null)
-                          Row(children: [
-                            Text('${t.rateFeedback}: '),
-                            for (var star = 1; star <= 5; star++)
-                              IconButton(
-                                visualDensity: VisualDensity.compact,
-                                icon: const Icon(Icons.star_border, size: 20),
-                                onPressed: () => _rate(r, star),
-                              ),
-                          ])
+                          Row(
+                            children: [
+                              Text('${t.rateFeedback}: '),
+                              for (var star = 1; star <= 5; star++)
+                                IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  icon: const Icon(Icons.star_border, size: 20),
+                                  onPressed: () => _rate(r, star),
+                                ),
+                            ],
+                          )
                         else
-                          Row(children: [
-                            for (var star = 1; star <= 5; star++)
-                              Icon(
-                                star <= r.rating!
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                size: 18,
-                                color: Colors.amber,
-                              ),
-                          ]),
+                          Row(
+                            children: [
+                              for (var star = 1; star <= 5; star++)
+                                Icon(
+                                  star <= r.rating!
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  size: 18,
+                                  color: Colors.amber,
+                                ),
+                            ],
+                          ),
                       ],
                     ],
                   ),
@@ -1011,11 +1011,12 @@ class AbilityChart extends StatelessWidget {
   final Map<String, int> scores;
   final Map<String, String> labels;
   final void Function(String axis) onAxisTap;
-  const AbilityChart(
-      {super.key,
-      required this.scores,
-      required this.labels,
-      required this.onAxisTap});
+  const AbilityChart({
+    super.key,
+    required this.scores,
+    required this.labels,
+    required this.onAxisTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1024,7 +1025,9 @@ class AbilityChart extends StatelessWidget {
       builder: (context, constraints) => GestureDetector(
         onTapUp: (details) {
           final center = Offset(
-              constraints.maxWidth / 2, constraints.maxHeight / 2);
+            constraints.maxWidth / 2,
+            constraints.maxHeight / 2,
+          );
           final v = details.localPosition - center;
           if (v.distance < 10) return;
           var angle = math.atan2(v.dy, v.dx) + math.pi / 2; // üstten başla
@@ -1051,11 +1054,12 @@ class _RadarPainter extends CustomPainter {
   final Map<String, String> labels;
   final ColorScheme scheme;
   final TextStyle labelStyle;
-  _RadarPainter(
-      {required this.scores,
-      required this.labels,
-      required this.scheme,
-      required this.labelStyle});
+  _RadarPainter({
+    required this.scores,
+    required this.labels,
+    required this.scheme,
+    required this.labelStyle,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1072,7 +1076,8 @@ class _RadarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..color = scheme.outlineVariant;
     for (final f in [0.25, 0.5, 0.75, 1.0]) {
-      final ring = Path()..addPolygon([for (var i = 0; i < n; i++) point(i, radius * f)], true);
+      final ring = Path()
+        ..addPolygon([for (var i = 0; i < n; i++) point(i, radius * f)], true);
       canvas.drawPath(ring, grid);
     }
     for (var i = 0; i < n; i++) {
@@ -1080,20 +1085,22 @@ class _RadarPainter extends CustomPainter {
     }
 
     final dataPath = Path()
-      ..addPolygon(
-          [for (var i = 0; i < n; i++) point(i, radius * scores[axes[i]]! / 100)],
-          true);
+      ..addPolygon([
+        for (var i = 0; i < n; i++) point(i, radius * scores[axes[i]]! / 100),
+      ], true);
     canvas.drawPath(
-        dataPath,
-        Paint()
-          ..style = PaintingStyle.fill
-          ..color = scheme.primary.withValues(alpha: 0.25));
+      dataPath,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = scheme.primary.withValues(alpha: 0.25),
+    );
     canvas.drawPath(
-        dataPath,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
-          ..color = scheme.primary);
+      dataPath,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = scheme.primary,
+    );
 
     for (var i = 0; i < n; i++) {
       final tp = TextPainter(

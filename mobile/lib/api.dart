@@ -786,14 +786,41 @@ class ApiClient {
 }
 
 /// Mentor stil anahtarlarının görünen halleri (backend anahtar saklar).
+/// Mentor uzmanlık stilleri — filtre çipleri ve başvuru formu bunu kullanır.
+/// Sıra müşterinin verdiği sırayla (2026-08-08).
+///
+/// `anime` ve `manga` eski ayrı anahtarlardı; artık tek kategori (`anime_manga`).
+/// Eskiden kayıtlı mentorlar kırılmasın diye ikisi de `styleCanonical` ile
+/// yeni anahtara eşleniyor — sunucu tarafı da aynı eşlemeyi yapıyor.
 Map<String, String> styleLabels(AppLocalizations t) => {
-      'manga': t.styleManga,
+      'anime_manga': t.styleAnimeManga,
       'realist': t.styleRealist,
-      'karikatur': t.styleKarikatur,
-      'anime': t.styleAnime,
       'dijital': t.styleDijital,
+      'suluboya': t.styleSuluboya,
+      'guas_yagliboya': t.styleGuasYagliboya,
       'karakalem': t.styleKarakalem,
+      'concept_art': t.styleConceptArt,
+      'karikatur': t.styleKarikatur,
     };
+
+/// Eski kayıtları güncel anahtara çevirir (sunucudaki STYLE_ALIASES ile aynı).
+const _styleAliases = {'anime': 'anime_manga', 'manga': 'anime_manga'};
+
+String styleCanonical(String raw) => _styleAliases[raw] ?? raw;
+
+/// Bir mentorun stil listesini gösterilecek etiketlere çevirir; tanınmayan
+/// anahtar ham hâliyle kalır (ileride eklenen stil boş görünmesin).
+List<String> styleDisplay(List<String> styles, AppLocalizations t) {
+  final labels = styleLabels(t);
+  final seen = <String>{};
+  final out = <String>[];
+  for (final s in styles) {
+    final key = styleCanonical(s);
+    if (!seen.add(key)) continue; // anime+manga birleşince tekrar etmesin
+    out.add(labels[key] ?? key);
+  }
+  return out;
+}
 
 /// Eksen adlarının kullanıcıya görünen halleri (seçili UI dilinde).
 /// Sıra sabit — radar chart eksen dizilimi buna dayanır.

@@ -1508,6 +1508,54 @@ abstract class AppLocalizations {
   /// **'reddedildi'**
   String get adminDecisionRejected;
 
+  /// No description provided for @settingsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlar'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dil, tema, yasal metinler ve geri bildirim'**
+  String get settingsBody;
+
+  /// No description provided for @accountSectionTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap'**
+  String get accountSectionTitle;
+
+  /// No description provided for @journeyCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} ödev ve AI notların'**
+  String journeyCount(int count);
+
+  /// No description provided for @styleSuluboya.
+  ///
+  /// In tr, this message translates to:
+  /// **'Suluboya'**
+  String get styleSuluboya;
+
+  /// No description provided for @styleGuasYagliboya.
+  ///
+  /// In tr, this message translates to:
+  /// **'Guaj / Yağlıboya'**
+  String get styleGuasYagliboya;
+
+  /// No description provided for @styleConceptArt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Concept art'**
+  String get styleConceptArt;
+
+  /// No description provided for @styleAnimeManga.
+  ///
+  /// In tr, this message translates to:
+  /// **'Anime / Manga'**
+  String get styleAnimeManga;
+
   /// No description provided for @styleManga.
   ///
   /// In tr, this message translates to:
@@ -1523,7 +1571,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleKarikatur.
   ///
   /// In tr, this message translates to:
-  /// **'Karikatür'**
+  /// **'Karikatür / Cartoon'**
   String get styleKarikatur;
 
   /// No description provided for @styleAnime.
@@ -1541,7 +1589,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleKarakalem.
   ///
   /// In tr, this message translates to:
-  /// **'Karakalem'**
+  /// **'Karakalem / Eskiz'**
   String get styleKarakalem;
 
   /// No description provided for @axisAnatomi.

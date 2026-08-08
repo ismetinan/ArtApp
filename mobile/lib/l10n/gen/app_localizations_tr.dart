@@ -835,13 +835,39 @@ class AppLocalizationsTr extends AppLocalizations {
   String get adminDecisionRejected => 'reddedildi';
 
   @override
+  String get settingsTitle => 'Ayarlar';
+
+  @override
+  String get settingsBody => 'Dil, tema, yasal metinler ve geri bildirim';
+
+  @override
+  String get accountSectionTitle => 'Hesap';
+
+  @override
+  String journeyCount(int count) {
+    return '$count ödev ve AI notların';
+  }
+
+  @override
+  String get styleSuluboya => 'Suluboya';
+
+  @override
+  String get styleGuasYagliboya => 'Guaj / Yağlıboya';
+
+  @override
+  String get styleConceptArt => 'Concept art';
+
+  @override
+  String get styleAnimeManga => 'Anime / Manga';
+
+  @override
   String get styleManga => 'Manga';
 
   @override
   String get styleRealist => 'Realist';
 
   @override
-  String get styleKarikatur => 'Karikatür';
+  String get styleKarikatur => 'Karikatür / Cartoon';
 
   @override
   String get styleAnime => 'Anime';
@@ -850,7 +876,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get styleDijital => 'Dijital';
 
   @override
-  String get styleKarakalem => 'Karakalem';
+  String get styleKarakalem => 'Karakalem / Eskiz';
 
   @override
   String get axisAnatomi => 'Anatomi';

@@ -458,12 +458,25 @@
   "adminDecisionApproved": "onaylandı",
   "adminDecisionRejected": "reddedildi",
 
+  "settingsTitle": "Ayarlar",
+  "settingsBody": "Dil, tema, yasal metinler ve geri bildirim",
+  "accountSectionTitle": "Hesap",
+  "journeyCount": "{count} ödev ve AI notların",
+  "@journeyCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "styleSuluboya": "Suluboya",
+  "styleGuasYagliboya": "Guaj / Yağlıboya",
+  "styleConceptArt": "Concept art",
+  "styleAnimeManga": "Anime / Manga",
   "styleManga": "Manga",
   "styleRealist": "Realist",
-  "styleKarikatur": "Karikatür",
+  "styleKarikatur": "Karikatür / Cartoon",
   "styleAnime": "Anime",
   "styleDijital": "Dijital",
-  "styleKarakalem": "Karakalem",
+  "styleKarakalem": "Karakalem / Eskiz",
 
   "axisAnatomi": "Anatomi",
   "axisPerspektif": "Perspektif",

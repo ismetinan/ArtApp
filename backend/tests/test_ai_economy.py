@@ -477,3 +477,39 @@ def test_flag_off_keeps_old_mentor_costs(client, monkeypatch):
     r = client.post(f"/submissions/{sid}/mentor-request", headers=student_h)
     assert r.status_code == 200
     assert r.json()["jeton_balance"] == 2  # 3 - 1
+
+
+# ---------- Mentor stil filtresi (müşteri isteği, 2026-08-08) ----------
+
+
+def test_legacy_anime_manga_styles_map_to_new_category(client, economy):
+    """Eski 'manga'/'anime' kayıtları yeni 'anime_manga' kategorisine düşer —
+    mevcut mentorlar filtreden kaybolmamalı."""
+    from app import db as db_module
+    from app.models.tables import MentorProfile
+
+    mentor_h, _, _, profile_id = _approved_mentor(client, name="Eski")
+    # Eski şemayla kaydedilmiş gibi doğrudan DB'ye yaz
+    with db_module.SessionLocal() as s:
+        p = s.get(MentorProfile, profile_id)
+        p.styles = ["manga", "anime"]
+        s.commit()
+
+    student_h, _ = _user(client, "Arayan")
+    # Yeni kanonik anahtarla arama eski kaydı bulmalı
+    found = client.get(
+        "/mentors", params={"style": "anime_manga"}, headers=student_h
+    ).json()["mentors"]
+    assert any(m["id"] == profile_id for m in found)
+    # Ve dönen liste tekrar etmemeli (manga+anime tek kategoriye indi)
+    row = next(m for m in found if m["id"] == profile_id)
+    assert row["styles"] == ["anime_manga"]
+
+
+def test_new_styles_are_stored_canonically(client, economy):
+    """Başvuruda eski anahtar gönderilse bile kanonik hâlde saklanır."""
+    h, _ = _user(client, "YeniStil")
+    r = _apply_mentor(client, h, styles=["manga", "suluboya", "concept_art"])
+    assert r.status_code == 200
+    me = client.get("/mentor/me", headers=h).json()
+    assert me["styles"] == ["anime_manga", "suluboya", "concept_art"]

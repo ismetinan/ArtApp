@@ -159,7 +159,6 @@ class _MentorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
-    final styles = styleLabels(t);
     return Card(
       child: ListTile(
         leading: mentor.portfolioSubmissionIds.isEmpty
@@ -179,7 +178,7 @@ class _MentorCard extends StatelessWidget {
         subtitle: Text(
           [
             if (mentor.styles.isNotEmpty)
-              mentor.styles.map((s) => styles[s] ?? s).join(', '),
+              styleDisplay(mentor.styles, t).join(', '),
             if (mentor.bio.isNotEmpty) mentor.bio,
           ].join(' • '),
           maxLines: 2,
@@ -329,7 +328,6 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
-    final styles = styleLabels(t);
     return Scaffold(
       appBar: AppBar(title: Text(mentor.displayName)),
       body: ListView(
@@ -359,7 +357,8 @@ class _MentorProfileScreenState extends State<MentorProfileScreen> {
             Wrap(
               spacing: 8,
               children: [
-                for (final s in mentor.styles) Chip(label: Text(styles[s] ?? s)),
+                for (final label in styleDisplay(mentor.styles, t))
+                  Chip(label: Text(label)),
               ],
             ),
           if (mentor.bio.isNotEmpty) ...[

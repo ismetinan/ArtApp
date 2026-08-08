@@ -29,6 +29,21 @@ from ..services.push import send_push
 
 REQUEST_TIMEOUT = timedelta(hours=48)
 
+# Mentor uzmanlık stilleri (müşteri isteği, 2026-08-08). `anime` ve `manga`
+# eskiden ayrı anahtarlardı, artık tek kategori — eski profiller kırılmasın diye
+# okuma ve filtrelemede eşleniyor, yazarken kanonik hâle çevriliyor.
+# Flutter'daki styleLabels/styleCanonical ile birebir aynı olmalı.
+STYLE_ALIASES = {"anime": "anime_manga", "manga": "anime_manga"}
+
+
+def _canonical_styles(styles: list | None) -> list[str]:
+    out: list[str] = []
+    for s in styles or []:
+        key = STYLE_ALIASES.get(s, s)
+        if key not in out:  # anime+manga birleşince tekrar etmesin
+            out.append(key)
+    return out
+
 router = APIRouter(tags=["mentors"])
 
 
@@ -106,7 +121,7 @@ def _profile_json(
         "user_id": p.user_id,
         "display_name": display_name,
         "bio": p.bio,
-        "styles": p.styles,
+        "styles": _canonical_styles(p.styles),
         "portfolio_submission_ids": p.portfolio_submission_ids,
         "is_available": p.is_available,
         "rating": round(avg, 1) if avg is not None else None,
@@ -139,7 +154,9 @@ def list_mentors(
         .where(MentorProfile.status == "approved")
     ).all()
     if style:
-        rows = [r for r in rows if style in (r[0].styles or [])]
+        # Filtre kanonik anahtarla gelir; eski kayıtlar eşlenerek karşılaştırılır
+        wanted = STYLE_ALIASES.get(style, style)
+        rows = [r for r in rows if wanted in _canonical_styles(r[0].styles)]
     if q:
         needle = q.strip().lower()
         rows = [
@@ -519,7 +536,7 @@ async def apply_mentor(
 
     profile = existing or MentorProfile(user_id=user.id)
     profile.bio = body.bio
-    profile.styles = body.styles
+    profile.styles = _canonical_styles(body.styles)
     profile.portfolio_submission_ids = body.portfolio_submission_ids
     profile.status = "pending"
     profile.sample_critique = body.sample_critique
@@ -550,7 +567,7 @@ def mentor_me(user: User = Depends(get_current_user), db: Session = Depends(get_
         "status": profile.status,
         "is_available": profile.is_available,
         "bio": profile.bio,
-        "styles": profile.styles,
+        "styles": _canonical_styles(profile.styles),
         "sample_critique": profile.sample_critique,
         # Mentor kendi linkini her zaman görür (onay beklerken de) — öğrenciye
         # yalnız onaylıysa gösterilir
@@ -710,7 +727,7 @@ def list_applications(
                 "id": p.id,
                 "display_name": name,
                 "bio": p.bio,
-                "styles": p.styles,
+                "styles": _canonical_styles(p.styles),
                 "portfolio_submission_ids": p.portfolio_submission_ids,
                 "created_at": p.created_at.isoformat(),
                 # Kalite kapısı: admin kararını asıl buna bakarak verir

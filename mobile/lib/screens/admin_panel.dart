@@ -126,7 +126,7 @@ class _ApplicationsTabState extends State<_ApplicationsTab> {
                           children: [
                             for (final s in appStyles)
                               Chip(
-                                  label: Text(styles[s] ?? s),
+                                  label: Text(styles[styleCanonical(s)] ?? s),
                                   visualDensity: VisualDensity.compact),
                           ],
                         ),

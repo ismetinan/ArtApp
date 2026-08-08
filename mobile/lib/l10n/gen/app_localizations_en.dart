@@ -833,6 +833,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminDecisionRejected => 'rejected';
 
   @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsBody => 'Language, theme, legal texts and feedback';
+
+  @override
+  String get accountSectionTitle => 'Account';
+
+  @override
+  String journeyCount(int count) {
+    return '$count assignments with your AI notes';
+  }
+
+  @override
+  String get styleSuluboya => 'Watercolour';
+
+  @override
+  String get styleGuasYagliboya => 'Gouache / Oil';
+
+  @override
+  String get styleConceptArt => 'Concept art';
+
+  @override
+  String get styleAnimeManga => 'Anime / Manga';
+
+  @override
   String get styleManga => 'Manga';
 
   @override
@@ -848,7 +874,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleDijital => 'Digital';
 
   @override
-  String get styleKarakalem => 'Pencil';
+  String get styleKarakalem => 'Pencil / Sketch';
 
   @override
   String get axisAnatomi => 'Anatomy';
