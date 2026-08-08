@@ -349,6 +349,30 @@ App Store Connect → **Business** → Agreements, Tax, and Banking
 Durum **Active** olmadan IAP ürünleri "Ready to Submit" olmaz — ürünleri
 oluşturabilirsin ama satılamazlar. Onay birkaç gün sürebilir, ilk bunu başlat.
 
+#### Adım 0.5 — DSA tacir (trader) beyanı ⚠️ AB dağıtımı için ZORUNLU
+
+App Store Connect → **Business** → Digital Services Act / Compliance
+
+Jeton ve Premium sattığımız an DSA'ya göre **tacir** sayılıyoruz (Md. 3(f):
+ticari amaçla hareket eden kişi). Şahıs şirketi olmak, küçük olmak fark
+etmiyor. Türkiye'de olmak da değiştirmiyor — kural, AB'li kullanıcılara
+dağıtım yapılmasına bağlı.
+
+**Sonucu:** Apple'ın istediği **adres, telefon, e-posta** AB'nin 27 ülkesinde
+App Store ürün sayfasında **herkese açık yayınlanır** (DSA Md. 30). Yayınlamadan
+tacir olmanın yolu yok.
+
+⚠️ Şahıs şirketiyle kayıtlı adres genelde EV ADRESİDİR ve telefonla birlikte
+kalıcı olarak yayına çıkar. Bunu istemiyorsan gönderimden ÖNCE bir iş adresi
+(şirket ya da sanal ofis) çözülmeli.
+
+**Zamanlama:** 17 Şubat 2025'ten beri AB dağıtımı olan her yeni gönderim ve
+güncelleme için tacir durumu beyan edilmiş VE doğrulanmış olmalı; uyulmazsa
+uygulama 27 AB ülkesinden kaldırılır. Apple doğrulama için belge isteyebilir —
+son dakikaya bırakma.
+
+Google Play'de de aynı beyan var (Play Console → Payments profile / DSA).
+
 #### Adım 1 — Abonelik grubu ve `premium_monthly`
 
 App Store Connect → **Apps** → Artora → sol menü **Monetization** →
