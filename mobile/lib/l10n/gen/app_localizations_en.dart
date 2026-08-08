@@ -729,6 +729,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get storeTitleAi => 'Jeton Store';
+
+  @override
   String get storeJetonSectionAi => 'Jeton packs';
 
   @override

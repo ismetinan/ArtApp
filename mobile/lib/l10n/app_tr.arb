@@ -391,6 +391,7 @@
       "count": {"type": "int"}
     }
   },
+  "storeTitleAi": "Jeton Mağazası",
   "storeJetonSectionAi": "Jeton paketleri",
   "storeJetonPackAi": "{count} jeton",
   "@storeJetonPackAi": {

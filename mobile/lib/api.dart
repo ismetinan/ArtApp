@@ -261,7 +261,13 @@ class ApiClient {
   bool jetonAiEconomy = false;
 
   /// Haftalık ücretsiz jeton tabanı ("her hafta 3'e tamamlanır" bilgisi).
+  /// Bu KULLANICININ tabanı — Premium satış metninde kullanma.
   int weeklyJetonFloor = 3;
+
+  /// Premium'un vaat ettiği haftalık taban. Mağaza kartı bunu yazar; kullanıcı
+  /// Premium olmadığı için weeklyJetonFloor yazılırsa kart Premium'u ücretsiz
+  /// katmanla aynı gösterir ve satın almak için sebep kalmaz.
+  int weeklyJetonFloorPremium = 25;
 
   /// AI aksiyon fiyatları (redline / serbest analiz) — sunucudan gelir.
   int aiCostRedline = 1;
@@ -594,6 +600,8 @@ class ApiClient {
     mentorMarketEnabled = j['mentor_market_enabled'] ?? mentorMarketEnabled;
     jetonAiEconomy = j['jeton_ai_economy'] ?? jetonAiEconomy;
     weeklyJetonFloor = j['weekly_jeton_floor'] ?? weeklyJetonFloor;
+    weeklyJetonFloorPremium =
+        j['weekly_jeton_floor_premium'] ?? weeklyJetonFloorPremium;
     final costs = j['ai_costs'];
     if (costs is Map) {
       aiCostRedline = costs['redline'] ?? aiCostRedline;

@@ -81,11 +81,15 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         "jeton_ai_economy": get_settings().jeton_ai_economy_enabled,
         # Haftalık ücretsiz jeton tabanı (yeni ekonomi) — "her hafta 3'e tamamlanır"
         # bilgilendirmesi istemcide sabit yazılmasın diye sunucudan gelir.
+        # Bu KULLANICININ tabanı; Premium'un satış metni için aşağıdaki ayrı alan
+        # kullanılmalı, yoksa paywall Premium'u ücretsiz katmanla aynı gösterir.
         "weekly_jeton_floor": (
             get_settings().weekly_jeton_floor_premium
             if billing_service.is_premium(user)
             else get_settings().weekly_jeton_floor
         ),
+        # Premium'un vaadi — mağaza kartı bunu yazar (kullanıcı Premium olmasa da)
+        "weekly_jeton_floor_premium": get_settings().weekly_jeton_floor_premium,
         # AI aksiyon fiyatları — istemci "1 jeton" yazısını buradan alır.
         "ai_costs": {
             "redline": get_settings().ai_cost_redline,

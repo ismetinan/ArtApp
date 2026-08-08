@@ -187,7 +187,10 @@ class _StoreScreenState extends State<StoreScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(t.storeTitle)),
+      appBar: AppBar(
+          title: Text(ApiClient.instance.jetonAiEconomy
+              ? t.storeTitleAi
+              : t.storeTitle)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : !_storeAvailable
@@ -279,7 +282,8 @@ class _PremiumCard extends StatelessWidget {
             for (final perk in ApiClient.instance.jetonAiEconomy
                 ? [
                     t.storePremiumPerkAi1,
-                    t.storePremiumPerkAi2(ApiClient.instance.weeklyJetonFloor),
+                    t.storePremiumPerkAi2(
+                        ApiClient.instance.weeklyJetonFloorPremium),
                     t.storePremiumPerkAi3,
                   ]
                 : [

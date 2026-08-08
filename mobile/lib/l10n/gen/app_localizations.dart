@@ -1340,6 +1340,12 @@ abstract class AppLocalizations {
   /// **'Jetonlar AI analizleri için kullanılır. Haftada {count} ücretsiz jetonun zaten var ve her hafta {count}\'e tamamlanır; buradan aldığın jetonların ise süresi dolmaz ve haftalık yenileme onlara dokunmaz. Dersler, yetenek ağacı ve mentor desteği ücretsiz — jeton yalnız AI analizini daha çok kullanmak için.'**
   String storeJetonExplainerAi(int count);
 
+  /// No description provided for @storeTitleAi.
+  ///
+  /// In tr, this message translates to:
+  /// **'Jeton Mağazası'**
+  String get storeTitleAi;
+
   /// No description provided for @storeJetonSectionAi.
   ///
   /// In tr, this message translates to:

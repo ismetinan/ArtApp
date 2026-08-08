@@ -240,6 +240,7 @@
   "aiWaitTitleAssignment": "Preparing your assignment",
   "aiWaitTitleLevel": "Determining your level",
   "storeJetonExplainerAi": "Jetons are used for AI analyses. You already get {count} free jetons a week and your balance is topped back up to {count} every week; jetons you buy here never expire and the weekly top-up doesn't touch them. Lessons, the skill tree and mentor support are free — jetons are only for using AI analysis more.",
+  "storeTitleAi": "Jeton Store",
   "storeJetonSectionAi": "Jeton packs",
   "storeJetonPackAi": "{count} jetons",
   "storePremiumPerkAi1": "A stronger AI model — more detailed and faster analysis",
