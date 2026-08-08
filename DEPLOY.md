@@ -256,7 +256,23 @@ OPENROUTER_MODEL=google/gemini-2.5-flash-lite     # ücretsiz katman
 OPENROUTER_PREMIUM_MODEL=google/gemini-2.5-flash  # Premium abone
 OPENROUTER_FALLBACK_MODEL=google/gemini-2.5-flash-lite
 AI_IMAGE_MAX_EDGE=1024                            # 0 = küçültme kapalı
+OPENROUTER_MAX_TOKENS=2000                        # çıktı tavanı (aşağıya bak)
 ```
+
+### ⚠️ OpenRouter kredisi
+
+Hesap şu an **ücretsiz katmanda ve 0 kredili** (`is_free_tier: true`,
+`total_credits: 0`). Ücretsiz katmanda paralı modeller çalışıyor ama
+"karşılanabilir" çıktı tavanı düşük. `OPENROUTER_MAX_TOKENS` gönderilmezse
+OpenRouter modelin TÜM çıktı bütçesini (65k) rezerve ediyor ve istek şu hatayla
+reddediliyor:
+
+> `402 — You requested up to 65535 tokens, but can only afford 16000`
+
+Kod artık her istekte `max_tokens` gönderiyor, bu yüzden paralı model kredisiz
+hesapta da çalışıyor (canlıda doğrulandı). Yine de **gerçek kullanıcı hacmi
+için krediye geçilmeli**: ücretsiz katmanın kendi kotası var ve dolunca analiz
+tamamen durur. https://openrouter.ai/settings/credits
 
 `OPENROUTER_PREMIUM_MODEL` boşsa Premium da normal modeli kullanır (sessiz
 düşüş) — yanlış yapılandırma yüzünden ödeme yapan kullanıcının analizi hiç

@@ -102,3 +102,57 @@ def test_premium_falls_back_when_unset(client, openrouter):
     from app.ai.factory import get_ai_provider
 
     assert get_ai_provider(premium=True)._model == "free/model"
+
+
+def test_openrouter_payload_caps_max_tokens(client, openrouter, monkeypatch):
+    """max_tokens GÖNDERİLMEZSE OpenRouter modelin tüm çıktı bütçesini (65k)
+    rezerve ediyor ve düşük bakiyeli hesapta istek 402 ile reddediliyor:
+    "You requested up to 65535 tokens, but can only afford 16000".
+    Canlıda bu yüzden premium model hiç çalışmıyordu."""
+    import json
+
+    import httpx
+
+    from app.ai.openrouter import OpenRouterProvider
+
+    sent = {}
+
+    class _Resp:
+        status_code = 200
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {
+                "choices": [
+                    {"message": {"content": json.dumps({
+                        "strengths_tr": ["iyi"],
+                        "findings": [],
+                        "overall_comment_tr": "devam",
+                    })}}
+                ]
+            }
+
+    class _Client:
+        def __init__(self, *a, **kw):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            return False
+
+        async def post(self, url, json=None, headers=None):
+            sent.update(json)
+            return _Resp()
+
+    monkeypatch.setattr(httpx, "AsyncClient", _Client)
+    monkeypatch.setattr(openrouter, "openrouter_max_tokens", 1234)
+
+    import asyncio
+
+    provider = OpenRouterProvider(api_key="k", model="m", fallback_model="")
+    asyncio.run(provider.redline_analysis(b"img", "ders", language="tr"))
+    assert sent["max_tokens"] == 1234

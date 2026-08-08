@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     # Ücretsiz model listesi dönüşümlü; güncel liste: openrouter.ai/collections/free-models
     openrouter_model: str = "google/gemma-4-26b-a4b-it:free"
     openrouter_fallback_model: str = "nvidia/nemotron-nano-12b-v2-vl:free"
+    # Modelden istenecek azami çıktı token'ı. GÖNDERİLMEZSE OpenRouter modelin
+    # tüm çıktı bütçesini (65k) rezerve ediyor ve düşük bakiyeli hesaplarda istek
+    # 402 ile reddediliyor ("requested up to 65535, can only afford 16000").
+    # Gerçek çıktımız 400-600 token; 2000 rahat bir tavan.
+    openrouter_max_tokens: int = 2000
     # Premium'un aldığı model. Boşsa Premium da openrouter_model'i kullanır.
     # Ücretsiz havuz dalgalı ve rate-limit yiyor; jeton satışı açılmadan önce
     # burası GERÇEKTEN paralı bir modele ayarlanmalı (bkz. plan A4).

@@ -12,6 +12,7 @@ import json
 import httpx
 from pydantic import BaseModel
 
+from ..core.config import get_settings
 from .base import AIProvider
 from .images import prepare_for_model
 from .prompts import MODERATION_PROMPT, assess_prompt, assignment_prompt, redline_prompt
@@ -73,6 +74,9 @@ class OpenRouterProvider(AIProvider):
     ) -> T:
         payload = {
             "model": model,
+            # Zorunlu: yoksa OpenRouter modelin tüm çıktı bütçesini rezerve edip
+            # düşük bakiyeli hesapta 402 döndürüyor (bkz. config yorumu).
+            "max_tokens": get_settings().openrouter_max_tokens,
             "messages": [{"role": "user", "content": content}],
             "response_format": {
                 "type": "json_schema",
