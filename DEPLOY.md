@@ -323,21 +323,106 @@ görürdü. Hem kötü deneyim hem App Store inceleme riski.
 `IOS_ALLOW_SANDBOX_PURCHASES=true` yalnız TestFlight'ta satın alma akışını
 denerken açılır; açık kalırsa sandbox satın almasıyla bedava Premium alınır.
 
-### App Store Connect adımları (sende)
+### App Store Connect adımları (sende) — adım adım
 
-1. **Anlaşmalar**: Business → Agreements → **Paid Applications Agreement**'ı
-   kabul et + banka ve vergi bilgilerini gir. ⚠️ Onay birkaç gün sürebilir ve
-   bu tamamlanmadan IAP ürünleri "Ready to Submit" olmaz.
-2. **Ürünler** (kimlikler Play ile birebir aynı olmalı — sunucu aynı katalogla
-   çalışıyor, `services/billing.py`):
-   - Tüketilebilir (Consumable): `jeton_5`, `jeton_15`, `jeton_40`
-   - Otomatik yenilenen abonelik: `premium_monthly` (bir abonelik grubu içinde)
-   - Her ürüne: fiyat, yerelleştirilmiş ad/açıklama, inceleme ekran görüntüsü.
-3. **Sandbox test hesabı**: Users and Access → Sandbox Testers → ekle.
-   Test cihazında App Store'dan çıkış yapıp sandbox hesabıyla dene.
-4. **Bayrak**: sunucuda `BILLING_ENABLED=true` (Android'le ortak).
-5. **Sürüm**: IAP ürünleri ilk kez yeni bir uygulama sürümüyle birlikte
-   incelemeye gönderilir.
+⚠️ **Ürün kimlikleri Play'dekiyle BİREBİR aynı olmalı.** Sunucu tek katalogla
+çalışıyor (`services/billing.py`); farklı yazarsan doğrulama `purchase_invalid`
+döner ve kullanıcı ödeme yapıp hak alamaz.
+
+| Kimlik | Tip | Verdiği hak |
+|---|---|---|
+| `jeton_5` | Consumable | 5 jeton |
+| `jeton_15` | Consumable | 15 jeton |
+| `jeton_40` | Consumable | 40 jeton |
+| `premium_monthly` | Auto-Renewable Subscription | Haftalık jeton tabanı 3 → 25 + güçlü AI modeli |
+
+---
+
+#### Adım 0 — Paid Applications Agreement ⚠️ ÖNCE BU
+
+App Store Connect → **Business** → Agreements, Tax, and Banking
+
+1. **Paid Applications** satırında "Request"/"Kabul et" → sözleşmeyi onayla.
+2. **Bank Account** ekle (IBAN, hesap sahibi adı vergi kaydıyla eşleşmeli).
+3. **Tax Forms** doldur (Türkiye için W-8BEN / W-8BEN-E istenir).
+
+Durum **Active** olmadan IAP ürünleri "Ready to Submit" olmaz — ürünleri
+oluşturabilirsin ama satılamazlar. Onay birkaç gün sürebilir, ilk bunu başlat.
+
+#### Adım 1 — Abonelik grubu ve `premium_monthly`
+
+App Store Connect → **Apps** → Artora → sol menü **Monetization** →
+**Subscriptions**
+
+1. **Create** ile bir abonelik grubu aç. Grup adı kullanıcıya görünür:
+   `Artora Premium`. (Grup mantığı: aynı gruptaki abonelikler birbirine
+   yükseltme/düşürme olur. Tek planımız var ama grup zorunlu.)
+2. Grup içinde **Create** → yeni abonelik:
+   - **Reference Name**: `Premium Monthly` (yalnız iç kullanım)
+   - **Product ID**: `premium_monthly` ← birebir böyle
+   - **Subscription Duration**: 1 Month
+3. **Subscription Prices** → Add → ülke/fiyat seç (Türkiye dahil tüm ülkeler).
+4. **App Store Localization** → Add → Türkçe:
+   - *Display Name*: `Artora Premium`
+   - *Description*: `Haftada 25 jeton ve daha güçlü yapay zekâ modeliyle daha
+     ayrıntılı, daha hızlı çizim analizi. Dersler ve mentor desteği zaten
+     ücretsiz — Premium yapay zekâ tarafını güçlendirir.`
+   İngilizce de ekle (App Store birincil dilin dışında sorabilir).
+5. **Review Information** → **Screenshot** yükle (uygulamadaki mağaza ekranının
+   görüntüsü). ⚠️ Eksikse ürün reddedilir.
+
+#### Adım 2 — Üç jeton paketi (Consumable)
+
+Sol menü **Monetization** → **In-App Purchases** → **Create**
+
+Her biri için (üç kez tekrar):
+
+1. **Type**: Consumable
+2. **Reference Name**: `Jeton 5` / `Jeton 15` / `Jeton 40`
+3. **Product ID**: `jeton_5` / `jeton_15` / `jeton_40` ← birebir böyle
+4. **Price** seç.
+5. **Localization** → Türkçe:
+   - `5 Jeton` / `15 Jeton` / `40 Jeton`
+   - Açıklama: `Yapay zekâ analizleri için {N} jeton. Satın alınan jetonların
+     süresi dolmaz ve haftalık ücretsiz yenileme onlara dokunmaz.`
+6. **Review Information** → açıklama + **screenshot** (mağaza ekranı).
+
+> Consumable seçmek önemli: jeton harcanıp tükeniyor. Non-Consumable seçersen
+> kullanıcı bir kez alır, tekrar satın alamaz.
+
+#### Adım 3 — Sandbox testçisi
+
+**Users and Access** → **Sandbox** → **Test Accounts** → ➕
+Gerçek olmayan bir e-posta kullan (Apple ID'ye dönüşür).
+
+Test cihazında: Ayarlar → App Store → mevcut Apple hesabından **çık**, sonra
+uygulama içinde satın alma yaparken sandbox hesabıyla giriş yap.
+Sandbox'ta gerçek para çekilmez; abonelikler hızlandırılmış yenilenir
+(1 ay ≈ 5 dakika).
+
+#### Adım 4 — Sunucuyu teste aç
+
+Railway → Variables:
+
+```
+BILLING_ENABLED=true
+IOS_ALLOW_SANDBOX_PURCHASES=true    # SADECE TEST SÜRESİNCE
+IOS_BILLING_ENABLED=true
+```
+
+#### Adım 5 — Test ettikten sonra kapat
+
+```
+IOS_ALLOW_SANDBOX_PURCHASES=false   # ⚠️ UNUTMA
+```
+
+Açık kalırsa sandbox satın almasıyla bedava Premium/jeton alınabilir.
+
+#### Adım 6 — İncelemeye gönder
+
+IAP ürünleri **ilk kez bir uygulama sürümüyle birlikte** incelenir:
+sürüm sayfasında **In-App Purchases and Subscriptions** bölümünden ürünleri
+sürüme ekle, sonra Submit.
 
 ### Telefon testi
 
