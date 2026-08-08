@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import (
     AbilityScore,
+    AnalysisJob,
     Assignment,
     SkillNode,
     Submission,
@@ -20,6 +21,7 @@ from ..models.tables import (
 )
 from ..services.billing import is_premium
 from ..services.gamification import award_xp, bump_ability
+from ..services import analysis_jobs
 from ..services.quota import spend_ai
 from ..services.storage import UploadError, read_upload, save_drawing
 
@@ -229,6 +231,159 @@ async def submit_assignment(
         "level": user.level,
         "xp": user.xp,
     }
+
+
+# ---------- Asenkron analiz (Faz 2) ----------
+#
+# Senkron uçlar YUKARIDA aynen duruyor: Play'deki eski sürümler onları çağırıyor
+# ve kırılmamalı. Yeni istemci aşağıdaki -async uçlarını kullanır; fark, AI'ın
+# yanıt içinde değil arka planda koşması ve istemcinin iş kimliğiyle sonucu
+# istediği zaman alabilmesi (uygulama kapansa bile).
+
+
+@router.post("/skill-tree/{node_id}/submit-async")
+async def submit_assignment_async(
+    node_id: str,
+    background: BackgroundTasks,
+    file: UploadFile,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Ödevi yükler ve analiz işini kuyruğa alır; iş kimliğini hemen döner."""
+    node = db.get(SkillNode, node_id)
+    if node is None:
+        raise HTTPException(status_code=404, detail=msg("node_not_found", user.language))
+
+    completed = _completed_ids(db, user)
+    scores = _ability_scores(db, user)
+    nodes = db.execute(select(SkillNode)).scalars().all()
+    by_id = {n.id: n for n in nodes}
+    if _node_status(node, completed, scores, by_id)[0] == "locked":
+        raise HTTPException(status_code=403, detail=msg("node_locked", user.language))
+
+    # Takılı kalmış işleri önce düşür: hem iadeleri işler hem de aşağıdaki
+    # "zaten çalışan iş var mı" kontrolü doğru sonuç versin.
+    if analysis_jobs.fail_stale(db, user.id):
+        db.commit()
+    active = db.execute(
+        select(AnalysisJob.id).where(
+            AnalysisJob.user_id == user.id,
+            AnalysisJob.status.in_(("queued", "running")),
+        )
+    ).first()
+    if active is not None:
+        raise HTTPException(
+            status_code=409, detail=msg("analysis_in_progress", user.language)
+        )
+
+    try:
+        content = await read_upload(file)
+        rel_path = save_drawing(content, file.filename or "odev.png")
+    except UploadError as e:
+        raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))
+
+    cost = get_settings().ai_cost_redline
+    spend_ai(db, user, cost, "ai_redline")  # yetersizse 402, hiçbir şey yazılmaz
+    submission = Submission(
+        user_id=user.id, node_id=node.id, kind="assignment", file_path=rel_path
+    )
+    db.add(submission)
+    db.flush()
+    job = analysis_jobs.create(
+        db, user, "assignment", submission.id, cost, node_id=node.id
+    )
+    db.commit()
+
+    background.add_task(
+        analysis_jobs.run, job.id, content, _node_title(node, user.language), user.language
+    )
+    return {"job_id": job.id, "submission_id": submission.id, "status": "queued"}
+
+
+@router.post("/free-analysis-async")
+async def free_analysis_async(
+    background: BackgroundTasks,
+    file: UploadFile,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Serbest çizim analizini kuyruğa alır; iş kimliğini hemen döner."""
+    settings = get_settings()
+    if analysis_jobs.fail_stale(db, user.id):
+        db.commit()
+    active = db.execute(
+        select(AnalysisJob.id).where(
+            AnalysisJob.user_id == user.id,
+            AnalysisJob.status.in_(("queued", "running")),
+        )
+    ).first()
+    if active is not None:
+        raise HTTPException(
+            status_code=409, detail=msg("analysis_in_progress", user.language)
+        )
+
+    if not settings.jeton_ai_economy_enabled and not is_premium(user):
+        cutoff = datetime.now(timezone.utc) - FREE_ANALYSIS_WINDOW
+        recent = db.execute(
+            select(Submission.id).where(
+                Submission.user_id == user.id,
+                Submission.kind == "free",
+                Submission.created_at >= cutoff,
+            )
+        ).first()
+        if recent is not None:
+            raise HTTPException(
+                status_code=429, detail=msg("free_analysis_limit", user.language)
+            )
+
+    try:
+        content = await read_upload(file)
+        rel_path = save_drawing(content, file.filename or "serbest.png")
+    except UploadError as e:
+        raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))
+
+    cost = settings.ai_cost_free_analysis
+    spend_ai(db, user, cost, "ai_free_analysis")
+    submission = Submission(user_id=user.id, kind="free", file_path=rel_path)
+    db.add(submission)
+    db.flush()
+    job = analysis_jobs.create(db, user, "free", submission.id, cost)
+    db.commit()
+
+    background.add_task(
+        analysis_jobs.run, job.id, content, _FREE_CONTEXT.get(user.language), user.language
+    )
+    return {"job_id": job.id, "submission_id": submission.id, "status": "queued"}
+
+
+@router.get("/analysis-jobs/latest")
+def latest_analysis_job(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
+    """Kurtarma ucu: uygulama açılışta bunu sorgular. Uygulama analiz sırasında
+    kapandıysa sonucu burada bulur — yeniden yükleyip ikinci kez jeton harcamaz."""
+    if analysis_jobs.fail_stale(db, user.id):
+        db.commit()
+    job = db.execute(
+        select(AnalysisJob)
+        .where(AnalysisJob.user_id == user.id)
+        .order_by(AnalysisJob.id.desc())
+    ).scalars().first()
+    if job is None:
+        return {"job": None}
+    return {"job": analysis_jobs.to_json(job, user.language)}
+
+
+@router.get("/analysis-jobs/{job_id}")
+def get_analysis_job(
+    job_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
+    if analysis_jobs.fail_stale(db, user.id):
+        db.commit()
+    job = db.get(AnalysisJob, job_id)
+    if job is None or job.user_id != user.id:
+        raise HTTPException(status_code=404, detail=msg("job_not_found", user.language))
+    return analysis_jobs.to_json(job, user.language)
 
 
 # ---------- Serbest çizim analizi ----------

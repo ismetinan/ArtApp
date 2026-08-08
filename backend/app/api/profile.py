@@ -11,7 +11,7 @@ from ..api.deps import get_current_user
 from ..core.config import get_settings
 from ..core.messages import msg
 from ..db import get_db
-from ..models.tables import AbilityScore, MentorProfile, Submission, User
+from ..models.tables import AbilityHistory, AbilityScore, MentorProfile, Submission, User
 from ..services import billing as billing_service
 from ..services import jetons
 from ..services import moderation
@@ -54,6 +54,12 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         .order_by(Submission.created_at)
     ).scalars().all()
     score_map = {s.axis: s.score for s in scores}
+    # Zaman serisi kronolojik; grafiği istemci çiziyor
+    history = db.execute(
+        select(AbilityHistory)
+        .where(AbilityHistory.user_id == user.id)
+        .order_by(AbilityHistory.created_at)
+    ).scalars().all()
     mentor = db.execute(
         select(MentorProfile).where(MentorProfile.user_id == user.id)
     ).scalar_one_or_none()
@@ -101,6 +107,17 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
         "ability_chart": (
             {a.value: score_map.get(a.value, 0) for a in SkillAxis} if score_map else {}
         ),
+        # Faz 3: eksen skorlarının zaman serisi — "perspektifin 8 haftada 34 → 61"
+        # anlatısı bunun üzerine kuruluyor. Yalnız ölçüme dayalı (redline
+        # bulgularından gelen) güncellemeler kaydediliyor.
+        "ability_history": [
+            {
+                "axis": h.axis,
+                "score": h.score,
+                "at": h.created_at.isoformat() if h.created_at else None,
+            }
+            for h in history
+        ],
         # "Gelişim Macerası": kronolojik, her ödev kendi AI notlarıyla
         "gelisim_macerasi": [
             {

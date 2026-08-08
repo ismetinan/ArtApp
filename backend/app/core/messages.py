@@ -112,6 +112,15 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "Şu an müsait mentor yok — jetonun harcanmadı, biraz sonra tekrar dene.",
         "en": "No mentor is available right now — your jeton wasn't spent, try again soon.",
     },
+    # --- Asenkron analiz işleri (Faz 2, 2026-08-08) ---
+    "analysis_in_progress": {
+        "tr": "Zaten devam eden bir analizin var. O bitince yenisini gönderebilirsin.",
+        "en": "You already have an analysis in progress. You can send another once it finishes.",
+    },
+    "job_not_found": {
+        "tr": "Bu analiz bulunamadı.",
+        "en": "That analysis couldn't be found.",
+    },
     # --- Jeton = AI ekonomisi (2026-08-08) ---
     # AI harcaması için ayrı çift: eski jeton_insufficient mentor isteği metnidir
     # ("bu istek"), canlı Android'de kullanılıyor ve dokunulmuyor.
@@ -273,6 +282,24 @@ _CATALOG: dict[str, dict[str, str]] = {
     "push_request_expired_body": {
         "tr": "Mentor isteğin zamanında cevaplanamadı. Dilersen tekrar gönderebilirsin.",
         "en": "Your mentor request wasn't answered in time. Feel free to send it again.",
+    },
+    # Analiz arka planda bittiğinde — kullanıcı uygulamadan çıkmış olabilir,
+    # asıl mesele bu (senkron akışta çıkarsa sonucu hiç göremiyordu)
+    "push_analysis_ready_title": {
+        "tr": "Analizin hazır",
+        "en": "Your analysis is ready",
+    },
+    "push_analysis_ready_body": {
+        "tr": "Çizimine yapay zekâ geri bildirimi geldi — bakmak için dokun.",
+        "en": "AI feedback on your drawing is in — tap to take a look.",
+    },
+    "push_analysis_failed_title": {
+        "tr": "Analiz tamamlanamadı",
+        "en": "The analysis couldn't be completed",
+    },
+    "push_analysis_failed_body": {
+        "tr": "Bir sorun çıktı ve jetonun iade edildi. Tekrar deneyebilirsin.",
+        "en": "Something went wrong and your jeton was refunded. Feel free to try again.",
     },
     "push_application_approved_title": {
         "tr": "Mentor başvurun onaylandı 🎉",

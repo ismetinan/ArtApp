@@ -215,6 +215,33 @@ class EarningsInfo {
         rating = (j['rating'] as num?)?.toDouble();
 }
 
+/// Asenkron analiz işinin durumu (Faz 2).
+class AnalysisJobInfo {
+  final int jobId;
+  final String status; // queued | running | done | failed
+  final String kind; // assignment | free
+  final String? nodeId;
+  final int? submissionId;
+  final RedlineResult? analysis;
+  final int xpAwarded;
+
+  /// Sunucudan YERELLEŞTİRİLMİŞ gelir; istemci hata anahtarı sözlüğü tutmaz.
+  final String? error;
+
+  bool get isFinished => status == 'done' || status == 'failed';
+
+  AnalysisJobInfo.fromJson(Map<String, dynamic> j)
+      : jobId = j['job_id'],
+        status = j['status'],
+        kind = j['kind'] ?? 'assignment',
+        nodeId = j['node_id'],
+        submissionId = j['submission_id'],
+        analysis =
+            j['analysis'] == null ? null : RedlineResult.fromJson(j['analysis']),
+        xpAwarded = j['xp_awarded'] ?? 0,
+        error = j['error'];
+}
+
 class ApiClient {
   ApiClient._();
   static final instance = ApiClient._();
@@ -474,6 +501,46 @@ class ApiClient {
       level: j['level'] as int,
       submissionId: j['submission_id'] as int,
     );
+  }
+
+  // ---------- Asenkron analiz (Faz 2) ----------
+  //
+  // Yükleme artık AI'ı beklemiyor: sunucu iş kimliğini hemen döner, analiz
+  // arka planda koşar. Uygulama kapansa bile iş kaybolmaz — açılışta
+  // getLatestAnalysisJob ile sonuç bulunur.
+
+  Future<int> submitAssignmentAsync(
+      String nodeId, List<int> bytes, String name) async {
+    final req = http.MultipartRequest(
+        'POST', Uri.parse('$apiBase/skill-tree/$nodeId/submit-async'))
+      ..headers.addAll(authHeaders)
+      ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: name));
+    final r = await http.Response.fromStream(await req.send());
+    return _decode(r)['job_id'] as int;
+  }
+
+  Future<int> submitFreeAnalysisAsync(List<int> bytes, String name) async {
+    final req =
+        http.MultipartRequest('POST', Uri.parse('$apiBase/free-analysis-async'))
+          ..headers.addAll(authHeaders)
+          ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: name));
+    final r = await http.Response.fromStream(await req.send());
+    return _decode(r)['job_id'] as int;
+  }
+
+  Future<AnalysisJobInfo> getAnalysisJob(int jobId) async {
+    final r = await http.get(Uri.parse('$apiBase/analysis-jobs/$jobId'),
+        headers: authHeaders);
+    return AnalysisJobInfo.fromJson(Map<String, dynamic>.from(_decode(r)));
+  }
+
+  /// Kurtarma: son iş (varsa). Uygulama analiz sırasında kapandıysa sonuç burada.
+  Future<AnalysisJobInfo?> getLatestAnalysisJob() async {
+    final r = await http.get(Uri.parse('$apiBase/analysis-jobs/latest'),
+        headers: authHeaders);
+    final j = _decode(r)['job'];
+    if (j == null) return null;
+    return AnalysisJobInfo.fromJson(Map<String, dynamic>.from(j));
   }
 
   /// Topluluk galerisi: herkese açık paylaşılan çizimler (en yeni önce).

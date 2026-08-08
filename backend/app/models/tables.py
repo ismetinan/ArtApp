@@ -281,6 +281,66 @@ class Purchase(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class AbilityHistory(Base):
+    """Eksen skorunun zaman serisi (Faz 3, 2026-08-08).
+
+    AbilityScore yalnız GÜNCEL değeri tutuyor; "perspektifin 8 haftada 34 → 61"
+    gibi gelişim anlatısı ancak geçmiş saklanırsa kurulabilir — ki ürünün asıl
+    vaadi bu. Yalnız ÖLÇÜME dayalı güncellemeler (redline bulgularından gelen)
+    kaydedilir; eski sabit +8 artışları gürültü olurdu.
+    """
+
+    __tablename__ = "ability_history"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    axis: Mapped[str] = mapped_column(String(32))
+    score: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class AnalysisJob(Base):
+    """Asenkron AI analiz işi (Faz 2, 2026-08-08).
+
+    Neden var: AI çağrısı istek içinde SENKRON koşuyordu ve 30-60 sn sürüyordu.
+    İstemci bu sırada ölürse (Android düşük bellekte kamera/galeri dönüşünde
+    uygulamayı kapatıyor) sunucu analizi tamamlayıp kaydediyor ama sonuç
+    kullanıcıya hiç ulaşmıyordu — jeton harcanmış, çizim yalnız galeride.
+    Artık yükleme anında bu satır oluşur, iş kimliği hemen döner ve istemci
+    ne zaman isterse durumu sorgular; uygulama kapansa da iş kaybolmaz.
+
+    result: bitmiş analizin gövdesi (redline). Submission.ai_result ile aynı
+    veriyi taşır; işte de tutulur ki istemci tek sorguyla sonucu alabilsin.
+    """
+
+    __tablename__ = "analysis_jobs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(16))  # assignment | free
+    node_id: Mapped[str | None] = mapped_column(
+        ForeignKey("skill_nodes.id"), nullable=True
+    )
+    submission_id: Mapped[int | None] = mapped_column(
+        ForeignKey("submissions.id"), nullable=True
+    )
+    # queued: sıraya girdi | running: AI çalışıyor | done | failed
+    status: Mapped[str] = mapped_column(String(16), default="queued", index=True)
+    result: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Yerelleştirilebilir hata anahtarı (messages.py); ham hata metni DEĞİL
+    error_code: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    xp_awarded: Mapped[int] = mapped_column(Integer, default=0)
+    # Harcanan jeton — iş başarısız olursa bu kadar iade edilir. Senkron akışta
+    # iadeyi transaction rollback'i yapıyordu; asenkronda yükleme ayrı commit
+    # olduğu için AÇIK iade şart (para/güven akışı, CLAUDE.md §6).
+    jeton_cost: Mapped[int] = mapped_column(Integer, default=0)
+    refunded: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
 class AbilityScore(Base):
     __tablename__ = "ability_scores"
     __table_args__ = (UniqueConstraint("user_id", "axis"),)

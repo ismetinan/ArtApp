@@ -710,8 +710,8 @@ class AppLocalizationsTr extends AppLocalizations {
       'Seçtiğin fotoğraf uygulama arka planda kapatıldığı için gönderilemedi. Dersi açıp tekrar dener misin?';
 
   @override
-  String get recoveredAnalysisSaved =>
-      'Analizin tamamlandı ama uygulama kapandığı için gösterilemedi. Sonucu Profil → Gelişim Macerası\'nda bulabilirsin — tekrar yüklemene gerek yok.';
+  String get analysisStillRunning =>
+      'Analizin hâlâ sürüyor. Uygulamayı kapatabilirsin — bittiğinde bildirim göndereceğiz.';
 
   @override
   String get aiWaitTitleAssignment => 'Ödevin hazırlanıyor';

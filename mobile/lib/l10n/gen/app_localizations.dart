@@ -1304,11 +1304,11 @@ abstract class AppLocalizations {
   /// **'Seçtiğin fotoğraf uygulama arka planda kapatıldığı için gönderilemedi. Dersi açıp tekrar dener misin?'**
   String get recoveredPickRetry;
 
-  /// No description provided for @recoveredAnalysisSaved.
+  /// No description provided for @analysisStillRunning.
   ///
   /// In tr, this message translates to:
-  /// **'Analizin tamamlandı ama uygulama kapandığı için gösterilemedi. Sonucu Profil → Gelişim Macerası\'nda bulabilirsin — tekrar yüklemene gerek yok.'**
-  String get recoveredAnalysisSaved;
+  /// **'Analizin hâlâ sürüyor. Uygulamayı kapatabilirsin — bittiğinde bildirim göndereceğiz.'**
+  String get analysisStillRunning;
 
   /// No description provided for @aiWaitTitleAssignment.
   ///

@@ -234,7 +234,7 @@
   "aiWaitTipWriting": "Writing your feedback…",
   "aiWaitStayHint": "This can take 30-60 seconds. If you leave, the analysis isn't lost — it's saved to your Progress Journey.",
   "recoveredPickRetry": "The photo you picked couldn't be sent because the app was closed in the background. Could you open the lesson and try again?",
-  "recoveredAnalysisSaved": "Your analysis finished but couldn't be shown because the app closed. You'll find it under Profile → Progress Journey — no need to upload again.",
+  "analysisStillRunning": "Your analysis is still running. You can close the app — we'll notify you when it's done.",
   "aiWaitTitleAssignment": "Preparing your assignment",
   "aiWaitTitleLevel": "Determining your level",
   "storeJetonExplainerAi": "Jetons are used for AI analyses. You already get {count} free jetons a week and your balance is topped back up to {count} every week; jetons you buy here never expire and the weekly top-up doesn't touch them. Lessons, the skill tree and mentor support are free — jetons are only for using AI analysis more.",

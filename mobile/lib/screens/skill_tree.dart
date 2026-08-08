@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import '../analysis_watcher.dart';
 import '../pending_analysis.dart';
 import 'ai_wait.dart';
 import 'redline.dart';
@@ -35,7 +36,10 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     _future = ApiClient.instance.getTree();
     // Android seçici/analiz sırasında uygulamayı öldürdüyse kurtarma
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _recoverPending());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _recoverPending();
+      _recoverJob();
+    });
   }
 
   @override
@@ -46,7 +50,10 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _recoverPending();
+    if (state == AppLifecycleState.resumed) {
+      _recoverPending();
+      _recoverJob();
+    }
   }
 
   /// Yarım kalmış analizi kurtarır (bkz. lib/pending_analysis.dart).
@@ -79,17 +86,57 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
         }
         return;
       }
-      // stageUploading
       await PendingAnalysis.clear();
-      if (!mounted) return;
-      final t = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(t.recoveredAnalysisSaved),
-        duration: const Duration(seconds: 8),
-      ));
     } finally {
       _recovering = false;
     }
+  }
+
+  /// Yarım kalmış analiz İŞİNİ kurtarır (Faz 2).
+  ///
+  /// Uygulama analiz sırasında kapansa bile iş sunucuda koşmaya devam ediyor;
+  /// burada ya bitmiş sonucu gösteriyoruz ya da beklemeyi kaldığı yerden
+  /// sürdürüyoruz. Kullanıcı tekrar yükleyip ikinci kez jeton harcamıyor.
+  Future<void> _recoverJob() async {
+    if (_recovering || _freeBusy) return;
+    _recovering = true;
+    try {
+      final job = await AnalysisWatcher.recover();
+      if (job == null || !mounted) return;
+      if (job.isFinished) {
+        if (job.status == 'done' && job.analysis != null) {
+          await _showRecovered(job);
+        } else if (job.status == 'failed' && mounted) {
+          final t = AppLocalizations.of(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(job.error ?? t.errorUnexpected)));
+        }
+        return;
+      }
+      // Hâlâ koşuyor: beklemeyi sürdür
+      await _awaitJob(job.jobId);
+    } catch (_) {
+      // Kurtarma en iyi çabadır; ağ yoksa sessizce geç
+    } finally {
+      _recovering = false;
+    }
+  }
+
+  Future<void> _showRecovered(AnalysisJobInfo job) async {
+    if (!mounted || job.submissionId == null) return;
+    await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => RedlineScreen(
+        // Yerel dosya yok (uygulama yeniden başladı) — çizim sunucudan
+        image: NetworkImage(
+          ApiClient.instance.imageUrl(job.submissionId!),
+          headers: ApiClient.instance.authHeaders,
+        ),
+        analysis: job.analysis!,
+        xpAwarded: job.xpAwarded,
+        submissionId: job.submissionId,
+      ),
+    ));
+    if (mounted) _reload();
   }
 
   @override
@@ -122,36 +169,73 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   Future<void> _sendFreeAnalysis(XFile file) async {
     if (!mounted) return;
     setState(() => _freeBusy = true);
-    await PendingAnalysis.mark(
-        PendingAnalysis.freeAnalysisNode, PendingAnalysis.stageUploading);
-    if (!mounted) return; // mark() async gap
-    AiWait.show(context); // hide() sayfa geçişinden önce, tam bir kez
-    ({RedlineResult analysis, int xpAwarded, int level, int submissionId})? result;
-    Object? error;
-    try {
-      result = await ApiClient.instance
-          .submitFreeAnalysis(await file.readAsBytes(), file.name);
-    } catch (e) {
-      error = e;
-    }
-    await PendingAnalysis.clear();
+    await PendingAnalysis.clear(); // seçim tamam, artık iş kimliği takip ediyor
     if (!mounted) return;
-    AiWait.hide(context);
-    setState(() => _freeBusy = false);
-    if (error != null) {
-      // Jeton yetersizse (402) ve mağaza açıksa "Jeton Al" kısayolu eklenir;
-      // eski ekonomideki haftalık limit (429) düz mesaj olarak gösterilir.
-      showErrorWithStoreAction(context, error);
+
+    int jobId;
+    try {
+      jobId = await ApiClient.instance
+          .submitFreeAnalysisAsync(await file.readAsBytes(), file.name);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _freeBusy = false);
+      // Jeton yetersizse (402) ve mağaza açıksa "Jeton Al" kısayolu eklenir.
+      showErrorWithStoreAction(context, e);
       return;
     }
+    await AnalysisWatcher.remember(jobId);
+    if (!mounted) return;
+    await _awaitJob(jobId, image: FileImage(File(file.path)));
+    if (mounted) setState(() => _freeBusy = false);
+  }
+
+  /// İşi bekler ve sonucu gösterir. Bekleme modalı burada açılıp kapanıyor;
+  /// modal artık ZORUNLU değil — iş sunucuda koştuğu için kullanıcı çıksa da
+  /// sonuç kaybolmaz, ama akışta kalması hâlâ en iyi deneyim.
+  Future<void> _awaitJob(int jobId, {ImageProvider? image}) async {
+    AiWait.show(context);
+    AnalysisJobInfo job;
+    try {
+      job = await AnalysisWatcher.waitFor(jobId);
+    } catch (e) {
+      if (!mounted) return;
+      AiWait.hide(context);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+      return;
+    }
+    if (!mounted) return;
+    AiWait.hide(context);
+
+    if (job.status == 'failed') {
+      final t = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(job.error ?? t.errorUnexpected)));
+      return;
+    }
+    if (job.status != 'done' || job.analysis == null) {
+      // İstemci zaman aşımı — iş sunucuda sürüyor, sonuç kaybolmuyor
+      final t = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.analysisStillRunning), duration: const Duration(seconds: 6)));
+      return;
+    }
+    // Kurtarma yolunda yerel dosya elimizde yok (uygulama yeniden başladı) —
+    // çizimi sunucudan çekiyoruz.
+    final shown = image ??
+        NetworkImage(
+          ApiClient.instance.imageUrl(job.submissionId!),
+          headers: ApiClient.instance.authHeaders,
+        );
     await Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => RedlineScreen(
-        image: FileImage(File(file.path)),
-        analysis: result!.analysis,
-        xpAwarded: 0,
-        submissionId: result.submissionId,
+        image: shown,
+        analysis: job.analysis!,
+        xpAwarded: job.xpAwarded,
+        submissionId: job.submissionId,
       ),
     ));
+    if (mounted) _reload(); // ağaç ilerlemesi değişmiş olabilir
   }
 
   int _depth(SkillNode node, Map<String, SkillNode> byId, [int guard = 0]) {
@@ -435,39 +519,65 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
   Future<void> _sendAssignment(XFile file) async {
     if (!mounted) return;
     setState(() => _submitting = true);
-    await PendingAnalysis.mark(widget.node.id, PendingAnalysis.stageUploading);
-    if (!mounted) return; // mark() async gap
-    // Bekleme modalı: AI senkron koşuyor ve 30-60 sn sürebiliyor.
-    // hide() TAM OLARAK BİR KEZ ve modal en üstteyken çağrılmalı — push
-    // döndükten sonra çağrılırsa açık olan sayfayı pop eder.
+    await PendingAnalysis.clear(); // seçim tamam, takibi iş kimliği devralıyor
+    if (!mounted) return;
+
+    int jobId;
+    try {
+      jobId = await ApiClient.instance
+          .submitAssignmentAsync(widget.node.id, await file.readAsBytes(), file.name);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      showErrorWithStoreAction(context, e); // 402'de "Jeton Al" kısayolu
+      return;
+    }
+    await AnalysisWatcher.remember(jobId);
+    if (!mounted) return;
+
+    // Yükleme bitti; analiz artık SUNUCUDA koşuyor. Kullanıcı çıksa da iş
+    // kaybolmaz — bekleme modalı bu yüzden artık veri kaybını önleyen bir
+    // güvenlik önlemi değil, yalnızca daha iyi bir deneyim.
     AiWait.show(context);
-    ({RedlineResult analysis, int xpAwarded, int level, int submissionId})? result;
+    AnalysisJobInfo? job;
     Object? error;
     try {
-      result = await ApiClient.instance
-          .submitAssignment(widget.node.id, await file.readAsBytes(), file.name);
-      _completedNow = true;
+      job = await AnalysisWatcher.waitFor(jobId);
     } catch (e) {
       error = e;
     }
-    // Modal PopScope ile geri tuşunu kilitlediği için bu ekran await sırasında
-    // unmount olamaz; yine de savunmacı kontrol.
-    // Sonuç elimizde (ya da hata alındı) — kurtarma bayrağı artık gereksiz
-    await PendingAnalysis.clear();
     if (!mounted) return;
     AiWait.hide(context);
     setState(() => _submitting = false);
+
+    final t = AppLocalizations.of(context);
     if (error != null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(friendlyError(context, error))));
       return;
     }
+    final done = job!;
+    if (done.status == 'failed') {
+      // Sunucu jetonu iade etti; mesaj yerelleştirilmiş olarak oradan geliyor
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(done.error ?? t.errorUnexpected)));
+      return;
+    }
+    final analysis = done.analysis;
+    if (done.status != 'done' || analysis == null) {
+      // İstemci zaman aşımı — iş sunucuda sürüyor, sonuç kaybolmuyor
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(t.analysisStillRunning),
+          duration: const Duration(seconds: 6)));
+      return;
+    }
+    if (done.xpAwarded > 0) _completedNow = true;
     await Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => RedlineScreen(
         image: FileImage(File(file.path)),
-        analysis: result!.analysis,
-        xpAwarded: result.xpAwarded,
-        submissionId: result.submissionId,
+        analysis: analysis,
+        xpAwarded: done.xpAwarded,
+        submissionId: done.submissionId,
       ),
     ));
   }
