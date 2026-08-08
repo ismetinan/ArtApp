@@ -7,19 +7,15 @@ Alan alan aşağıdaki metinleri gir. Karakter sınırları başlıklarda yazıy
 false). Metinlerde jeton satın almadan bahsedilmiyor — bahsedilirse Apple
 "tanımlı ürün yok" diye sorar.
 
-⚠️ **Aşağıdaki metinler ESKİ ekonomiyi anlatıyor ve iOS 1.0 bilinçli olarak eski
-modelle gidiyor** (jeton = mentor parası, AI günlük kotayla ücretsiz;
-`JETON_AI_ECONOMY_ENABLED=false`). Bayrak iOS'ta açıldığında (iOS IAP sonrası)
-şu iki cümle **yanlış** hale gelir ve yeni sürümde düzeltilmelidir:
+✅ **Metinler YENİ ekonomiye göre yazıldı** (jeton = AI kullanım birimi,
+mentorluk ücretsiz). Bu metinlerle göndermek için sunucuda
+`JETON_AI_ECONOMY_ENABLED=true` OLMALI — açıklama ile uygulamanın davranışı
+uyuşmazsa Apple reddeder.
 
-- §2 Description: *"Yapay zekâ analizi ücretsiz ve günlük kotayla sınırsıza yakın"*
-  → yeni modelde haftada 3 ücretsiz jeton, fazlası satın alınıyor.
-- §2 Description: *"AI yetmezse jetonunla ödevini gerçek bir mentora gönder"*
-  → yeni modelde mentorluk tamamen ücretsiz, jeton yalnız AI için.
-
-Ayrıca bayrak açıldığında **App Privacy'ye `Purchases` eklenmeli** ve
-**EULA alanına `https://artapp-production.up.railway.app/terms`** girilmelidir
-(bağış kuralları ve jetonun nakde çevrilemezliği orada beyan ediliyor).
+Satın alma açıkken ayrıca:
+- **App Privacy'ye `Purchases` eklenmeli**
+- **EULA alanına** `https://artapp-production.up.railway.app/terms` (jetonun
+  nakde çevrilemezliği ve bağış kuralları orada beyan ediliyor)
 
 ---
 
@@ -57,10 +53,10 @@ NASIL ÇALIŞIR
 
 1. Son 3 çizimini yükle — AI güçlü ve zayıf yönlerini çıkarır.
 2. Yetenek ağacını takip et — her düğümde özenle seçilmiş video dersler var.
-3. Ödevini yükle — anında ve ücretsiz "redline" analizi al: çizimin üzerinde
-   somut noktalar, neyin çalıştığı ve neyi denemen gerektiği.
+3. Ödevini yükle — "redline" analizi al: çizimin üzerinde somut noktalar,
+   neyin çalıştığı ve neyi denemen gerektiği.
 4. XP kazan, seviye atla, ability chart'ının büyümesini izle.
-5. AI yetmezse jetonunla ödevini gerçek bir mentora gönder.
+5. Bir insan gözü istersen ödevini ücretsiz olarak bir mentora gönder.
 
 ARTORA'YI FARKLI KILAN
 
@@ -73,12 +69,19 @@ ARTORA'YI FARKLI KILAN
 • Topluluk galerisinde diğer çizerlerin paylaştıklarına bak, istersen kendi
   çalışmanı paylaş.
 
-MENTOR DESTEĞİ
+MENTOR DESTEĞİ ÜCRETSİZ
 
-Yapay zekâ analizi ücretsiz ve günlük kotayla sınırsıza yakın. Bir insana
-sormak istediğinde jetonunu harcayıp ödevini mentor havuzuna gönderirsin;
-onaylı bir mentor çizimine bakıp kişisel geri bildirim yazar. Her hafta
-ücretsiz jeton kazanırsın.
+Ödevini bir mentora göndermek jeton harcamaz. Onaylı bir mentor çizimine bakıp
+kişisel geri bildirim yazar. Adil kalması için aynı mentora 24 saatte bir soru
+sorabilir, aynı anda en fazla 3 açık isteğin olabilir.
+
+JETONLAR NE İŞE YARAR
+
+Jetonlar yapay zekâ analizleri için kullanılır. Her hafta ücretsiz jetonun
+yenilenir; daha fazla analiz yapmak istersen jeton paketi alabilir ya da
+Premium'a geçebilirsin. Premium daha güçlü bir AI modeli ve haftalık çok daha
+yüksek bir jeton hakkı verir. Dersler, yetenek ağacı ve mentor desteği her
+katmanda ücretsizdir.
 
 Bulunduğun yerden başla. Her çizimle ilerle.
 ```
