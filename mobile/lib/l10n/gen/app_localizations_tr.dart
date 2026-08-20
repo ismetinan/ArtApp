@@ -349,10 +349,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get sendFeedbackBody =>
-      'Beta\'da bir sorun mu gördün, fikrin mi var? Bize yaz!';
+      'Bir sorun mu gördün, fikrin mi var? Bize yaz!';
 
   @override
-  String get feedbackMailSubject => 'Artora Beta geri bildirimi';
+  String get feedbackMailSubject => 'Artora geri bildirimi';
 
   @override
   String feedbackMailBody(String version) {

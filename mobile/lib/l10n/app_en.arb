@@ -115,8 +115,8 @@
   "darkModeSubtitle": "Use the app with dark colors",
 
   "feedbackButton": "Send feedback",
-  "sendFeedbackBody": "Found a problem in the beta or have an idea? Tell us!",
-  "feedbackMailSubject": "Artora Beta feedback",
+  "sendFeedbackBody": "Found a problem or have an idea? Tell us!",
+  "feedbackMailSubject": "Artora feedback",
   "feedbackMailBody": "Hi! My feedback about Artora:\n\n\n---\nVersion: {version}",
 
   "signOut": "Sign Out",

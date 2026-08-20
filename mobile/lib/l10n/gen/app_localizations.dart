@@ -695,13 +695,13 @@ abstract class AppLocalizations {
   /// No description provided for @sendFeedbackBody.
   ///
   /// In tr, this message translates to:
-  /// **'Beta\'da bir sorun mu gördün, fikrin mi var? Bize yaz!'**
+  /// **'Bir sorun mu gördün, fikrin mi var? Bize yaz!'**
   String get sendFeedbackBody;
 
   /// No description provided for @feedbackMailSubject.
   ///
   /// In tr, this message translates to:
-  /// **'Artora Beta geri bildirimi'**
+  /// **'Artora geri bildirimi'**
   String get feedbackMailSubject;
 
   /// No description provided for @feedbackMailBody.

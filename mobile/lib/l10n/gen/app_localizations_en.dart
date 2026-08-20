@@ -346,11 +346,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackButton => 'Send feedback';
 
   @override
-  String get sendFeedbackBody =>
-      'Found a problem in the beta or have an idea? Tell us!';
+  String get sendFeedbackBody => 'Found a problem or have an idea? Tell us!';
 
   @override
-  String get feedbackMailSubject => 'Artora Beta feedback';
+  String get feedbackMailSubject => 'Artora feedback';
 
   @override
   String feedbackMailBody(String version) {

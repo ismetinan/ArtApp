@@ -190,8 +190,8 @@
   "darkModeSubtitle": "Uygulamayı koyu renklerle kullan",
 
   "feedbackButton": "Geri bildirim gönder",
-  "sendFeedbackBody": "Beta'da bir sorun mu gördün, fikrin mi var? Bize yaz!",
-  "feedbackMailSubject": "Artora Beta geri bildirimi",
+  "sendFeedbackBody": "Bir sorun mu gördün, fikrin mi var? Bize yaz!",
+  "feedbackMailSubject": "Artora geri bildirimi",
   "feedbackMailBody": "Merhaba! Artora hakkında geri bildirimim:\n\n\n---\nSürüm: {version}",
   "@feedbackMailBody": {
     "placeholders": {
