@@ -256,6 +256,7 @@
   "storePremiumPerk2": "5x your daily AI analysis limit",
   "storePremiumPerk3": "Lessons are free for everyone — Premium just adds speed",
   "storePremiumActive": "Premium active — until {date}",
+  "storePremiumTerms": "Monthly subscription — auto-renews at the end of each period, cancel anytime. Payment is charged to your Apple account at confirmation of purchase.",
   "storeSubscribe": "Subscribe",
   "storeBuy": "Buy",
   "storeRestore": "Restore purchases",

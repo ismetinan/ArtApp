@@ -787,6 +787,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get storePremiumTerms =>
+      'Monthly subscription — auto-renews at the end of each period, cancel anytime. Payment is charged to your Apple account at confirmation of purchase.';
+
+  @override
   String get storeSubscribe => 'Subscribe';
 
   @override

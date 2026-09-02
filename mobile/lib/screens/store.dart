@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
@@ -316,10 +317,53 @@ class _PremiumCard extends StatelessWidget {
                     ? t.storeSubscribe
                     : '${t.storeSubscribe} — ${product!.price}'),
               ),
+            // Apple Guideline 3.1.2: abonelik ekranında süre/otomatik yenileme
+            // açıklaması + Kullanım Koşulları (EULA) ve Gizlilik'e çalışan link.
+            const SizedBox(height: 12),
+            Text(
+              t.storePremiumTerms,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: scheme.onPrimaryContainer),
+            ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 16,
+              children: [
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 32),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => _openLegal('/terms'),
+                  child: Text(t.termsTitle),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 32),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => _openLegal('/privacy'),
+                  child: Text(t.privacyTitle),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _openLegal(String path) async {
+    try {
+      await launchUrl(Uri.parse('$apiBase$path'),
+          mode: LaunchMode.externalApplication);
+    } catch (_) {
+      // Link açılamazsa sessiz geç — abonelik akışını engelleme
+    }
   }
 }
 

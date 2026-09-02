@@ -432,6 +432,7 @@
       "date": {"type": "String"}
     }
   },
+  "storePremiumTerms": "Aylık abonelik — her dönem sonunda otomatik yenilenir, istediğin an iptal edebilirsin. Ödeme, satın alma onayında Apple hesabından tahsil edilir.",
   "storeSubscribe": "Abone Ol",
   "storeBuy": "Satın Al",
   "storeRestore": "Satın alımları geri yükle",

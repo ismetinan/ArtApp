@@ -1430,6 +1430,12 @@ abstract class AppLocalizations {
   /// **'Premium aktif — {date} tarihine kadar'**
   String storePremiumActive(String date);
 
+  /// No description provided for @storePremiumTerms.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık abonelik — her dönem sonunda otomatik yenilenir, istediğin an iptal edebilirsin. Ödeme, satın alma onayında Apple hesabından tahsil edilir.'**
+  String get storePremiumTerms;
+
   /// No description provided for @storeSubscribe.
   ///
   /// In tr, this message translates to:

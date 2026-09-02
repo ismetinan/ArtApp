@@ -790,6 +790,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get storePremiumTerms =>
+      'Aylık abonelik — her dönem sonunda otomatik yenilenir, istediğin an iptal edebilirsin. Ödeme, satın alma onayında Apple hesabından tahsil edilir.';
+
+  @override
   String get storeSubscribe => 'Abone Ol';
 
   @override
