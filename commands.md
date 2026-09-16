@@ -4,14 +4,6 @@ fuser -k 8000/tcp
 
 flutter run -d 4870494a --dart-define=API_BASE=http://[IP_ADDRESS]
 
-# Yerelleştirme: .arb dosyalarını değiştirdikten sonra ZORUNLU (mobile/ içinden).
-# Template app_tr.arb — Türkçe kaynak dosya, placeholder metadata'sı yalnız orada.
-# Üretilen lib/l10n/gen/* commit'lenir.
-flutter gen-l10n
-
-# Backend testleri (backend/ içinden)
-.venv/bin/python -m pytest -q
-
 1. Apple Developer üyeliğini bitir — kritik yol bu, doğrulama 1–7 gün sürebilir. Onay gelmeden aşağıdakilerin hiçbiri yapılamaz.
 
 2. App Store Connect → My Apps → ➕ New App
@@ -31,3 +23,4 @@ flutter gen-l10n
 6. App Store submit → ekran görüntüleri + açıklama + App Privacy etiketleri + Age Rating + inceleme notlarına bir test hesabı (Apple misafir akışını atlayabilir) ve "Google girişi bu platformda sunulmuyor" notu. Gizlilik politikası URL'i ve uygulama içi hesap silme zaten hazır. İnceleme genelde 1–3 gün.
 
 Adım 2'yi bitirip Apple ID'yi verdiğinde codemagic.yaml'ı güncelleyip push ediyorum — sonra build'i tetikleyebilirsin.
+ 

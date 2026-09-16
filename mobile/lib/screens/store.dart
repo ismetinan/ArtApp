@@ -94,6 +94,11 @@ class _StoreScreenState extends State<StoreScreen> {
   bool _loading = true;
   bool _storeAvailable = false;
   bool _busy = false;
+  // StoreKit/Play tanısı: yüklenemeyen ürün kimlikleri + sorgu hatası. Sağlık
+  // durumunda boş kalır; App Review "ürünler yüklenmedi" derse hangi kimliğin
+  // bulunamadığını doğrudan ekranda ve konsolda gösterir.
+  List<String> _notFound = [];
+  String? _queryError;
 
   @override
   void initState() {
@@ -117,9 +122,18 @@ class _StoreScreenState extends State<StoreScreen> {
         final ids = {...jetonProducts.keys, subscriptionProduct};
         final resp = await _iap.queryProductDetails(ids);
         _products = {for (final p in resp.productDetails) p.id: p};
+        _notFound = resp.notFoundIDs;
+        _queryError = resp.error?.message;
+        debugPrint('[Store] requested=$ids found=${_products.keys.toList()} '
+            'notFound=$_notFound error=$_queryError');
+      } else {
+        _queryError = 'IAP not available on this device';
+        debugPrint('[Store] $_queryError');
       }
-    } catch (_) {
+    } catch (e) {
       _storeAvailable = false;
+      _queryError = e.toString();
+      debugPrint('[Store] load exception: $e');
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -195,15 +209,24 @@ class _StoreScreenState extends State<StoreScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : !_storeAvailable
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(t.storeUnavailable, textAlign: TextAlign.center),
-                  ),
+              ? ListView(
+                  padding: const EdgeInsets.all(24),
+                  children: [
+                    Text(t.storeUnavailable, textAlign: TextAlign.center),
+                    if (_queryError != null) ...[
+                      const SizedBox(height: 16),
+                      _StoreDiagnostic(notFound: _notFound, error: _queryError),
+                    ],
+                  ],
                 )
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
+                    if (_notFound.isNotEmpty || _queryError != null) ...[
+                      _StoreDiagnostic(
+                          notFound: _notFound, error: _queryError),
+                      const SizedBox(height: 16),
+                    ],
                     JetonPaymentInfo(
                       body: ApiClient.instance.jetonAiEconomy
                           ? t.storeJetonExplainerAi(
@@ -392,6 +415,43 @@ class _JetonCard extends StatelessWidget {
         trailing: FilledButton.tonal(
           onPressed: (product == null || busy) ? null : onBuy,
           child: Text(t.storeBuy),
+        ),
+      ),
+    );
+  }
+}
+
+/// Ürün yükleme tanısı — yalnız bir sorun varken görünür. App Review "ürünler
+/// yüklenmedi" (2.1b) dediğinde StoreKit'in tam olarak hangi kimliği
+/// bulamadığını ve hata mesajını sandbox'ta doğrudan gösterir.
+class _StoreDiagnostic extends StatelessWidget {
+  final List<String> notFound;
+  final String? error;
+  const _StoreDiagnostic({required this.notFound, required this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final style = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(color: scheme.onErrorContainer);
+    return Card(
+      color: scheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Store diagnostic',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: scheme.onErrorContainer,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            if (error != null) Text('error: $error', style: style),
+            if (notFound.isNotEmpty)
+              Text('not found: ${notFound.join(", ")}', style: style),
+          ],
         ),
       ),
     );
