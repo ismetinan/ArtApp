@@ -1085,4 +1085,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String campaignGuestBody(int n, String date) {
     return 'Founding Artist campaign: create an account by $date and get $n free jetons.';
   }
+
+  @override
+  String taskMatchLabel(int n) {
+    return 'Task match: $n%';
+  }
+
+  @override
+  String get taskNotPassed =>
+      'This drawing doesn\'t meet the given task yet, so the lesson isn\'t completed. Redraw it following the task\'s steps and upload again — your feedback is above.';
 }

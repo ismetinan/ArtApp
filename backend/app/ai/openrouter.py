@@ -16,7 +16,13 @@ from ..core.config import get_settings
 from .base import AIProvider
 from .images import prepare_for_model
 from .prompts import MODERATION_PROMPT, assess_prompt, assignment_prompt, redline_prompt
-from .schemas import AssignmentBrief, LevelAssessment, ModerationVerdict, RedlineResult
+from .schemas import (
+    AssignmentBrief,
+    LevelAssessment,
+    ModerationVerdict,
+    RedlineResult,
+    TaskRedlineResult,
+)
 
 _API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -110,13 +116,18 @@ class OpenRouterProvider(AIProvider):
         return await self._generate(content, LevelAssessment)
 
     async def redline_analysis(
-        self, image: bytes, lesson_context: str, language: str = "tr"
+        self,
+        image: bytes,
+        lesson_context: str,
+        language: str = "tr",
+        assignment_text: str | None = None,
     ) -> RedlineResult:
         content = [
             _image_part(image),
-            {"type": "text", "text": redline_prompt(lesson_context, language)},
+            {"type": "text", "text": redline_prompt(lesson_context, language, assignment_text)},
         ]
-        return await self._generate(content, RedlineResult)
+        schema = TaskRedlineResult if assignment_text else RedlineResult
+        return await self._generate(content, schema)
 
     async def assignment_brief(
         self, node_title: str, node_description: str, language: str = "tr"

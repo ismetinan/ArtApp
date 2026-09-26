@@ -114,7 +114,21 @@ def to_json(job: AnalysisJob, lang: str) -> dict:
     }
 
 
-async def run(job_id: int, image: bytes, node_title: str | None, language: str) -> None:
+def task_passed(payload: dict) -> bool:
+    """Ödev uyumu kapısı: görev yoksa (task_match None) geçer; varsa eşik."""
+    from ..core.config import get_settings
+
+    tm = payload.get("task_match")
+    return tm is None or tm >= get_settings().task_match_threshold
+
+
+async def run(
+    job_id: int,
+    image: bytes,
+    node_title: str | None,
+    language: str,
+    assignment_text: str | None = None,
+) -> None:
     """Arka plan işi: AI'ı çağırır, sonucu işler, kullanıcıya push atar.
 
     KENDİ oturumunu açar — isteğin oturumu yanıt gönderilirken kapanıyor.
@@ -139,9 +153,10 @@ async def run(job_id: int, image: bytes, node_title: str | None, language: str) 
         owner = db.get(User, job.user_id)
         premium = owner is not None and is_premium(owner)
         try:
+            extra = {"assignment_text": assignment_text} if assignment_text else {}
             result = guard_redline(
                 await get_ai_provider(premium=premium).redline_analysis(
-                    image, node_title or "", language=language
+                    image, node_title or "", language=language, **extra
                 ),
                 language=language,
             )
@@ -158,6 +173,9 @@ async def run(job_id: int, image: bytes, node_title: str | None, language: str) 
         if job is None:
             return
         payload = result.model_dump(mode="json")
+        passed = task_passed(payload)
+        if job.kind == "assignment":
+            payload["task_passed"] = passed
         job.result = payload
         job.status = "done"
         job.finished_at = datetime.now(timezone.utc)
@@ -168,7 +186,9 @@ async def run(job_id: int, image: bytes, node_title: str | None, language: str) 
 
         user = db.get(User, job.user_id)
         # İlerleme yalnız ders ödevinde işlenir (serbest analiz XP vermez)
-        if job.kind == "assignment" and job.node_id and user is not None:
+        # Görevle alakasız çizim (task_match < eşik): ilerleme/XP/eksen YOK —
+        # geri bildirim yine gösterilir, jeton iade edilmez (analiz yapıldı).
+        if job.kind == "assignment" and job.node_id and user is not None and passed:
             node = db.get(SkillNode, job.node_id)
             already = db.execute(
                 select(UserProgress.id).where(

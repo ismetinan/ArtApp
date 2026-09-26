@@ -19,7 +19,7 @@ her adımın çıktısını (URL/ID/anahtar) Claude'a ver, gerisini o bağlar.
    AI_PROVIDER=openrouter
    OPENROUTER_API_KEY=<anahtarın>
    OPENROUTER_MODEL=google/gemma-4-26b-a4b-it:free
-   OPENROUTER_FALLBACK_MODEL=nvidia/nemotron-nano-12b-v2-vl:free
+   OPENROUTER_FALLBACK_MODEL=google/gemma-4-31b-it:free
    GOOGLE_CLIENT_ID=<adım 3'teki WEB client ID>
    AI_DAILY_LIMIT=10
    STORAGE_BACKEND=s3

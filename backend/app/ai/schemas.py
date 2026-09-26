@@ -46,6 +46,24 @@ class RedlineResult(BaseModel):
     overall_comment_tr: str = Field(
         description="Overall assessment with an encouraging closing, in the user's language"
     )
+    # Ödev uyumu (2026-09): yalnız öğrenciye AI ödevi verilmişse doldurulur.
+    # Serbest analizde ve eski kayıtlarda None — geriye dönük uyumlu.
+    task_match: int | None = None
+    task_match_comment_tr: str | None = None
+
+
+class TaskRedlineResult(RedlineResult):
+    """Ödev metni olan analizlerde modelden istenen şema: uyum alanları ZORUNLU.
+    float kabul edilir (bazı modeller 72.5 döndürüyor); guard 0-100 int'e çevirir."""
+
+    task_match: float = Field(  # type: ignore[assignment]
+        description="0-100: how well the drawing fulfils the given task's steps "
+        "(subject, requested views/angles, technique). Not a quality score."
+    )
+    task_match_comment_tr: str = Field(  # type: ignore[assignment]
+        description="1-2 constructive sentences: which task steps are met and which "
+        "are missing (in the user's language)"
+    )
 
 
 class ModerationVerdict(BaseModel):

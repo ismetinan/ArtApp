@@ -118,6 +118,18 @@ def get_tree(user: User = Depends(get_current_user), db: Session = Depends(get_d
 # ---------- AI ödev üretimi ----------
 
 
+def _task_text(db: Session, user: User, node: SkillNode) -> str:
+    """Redline'ın uyum puanlayacağı görev: üretilmiş AI ödevi, yoksa dersin
+    kendisi. Fallback şart — yoksa "ödev al"a hiç basmayan öğrenci alakasız
+    bir çizimle dersi geçebilirdi (ödev uyumu kapısının arka kapısı)."""
+    row = _assignment_row(db, user, node.id)
+    if row is not None:
+        return row.text
+    title = _node_title(node, user.language)
+    desc = _node_description(node, user.language)
+    return f"{title}: {desc}" if desc else title
+
+
 def _assignment_row(db: Session, user: User, node_id: str) -> Assignment | None:
     return db.execute(
         select(Assignment).where(
@@ -197,10 +209,11 @@ async def submit_assignment(
     except UploadError as e:
         raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))
 
+    extra = {"assignment_text": _task_text(db, user, node)}
     try:
         result = guard_redline(
             await get_ai_provider(premium=is_premium(user)).redline_analysis(
-                content, _node_title(node, user.language), language=user.language
+                content, _node_title(node, user.language), language=user.language, **extra
             ),
             language=user.language,
         )
@@ -208,16 +221,20 @@ async def submit_assignment(
         logger.exception("AI redline analizi başarısız (node=%s)", node.id)
         raise HTTPException(status_code=503, detail=msg("ai_unavailable", user.language))
 
+    payload = result.model_dump(mode="json")
+    passed = analysis_jobs.task_passed(payload)
+    payload["task_passed"] = passed
     submission = Submission(
         user_id=user.id,
         node_id=node.id,
         kind="assignment",
         file_path=rel_path,
-        ai_result=result.model_dump(mode="json"),
+        ai_result=payload,
     )
     db.add(submission)
 
-    first_completion = node.id not in completed
+    # Görevle alakasız çizim dersi tamamlatmaz (bkz. analysis_jobs.task_passed)
+    first_completion = node.id not in completed and passed
     if first_completion:
         db.add(UserProgress(user_id=user.id, node_id=node.id, xp_earned=node.xp_reward))
         award_xp(user, node.xp_reward)
@@ -226,7 +243,7 @@ async def submit_assignment(
 
     return {
         "submission_id": submission.id,
-        "analysis": result,
+        "analysis": payload,
         "xp_awarded": node.xp_reward if first_completion else 0,
         "level": user.level,
         "xp": user.xp,
@@ -295,7 +312,12 @@ async def submit_assignment_async(
     db.commit()
 
     background.add_task(
-        analysis_jobs.run, job.id, content, _node_title(node, user.language), user.language
+        analysis_jobs.run,
+        job.id,
+        content,
+        _node_title(node, user.language),
+        user.language,
+        _task_text(db, user, node),
     )
     return {"job_id": job.id, "submission_id": submission.id, "status": "queued"}
 

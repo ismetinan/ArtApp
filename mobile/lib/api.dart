@@ -114,11 +114,21 @@ class RedlineResult {
   final List<RedlineFinding> findings;
   final String overallCommentTr;
 
+  /// Ödev uyumu (0-100): yalnız AI ödevi verilmiş derslerde gelir.
+  final int? taskMatch;
+  final String? taskMatchComment;
+
+  /// false = çizim görevi karşılamadı, ders tamamlanmadı. null = eski kayıt.
+  final bool? taskPassed;
+
   RedlineResult.fromJson(Map<String, dynamic> j)
       : strengthsTr = List<String>.from(j['strengths_tr']),
         findings =
             (j['findings'] as List).map((f) => RedlineFinding.fromJson(f)).toList(),
-        overallCommentTr = j['overall_comment_tr'];
+        overallCommentTr = j['overall_comment_tr'],
+        taskMatch = (j['task_match'] as num?)?.round(),
+        taskMatchComment = j['task_match_comment_tr'],
+        taskPassed = j['task_passed'] as bool?;
 }
 
 class Assessment {

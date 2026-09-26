@@ -93,6 +93,20 @@ _REDLINE_TEXTS = {
 }
 
 
+_TASK_COMMENTS = {
+    "tr": {
+        "on": "Görevin adımlarının çoğu karşılanmış; istenen açıları çizmişsin.",
+        "off": "Bu çizim verilen görevden farklı bir konuya odaklanıyor; görevdeki "
+        "objeyi istenen açılardan çizmeyi dene.",
+    },
+    "en": {
+        "on": "Most of the task's steps are covered; you drew the requested views.",
+        "off": "This drawing focuses on something other than the given task; try "
+        "drawing the task's object from the requested angles.",
+    },
+}
+
+
 def _lang(language: str) -> str:
     return language if language in _REDLINE_TEXTS else "tr"
 
@@ -131,10 +145,23 @@ class MockAIProvider(AIProvider):
         )
 
     async def redline_analysis(
-        self, image: bytes, lesson_context: str, language: str = "tr"
+        self,
+        image: bytes,
+        lesson_context: str,
+        language: str = "tr",
+        assignment_text: str | None = None,
     ) -> RedlineResult:
         t = _REDLINE_TEXTS[_lang(language)]
+        # Ödev uyumu: görev verildiyse 80; test kancası — içeriğinde "OFFTASK"
+        # baytları geçen görsel görevle alakasız sayılır (15).
+        task_match = task_comment = None
+        if assignment_text:
+            off = b"OFFTASK" in image
+            task_match = 15 if off else 80
+            task_comment = _TASK_COMMENTS[_lang(language)]["off" if off else "on"]
         return RedlineResult(
+            task_match=task_match,
+            task_match_comment_tr=task_comment,
             strengths_tr=list(t["strengths"]),
             findings=[
                 RedlineFinding(

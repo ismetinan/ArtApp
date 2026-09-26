@@ -101,6 +101,7 @@ class _RedlineScreenState extends State<RedlineScreen> {
                 ]),
               ),
             ),
+          if (analysis.taskMatch != null) _TaskMatchCard(analysis: analysis),
           const SizedBox(height: 8),
           AspectRatio(
             aspectRatio: 3 / 4,
@@ -188,6 +189,55 @@ class _Marker extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text('$index', style: const TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+}
+
+
+/// Ödev uyumu kartı. Görev karşılanmadıysa ders tamamlanmamıştır — ton
+/// yapıcı kalsın diye kırmızı değil tertiary renk ve "tekrar dene" çağrısı.
+class _TaskMatchCard extends StatelessWidget {
+  final RedlineResult analysis;
+  const _TaskMatchCard({required this.analysis});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final passed = analysis.taskPassed != false;
+    final match = analysis.taskMatch!;
+    return Card(
+      color: passed ? cs.secondaryContainer : cs.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(passed ? Icons.task_alt : Icons.assignment_late_outlined),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(t.taskMatchLabel(match),
+                  style: Theme.of(context).textTheme.titleSmall),
+            ),
+          ]),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: match / 100,
+              minHeight: 6,
+              backgroundColor: cs.surface,
+            ),
+          ),
+          if (analysis.taskMatchComment?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 8),
+            Text(analysis.taskMatchComment!),
+          ],
+          if (!passed) ...[
+            const SizedBox(height: 8),
+            Text(t.taskNotPassed, style: const TextStyle(fontWeight: FontWeight.w600)),
+          ],
+        ]),
+      ),
     );
   }
 }

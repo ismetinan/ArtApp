@@ -21,13 +21,20 @@ class AIProvider(ABC):
 
     @abstractmethod
     async def redline_analysis(
-        self, image: bytes, lesson_context: str, language: str = "tr"
+        self,
+        image: bytes,
+        lesson_context: str,
+        language: str = "tr",
+        assignment_text: str | None = None,
     ) -> RedlineResult:
         """Bir ödev çizimi için koordinatlı, yapıcı redline analizi üretir.
 
         lesson_context: ödevin bağlı olduğu dersin başlığı/konusu (ör. "temel kafa
         oranları") — model geri bildirimi derse odaklar.
         language: çıktı metinlerinin dili (tr/en).
+        assignment_text: öğrenciye verilmiş AI ödevi. Verilirse model çizimin
+        görevi ne ölçüde karşıladığını da puanlar (task_match, 0-100) — dersi
+        tamamlama kararı buna bağlı (bkz. services/analysis_jobs.py).
         """
 
     @abstractmethod

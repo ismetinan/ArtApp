@@ -548,5 +548,8 @@
   "launchBonusBody": "Hesabına {n} jeton hediye edildi — Artora'nın ilk günlerinde burada olduğun için teşekkürler!",
   "@launchBonusBody": {"placeholders": {"n": {"type": "int"}}},
   "campaignGuestBody": "Kurucu Çizer kampanyası: {date} tarihine kadar hesap oluştur, {n} jeton hediye kazan.",
-  "@campaignGuestBody": {"placeholders": {"n": {"type": "int"}, "date": {"type": "String"}}}
+  "@campaignGuestBody": {"placeholders": {"n": {"type": "int"}, "date": {"type": "String"}}},
+  "taskMatchLabel": "Ödev uyumu: %{n}",
+  "@taskMatchLabel": {"placeholders": {"n": {"type": "int"}}},
+  "taskNotPassed": "Bu çizim verilen görevi henüz karşılamadığı için ders tamamlanmadı. Görevdeki adımlara göre yeniden çizip tekrar yükleyebilirsin — geri bildirimin yukarıda."
 }

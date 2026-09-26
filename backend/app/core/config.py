@@ -12,8 +12,9 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash"
     openrouter_api_key: str = ""
     # Ücretsiz model listesi dönüşümlü; güncel liste: openrouter.ai/collections/free-models
+    # (2026-09: nemotron-nano-12b-v2-vl:free kaldırıldı → yedek 404 veriyordu)
     openrouter_model: str = "google/gemma-4-26b-a4b-it:free"
-    openrouter_fallback_model: str = "nvidia/nemotron-nano-12b-v2-vl:free"
+    openrouter_fallback_model: str = "google/gemma-4-31b-it:free"
     # Modelden istenecek azami çıktı token'ı. GÖNDERİLMEZSE OpenRouter modelin
     # tüm çıktı bütçesini (65k) rezerve ediyor ve düşük bakiyeli hesaplarda istek
     # 402 ile reddediliyor ("requested up to 65535, can only afford 16000").
@@ -46,6 +47,10 @@ class Settings(BaseSettings):
     # Skora göre ders atlama eşiği: önkoşulun eksenindeki AbilityScore bu değerin
     # üstündeyse önkoşul tamamlanmadan düğüm açılır (müşteri isteği, 2026-07-19)
     skip_unlock_score: int = 60
+    # Ödev uyumu eşiği (2026-09): AI ödevi verilmiş derste çizimin görevi
+    # karşılama puanı (task_match) bunun altındaysa ders TAMAMLANMAZ, XP ve
+    # eksen güncellemesi olmaz; geri bildirim yine gösterilir.
+    task_match_threshold: int = 50
 
     sentry_dsn: str = ""
 

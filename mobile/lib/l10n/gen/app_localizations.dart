@@ -1981,6 +1981,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kurucu Çizer kampanyası: {date} tarihine kadar hesap oluştur, {n} jeton hediye kazan.'**
   String campaignGuestBody(int n, String date);
+
+  /// No description provided for @taskMatchLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödev uyumu: %{n}'**
+  String taskMatchLabel(int n);
+
+  /// No description provided for @taskNotPassed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu çizim verilen görevi henüz karşılamadığı için ders tamamlanmadı. Görevdeki adımlara göre yeniden çizip tekrar yükleyebilirsin — geri bildirimin yukarıda.'**
+  String get taskNotPassed;
 }
 
 class _AppLocalizationsDelegate

@@ -1088,4 +1088,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String campaignGuestBody(int n, String date) {
     return 'Kurucu Çizer kampanyası: $date tarihine kadar hesap oluştur, $n jeton hediye kazan.';
   }
+
+  @override
+  String taskMatchLabel(int n) {
+    return 'Ödev uyumu: %$n';
+  }
+
+  @override
+  String get taskNotPassed =>
+      'Bu çizim verilen görevi henüz karşılamadığı için ders tamamlanmadı. Görevdeki adımlara göre yeniden çizip tekrar yükleyebilirsin — geri bildirimin yukarıda.';
 }

@@ -10,7 +10,13 @@ from google.genai import types
 from .base import AIProvider
 from .images import prepare_for_model
 from .prompts import MODERATION_PROMPT, assess_prompt, assignment_prompt, redline_prompt
-from .schemas import AssignmentBrief, LevelAssessment, ModerationVerdict, RedlineResult
+from .schemas import (
+    AssignmentBrief,
+    LevelAssessment,
+    ModerationVerdict,
+    RedlineResult,
+    TaskRedlineResult,
+)
 
 
 def _image_part(image: bytes) -> types.Part:
@@ -44,10 +50,15 @@ class GeminiProvider(AIProvider):
         return await self._generate(contents, LevelAssessment)
 
     async def redline_analysis(
-        self, image: bytes, lesson_context: str, language: str = "tr"
+        self,
+        image: bytes,
+        lesson_context: str,
+        language: str = "tr",
+        assignment_text: str | None = None,
     ) -> RedlineResult:
-        prompt = redline_prompt(lesson_context, language)
-        return await self._generate([_image_part(image), prompt], RedlineResult)
+        prompt = redline_prompt(lesson_context, language, assignment_text)
+        schema = TaskRedlineResult if assignment_text else RedlineResult
+        return await self._generate([_image_part(image), prompt], schema)
 
     async def assignment_brief(
         self, node_title: str, node_description: str, language: str = "tr"

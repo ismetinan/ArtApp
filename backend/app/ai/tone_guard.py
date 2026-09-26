@@ -45,6 +45,11 @@ def guard_redline(result: RedlineResult, language: str = "tr") -> RedlineResult:
     result.strengths_tr = [_soften(s, lang) for s in result.strengths_tr]
     if not result.strengths_tr:
         result.strengths_tr = [_FALLBACK_STRENGTH[lang]]
+    if result.task_match is not None:
+        # Modeller 72.5 ya da 0-1 aralığı dışı değer döndürebiliyor
+        result.task_match = max(0, min(100, round(float(result.task_match))))
+    if result.task_match_comment_tr:
+        result.task_match_comment_tr = _soften(result.task_match_comment_tr, lang)
     return result
 
 
