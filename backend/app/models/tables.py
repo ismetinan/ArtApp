@@ -1,6 +1,16 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db import Base
@@ -47,6 +57,14 @@ class User(Base):
         DateTime(timezone=True), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    # Analitik (2026-09): son görülme + istemci platformu/sürümü. İstemci her
+    # istekte X-Platform / X-App-Version gönderir; deps.get_current_user günde
+    # bir kez yazar (bkz. services/activity.py).
+    last_seen_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    platform: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    app_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
     ability_scores: Mapped[list["AbilityScore"]] = relationship(back_populates="user")
     submissions: Mapped[list["Submission"]] = relationship(back_populates="user")
@@ -351,3 +369,31 @@ class AbilityScore(Base):
     score: Mapped[int] = mapped_column(Integer, default=0)  # 0-100
 
     user: Mapped[User] = relationship(back_populates="ability_scores")
+
+
+class UserActivityDay(Base):
+    """Kullanıcının aktif olduğu gün (analitik, 2026-09). DAU/WAU/MAU ve kohort
+    retention'ın tek kaynağı. Günde kullanıcı başına tek satır — içerik yok."""
+
+    __tablename__ = "user_activity_days"
+    __table_args__ = (UniqueConstraint("user_id", "day"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    day: Mapped[date] = mapped_column(Date, index=True)
+
+
+class AppEvent(Base):
+    """İstemci olayları (analitik, 2026-09). Yalnız BEYAZ LİSTELİ adlar ve
+    içerik taşımayan küçük props (düğüm id'si, ürün id'si gibi) kabul edilir —
+    bkz. api/events.py. Çizim, metin, e-posta asla buraya yazılmaz."""
+
+    __tablename__ = "app_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    name: Mapped[str] = mapped_column(String(40), index=True)
+    props: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, index=True
+    )

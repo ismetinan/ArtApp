@@ -25,6 +25,10 @@ def client(tmp_path, monkeypatch):
     db_module.engine = db_module._make_engine()
     db_module.SessionLocal.configure(bind=db_module.engine)
 
+    from app.services import activity
+
+    activity._SEEN.clear()  # kullanıcı id'leri testler arasında tekrar ediyor
+
     from fastapi.testclient import TestClient
 
     from app.main import app

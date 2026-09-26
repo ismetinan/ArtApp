@@ -471,6 +471,7 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
   @override
   void initState() {
     super.initState();
+    ApiClient.instance.logEvent('lesson_opened', {'node_id': widget.node.id});
     _loadAssignment();
   }
 
@@ -619,7 +620,11 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
                             ? t.resourceKindPlaylist
                             : t.resourceKindVideo)),
                     trailing: const Icon(Icons.open_in_new, size: 18),
-                    onTap: () => launchUrl(r.url),
+                    onTap: () {
+                      ApiClient.instance
+                          .logEvent('video_opened', {'node_id': node.id});
+                      launchUrl(r.url);
+                    },
                   ),
                 ),
             const SizedBox(height: 16),

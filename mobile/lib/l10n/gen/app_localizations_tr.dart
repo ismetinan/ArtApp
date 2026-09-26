@@ -818,14 +818,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get premiumBadge => 'Premium';
 
   @override
-  String get adminPanelTitle => 'Admin — Mentor Başvuruları';
+  String get adminPanelTitle => 'Admin Paneli';
 
   @override
   String get adminSectionTitle => 'Admin Paneli';
 
   @override
   String get adminSectionBody =>
-      'Bekleyen mentor başvurularını incele ve onayla.';
+      'Kullanım analitiği, mentor başvuruları ve şikayetler.';
 
   @override
   String get adminNoApplications => 'Bekleyen başvuru yok.';
@@ -911,4 +911,162 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get axisRenk => 'Renk';
+
+  @override
+  String get adminTabAnalytics => 'Analitik';
+
+  @override
+  String get analyticsOverview => 'Genel bakış';
+
+  @override
+  String get analyticsUsersTotal => 'Toplam kullanıcı';
+
+  @override
+  String get analyticsDau => 'Bugün aktif';
+
+  @override
+  String get analyticsWau => '7 gün aktif';
+
+  @override
+  String get analyticsMau => '30 gün aktif';
+
+  @override
+  String get analyticsStickiness => 'Bağlılık (DAU/MAU)';
+
+  @override
+  String get analyticsNew7d => 'Yeni (7 gün)';
+
+  @override
+  String get analyticsRegisteredRate => 'Kayıtlı hesap oranı';
+
+  @override
+  String get analyticsPremium => 'Premium';
+
+  @override
+  String get analyticsLast30d => 'Son 30 gün';
+
+  @override
+  String get analyticsActiveUsers => 'Aktif kullanıcı';
+
+  @override
+  String get analyticsSignups => 'Yeni kayıt';
+
+  @override
+  String get analyticsFunnel => 'Huni';
+
+  @override
+  String get analyticsFunnelNote =>
+      '\"Ders açtı\" yalnız 0.10 sürümünden itibaren ölçülüyor.';
+
+  @override
+  String get funnelSignedUp => 'Uygulamayı açtı';
+
+  @override
+  String get funnelOnboarded => 'Seviye belirleme yaptı';
+
+  @override
+  String get funnelLessonOpened => 'Ders açtı';
+
+  @override
+  String get funnelAssignmentGenerated => 'AI\'dan ödev aldı';
+
+  @override
+  String get funnelAssignmentSubmitted => 'Ödev yükledi';
+
+  @override
+  String get funnelLessonCompleted => 'Ders tamamladı';
+
+  @override
+  String get funnelReturned7d => '7+ gün sonra geri döndü';
+
+  @override
+  String get funnelRegistered => 'Hesap oluşturdu';
+
+  @override
+  String get analyticsRetention => 'Retention (haftalık kohort)';
+
+  @override
+  String get analyticsRetentionNote =>
+      'W1/W2/W4: kayıttan sonraki 1., 2. ve 4. haftada en az bir gün aktif olanlar. Boş hücre: kohort henüz o haftaya ulaşmadı.';
+
+  @override
+  String get analyticsCohortWeek => 'Kayıt haftası';
+
+  @override
+  String get analyticsNoData => 'Henüz veri yok.';
+
+  @override
+  String get analyticsLessons => 'Dersler';
+
+  @override
+  String get analyticsLessonsLegend =>
+      '👁 açan · 📝 ödev alan · ⬆ yükleyen · ✅ tamamlayan · ⛔ takılan · 🎯 ort. ödev uyumu';
+
+  @override
+  String get analyticsEconomy => 'Ekonomi';
+
+  @override
+  String get analyticsJetonsSpent => 'Harcanan jeton';
+
+  @override
+  String get analyticsJetonsGranted => 'Verilen jeton';
+
+  @override
+  String get analyticsPurchases => 'Satın almalar';
+
+  @override
+  String get analyticsAiJobs => 'AI analizleri (30 gün)';
+
+  @override
+  String get analyticsFailRate => 'hata oranı';
+
+  @override
+  String get analyticsAvgSeconds => 'ort. süre (sn)';
+
+  @override
+  String get analyticsUsersOpen => 'Kullanıcı listesi (anonim)';
+
+  @override
+  String get analyticsUsersTitle => 'Kullanıcılar (anonim)';
+
+  @override
+  String get analyticsSortLastSeen => 'Son görülme';
+
+  @override
+  String get analyticsSortCreated => 'Kayıt tarihi';
+
+  @override
+  String get analyticsSortLessons => 'Tamamlanan ders';
+
+  @override
+  String get analyticsSortAnalyses => 'Analiz sayısı';
+
+  @override
+  String get analyticsSortLevel => 'Seviye';
+
+  @override
+  String get analyticsGuest => 'misafir';
+
+  @override
+  String analyticsUserId(int id) {
+    return 'Kullanıcı #$id';
+  }
+
+  @override
+  String analyticsUserStats(int level, int lessons, int analyses, int days) {
+    return 'Sv $level · $lessons ders · $analyses analiz · $days aktif gün';
+  }
+
+  @override
+  String analyticsDaysAgo(int n) {
+    return '$n gün önce';
+  }
+
+  @override
+  String analyticsHoursAgo(int n) {
+    return '$n sa önce';
+  }
+
+  @override
+  String get analyticsJustNow => 'az önce';
 }

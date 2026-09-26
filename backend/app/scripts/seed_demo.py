@@ -39,13 +39,18 @@ from ..ai.mock import MockAIProvider
 from ..ai.schemas import SkillAxis
 from ..db import SessionLocal
 from ..models.tables import (
+    AbilityHistory,
     AbilityScore,
+    AnalysisJob,
+    AppEvent,
+    Assignment,
     JetonTransaction,
     MentorProfile,
     MentorshipRequest,
     SkillNode,
     Submission,
     User,
+    UserActivityDay,
     UserProgress,
 )
 from ..services.auth import generate_token, hash_password, hash_token
@@ -103,6 +108,9 @@ def _purge(db) -> None:
         (MentorshipRequest.student_id.in_(ids))
         | (MentorshipRequest.mentor_id.in_(ids))
     ).delete(synchronize_session=False)
+    # Reviewer oturumlarının ürettiği satırlar (aktiflik, olay, analiz işi…)
+    for table in (AnalysisJob, Assignment, AbilityHistory, UserActivityDay, AppEvent):
+        db.query(table).filter(table.user_id.in_(ids)).delete(synchronize_session=False)
     db.query(AbilityScore).filter(AbilityScore.user_id.in_(ids)).delete(
         synchronize_session=False
     )

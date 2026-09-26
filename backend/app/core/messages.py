@@ -87,6 +87,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "İstek çok büyük",
         "en": "Request is too large",
     },
+    "invalid_event": {
+        "tr": "Bilinmeyen olay.",
+        "en": "Unknown event.",
+    },
     "rate_limited": {
         "tr": "Çok fazla deneme yapıldı — lütfen biraz bekleyip tekrar dene.",
         "en": "Too many attempts — please wait a bit and try again.",

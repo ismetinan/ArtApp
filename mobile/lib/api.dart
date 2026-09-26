@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/gen/app_localizations.dart';
@@ -299,8 +300,22 @@ class ApiClient {
     return ui.PlatformDispatcher.instance.locale.languageCode == 'tr' ? 'tr' : 'en';
   }
 
-  Map<String, String> get authHeaders =>
-      {'Authorization': 'Bearer $token', 'Accept-Language': language};
+  /// "0.10.0+24" biçiminde; loadSession doldurur. Admin analitiği sürüm
+  /// dağılımını buradan görür.
+  String appVersion = '';
+
+  static String get _platform => Platform.isIOS
+      ? 'ios'
+      : Platform.isAndroid
+          ? 'android'
+          : 'other';
+
+  Map<String, String> get authHeaders => {
+        'Authorization': 'Bearer $token',
+        'Accept-Language': language,
+        'X-Platform': _platform,
+        if (appVersion.isNotEmpty) 'X-App-Version': appVersion,
+      };
   Map<String, String> get _jsonHeaders =>
       {...authHeaders, 'Content-Type': 'application/json'};
 
@@ -316,6 +331,34 @@ class ApiClient {
     _billingEnabledServer = prefs.getBool('billing') ?? false;
     _iosBillingEnabledServer = prefs.getBool('billing_ios') ?? false;
     onboardingSkipped = prefs.getBool('onboarding_skipped') ?? false;
+    try {
+      final info = await PackageInfo.fromPlatform();
+      appVersion = '${info.version}+${info.buildNumber}';
+    } catch (_) {
+      // Sürüm bilgisi analitik içindir; alınamazsa header gönderilmez
+    }
+  }
+
+  /// Analitik olayı (fire-and-forget). Sunucu yalnız beyaz listedeki adları
+  /// kabul eder; props içerik taşımamalı (node_id, product_id gibi kısa
+  /// etiketler). Hata kullanıcı akışını asla bozmaz.
+  void logEvent(String name, [Map<String, Object> props = const {}]) {
+    if (token == null) return;
+    http
+        .post(Uri.parse('$apiBase/events'),
+            headers: _jsonHeaders, body: jsonEncode({'name': name, 'props': props}))
+        .timeout(const Duration(seconds: 10))
+        .then((_) {}, onError: (_) {});
+  }
+
+  /// Admin analitiği: /admin/analytics/{section} (overview, funnel, retention,
+  /// lessons, economy, users). Yanıt ham JSON — ekran kendisi yorumlar.
+  Future<Map<String, dynamic>> getAdminAnalytics(String section,
+      [Map<String, String>? query]) async {
+    final uri =
+        Uri.parse('$apiBase/admin/analytics/$section').replace(queryParameters: query);
+    final r = await http.get(uri, headers: authHeaders);
+    return _decode(r);
   }
 
   Future<void> setOnboardingSkipped() async {

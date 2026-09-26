@@ -103,6 +103,7 @@ class _StoreScreenState extends State<StoreScreen> {
   @override
   void initState() {
     super.initState();
+    ApiClient.instance.logEvent('store_opened');
     _sub = _iap.purchaseStream.listen(_onPurchases, onError: (Object e) {
       if (mounted) setState(() => _busy = false);
     });
@@ -139,6 +140,7 @@ class _StoreScreenState extends State<StoreScreen> {
   }
 
   Future<void> _buy(String productId) async {
+    ApiClient.instance.logEvent('purchase_started', {'product_id': productId});
     final details = _products[productId];
     if (details == null || _busy) return;
     setState(() => _busy = true);

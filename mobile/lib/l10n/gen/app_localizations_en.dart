@@ -815,14 +815,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get premiumBadge => 'Premium';
 
   @override
-  String get adminPanelTitle => 'Admin — Mentor Applications';
+  String get adminPanelTitle => 'Admin Panel';
 
   @override
   String get adminSectionTitle => 'Admin Panel';
 
   @override
   String get adminSectionBody =>
-      'Review and approve pending mentor applications.';
+      'Usage analytics, mentor applications and reports.';
 
   @override
   String get adminNoApplications => 'No pending applications.';
@@ -908,4 +908,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get axisRenk => 'Color';
+
+  @override
+  String get adminTabAnalytics => 'Analytics';
+
+  @override
+  String get analyticsOverview => 'Overview';
+
+  @override
+  String get analyticsUsersTotal => 'Total users';
+
+  @override
+  String get analyticsDau => 'Active today';
+
+  @override
+  String get analyticsWau => 'Active 7d';
+
+  @override
+  String get analyticsMau => 'Active 30d';
+
+  @override
+  String get analyticsStickiness => 'Stickiness (DAU/MAU)';
+
+  @override
+  String get analyticsNew7d => 'New (7d)';
+
+  @override
+  String get analyticsRegisteredRate => 'Registered share';
+
+  @override
+  String get analyticsPremium => 'Premium';
+
+  @override
+  String get analyticsLast30d => 'Last 30 days';
+
+  @override
+  String get analyticsActiveUsers => 'Active users';
+
+  @override
+  String get analyticsSignups => 'Sign-ups';
+
+  @override
+  String get analyticsFunnel => 'Funnel';
+
+  @override
+  String get analyticsFunnelNote =>
+      '\"Opened a lesson\" is tracked since version 0.10.';
+
+  @override
+  String get funnelSignedUp => 'Opened the app';
+
+  @override
+  String get funnelOnboarded => 'Did level assessment';
+
+  @override
+  String get funnelLessonOpened => 'Opened a lesson';
+
+  @override
+  String get funnelAssignmentGenerated => 'Got an AI assignment';
+
+  @override
+  String get funnelAssignmentSubmitted => 'Uploaded homework';
+
+  @override
+  String get funnelLessonCompleted => 'Completed a lesson';
+
+  @override
+  String get funnelReturned7d => 'Came back after 7+ days';
+
+  @override
+  String get funnelRegistered => 'Created an account';
+
+  @override
+  String get analyticsRetention => 'Retention (weekly cohorts)';
+
+  @override
+  String get analyticsRetentionNote =>
+      'W1/W2/W4: active at least one day in week 1, 2 and 4 after sign-up. Empty cell: cohort hasn\'t reached that week yet.';
+
+  @override
+  String get analyticsCohortWeek => 'Sign-up week';
+
+  @override
+  String get analyticsNoData => 'No data yet.';
+
+  @override
+  String get analyticsLessons => 'Lessons';
+
+  @override
+  String get analyticsLessonsLegend =>
+      '👁 opened · 📝 got assignment · ⬆ uploaded · ✅ completed · ⛔ stuck · 🎯 avg. task match';
+
+  @override
+  String get analyticsEconomy => 'Economy';
+
+  @override
+  String get analyticsJetonsSpent => 'Jetons spent';
+
+  @override
+  String get analyticsJetonsGranted => 'Jetons granted';
+
+  @override
+  String get analyticsPurchases => 'Purchases';
+
+  @override
+  String get analyticsAiJobs => 'AI analyses (30d)';
+
+  @override
+  String get analyticsFailRate => 'fail rate';
+
+  @override
+  String get analyticsAvgSeconds => 'avg. time (s)';
+
+  @override
+  String get analyticsUsersOpen => 'User list (anonymous)';
+
+  @override
+  String get analyticsUsersTitle => 'Users (anonymous)';
+
+  @override
+  String get analyticsSortLastSeen => 'Last seen';
+
+  @override
+  String get analyticsSortCreated => 'Sign-up date';
+
+  @override
+  String get analyticsSortLessons => 'Lessons completed';
+
+  @override
+  String get analyticsSortAnalyses => 'Analyses';
+
+  @override
+  String get analyticsSortLevel => 'Level';
+
+  @override
+  String get analyticsGuest => 'guest';
+
+  @override
+  String analyticsUserId(int id) {
+    return 'User #$id';
+  }
+
+  @override
+  String analyticsUserStats(int level, int lessons, int analyses, int days) {
+    return 'Lv $level · $lessons lessons · $analyses analyses · $days active days';
+  }
+
+  @override
+  String analyticsDaysAgo(int n) {
+    return '${n}d ago';
+  }
+
+  @override
+  String analyticsHoursAgo(int n) {
+    return '${n}h ago';
+  }
+
+  @override
+  String get analyticsJustNow => 'just now';
 }

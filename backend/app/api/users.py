@@ -10,8 +10,12 @@ from ..core.messages import SUPPORTED_LANGUAGES, msg, normalize_lang
 from ..core.ratelimit import rate_limit
 from ..db import get_db
 from ..models.tables import (
+    AbilityHistory,
     AbilityScore,
+    AnalysisJob,
     AiUsage,
+    AppEvent,
+    Assignment,
     ContentReport,
     JetonTransaction,
     MentorEarning,
@@ -20,6 +24,7 @@ from ..models.tables import (
     Purchase,
     Submission,
     User,
+    UserActivityDay,
     UserProgress,
 )
 from ..services import jetons
@@ -299,7 +304,13 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
     db.execute(
         delete(ContentReport).where(ContentReport.submission_id.in_(own_submission_ids))
     )
-    for table in (Submission, UserProgress, AbilityScore, AiUsage, Purchase):
+    # AnalysisJob submissions'a FK verir → Submission'dan ÖNCE silinmeli.
+    # (Bu üç tablo eskiden listede yoktu: Postgres'te FK ihlaliyle hesap silme
+    # 500 dönüyordu — SQLite testleri FK zorlamadığı için yakalanmamıştı.)
+    for table in (
+        AnalysisJob, Assignment, AbilityHistory,
+        Submission, UserProgress, AbilityScore, AiUsage, Purchase, UserActivityDay, AppEvent,
+    ):
         db.execute(delete(table).where(table.user_id == user.id))
     db.delete(user)
     db.commit()

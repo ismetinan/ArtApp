@@ -1481,7 +1481,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminPanelTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Admin — Mentor Başvuruları'**
+  /// **'Admin Paneli'**
   String get adminPanelTitle;
 
   /// No description provided for @adminSectionTitle.
@@ -1493,7 +1493,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminSectionBody.
   ///
   /// In tr, this message translates to:
-  /// **'Bekleyen mentor başvurularını incele ve onayla.'**
+  /// **'Kullanım analitiği, mentor başvuruları ve şikayetler.'**
   String get adminSectionBody;
 
   /// No description provided for @adminNoApplications.
@@ -1657,6 +1657,300 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Renk'**
   String get axisRenk;
+
+  /// No description provided for @adminTabAnalytics.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analitik'**
+  String get adminTabAnalytics;
+
+  /// No description provided for @analyticsOverview.
+  ///
+  /// In tr, this message translates to:
+  /// **'Genel bakış'**
+  String get analyticsOverview;
+
+  /// No description provided for @analyticsUsersTotal.
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplam kullanıcı'**
+  String get analyticsUsersTotal;
+
+  /// No description provided for @analyticsDau.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün aktif'**
+  String get analyticsDau;
+
+  /// No description provided for @analyticsWau.
+  ///
+  /// In tr, this message translates to:
+  /// **'7 gün aktif'**
+  String get analyticsWau;
+
+  /// No description provided for @analyticsMau.
+  ///
+  /// In tr, this message translates to:
+  /// **'30 gün aktif'**
+  String get analyticsMau;
+
+  /// No description provided for @analyticsStickiness.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlılık (DAU/MAU)'**
+  String get analyticsStickiness;
+
+  /// No description provided for @analyticsNew7d.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni (7 gün)'**
+  String get analyticsNew7d;
+
+  /// No description provided for @analyticsRegisteredRate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıtlı hesap oranı'**
+  String get analyticsRegisteredRate;
+
+  /// No description provided for @analyticsPremium.
+  ///
+  /// In tr, this message translates to:
+  /// **'Premium'**
+  String get analyticsPremium;
+
+  /// No description provided for @analyticsLast30d.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son 30 gün'**
+  String get analyticsLast30d;
+
+  /// No description provided for @analyticsActiveUsers.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif kullanıcı'**
+  String get analyticsActiveUsers;
+
+  /// No description provided for @analyticsSignups.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni kayıt'**
+  String get analyticsSignups;
+
+  /// No description provided for @analyticsFunnel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Huni'**
+  String get analyticsFunnel;
+
+  /// No description provided for @analyticsFunnelNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'\"Ders açtı\" yalnız 0.10 sürümünden itibaren ölçülüyor.'**
+  String get analyticsFunnelNote;
+
+  /// No description provided for @funnelSignedUp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulamayı açtı'**
+  String get funnelSignedUp;
+
+  /// No description provided for @funnelOnboarded.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seviye belirleme yaptı'**
+  String get funnelOnboarded;
+
+  /// No description provided for @funnelLessonOpened.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ders açtı'**
+  String get funnelLessonOpened;
+
+  /// No description provided for @funnelAssignmentGenerated.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI\'dan ödev aldı'**
+  String get funnelAssignmentGenerated;
+
+  /// No description provided for @funnelAssignmentSubmitted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ödev yükledi'**
+  String get funnelAssignmentSubmitted;
+
+  /// No description provided for @funnelLessonCompleted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ders tamamladı'**
+  String get funnelLessonCompleted;
+
+  /// No description provided for @funnelReturned7d.
+  ///
+  /// In tr, this message translates to:
+  /// **'7+ gün sonra geri döndü'**
+  String get funnelReturned7d;
+
+  /// No description provided for @funnelRegistered.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap oluşturdu'**
+  String get funnelRegistered;
+
+  /// No description provided for @analyticsRetention.
+  ///
+  /// In tr, this message translates to:
+  /// **'Retention (haftalık kohort)'**
+  String get analyticsRetention;
+
+  /// No description provided for @analyticsRetentionNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'W1/W2/W4: kayıttan sonraki 1., 2. ve 4. haftada en az bir gün aktif olanlar. Boş hücre: kohort henüz o haftaya ulaşmadı.'**
+  String get analyticsRetentionNote;
+
+  /// No description provided for @analyticsCohortWeek.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt haftası'**
+  String get analyticsCohortWeek;
+
+  /// No description provided for @analyticsNoData.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz veri yok.'**
+  String get analyticsNoData;
+
+  /// No description provided for @analyticsLessons.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dersler'**
+  String get analyticsLessons;
+
+  /// No description provided for @analyticsLessonsLegend.
+  ///
+  /// In tr, this message translates to:
+  /// **'👁 açan · 📝 ödev alan · ⬆ yükleyen · ✅ tamamlayan · ⛔ takılan · 🎯 ort. ödev uyumu'**
+  String get analyticsLessonsLegend;
+
+  /// No description provided for @analyticsEconomy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekonomi'**
+  String get analyticsEconomy;
+
+  /// No description provided for @analyticsJetonsSpent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Harcanan jeton'**
+  String get analyticsJetonsSpent;
+
+  /// No description provided for @analyticsJetonsGranted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Verilen jeton'**
+  String get analyticsJetonsGranted;
+
+  /// No description provided for @analyticsPurchases.
+  ///
+  /// In tr, this message translates to:
+  /// **'Satın almalar'**
+  String get analyticsPurchases;
+
+  /// No description provided for @analyticsAiJobs.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI analizleri (30 gün)'**
+  String get analyticsAiJobs;
+
+  /// No description provided for @analyticsFailRate.
+  ///
+  /// In tr, this message translates to:
+  /// **'hata oranı'**
+  String get analyticsFailRate;
+
+  /// No description provided for @analyticsAvgSeconds.
+  ///
+  /// In tr, this message translates to:
+  /// **'ort. süre (sn)'**
+  String get analyticsAvgSeconds;
+
+  /// No description provided for @analyticsUsersOpen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı listesi (anonim)'**
+  String get analyticsUsersOpen;
+
+  /// No description provided for @analyticsUsersTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcılar (anonim)'**
+  String get analyticsUsersTitle;
+
+  /// No description provided for @analyticsSortLastSeen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son görülme'**
+  String get analyticsSortLastSeen;
+
+  /// No description provided for @analyticsSortCreated.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kayıt tarihi'**
+  String get analyticsSortCreated;
+
+  /// No description provided for @analyticsSortLessons.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanan ders'**
+  String get analyticsSortLessons;
+
+  /// No description provided for @analyticsSortAnalyses.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz sayısı'**
+  String get analyticsSortAnalyses;
+
+  /// No description provided for @analyticsSortLevel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seviye'**
+  String get analyticsSortLevel;
+
+  /// No description provided for @analyticsGuest.
+  ///
+  /// In tr, this message translates to:
+  /// **'misafir'**
+  String get analyticsGuest;
+
+  /// No description provided for @analyticsUserId.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kullanıcı #{id}'**
+  String analyticsUserId(int id);
+
+  /// No description provided for @analyticsUserStats.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sv {level} · {lessons} ders · {analyses} analiz · {days} aktif gün'**
+  String analyticsUserStats(int level, int lessons, int analyses, int days);
+
+  /// No description provided for @analyticsDaysAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} gün önce'**
+  String analyticsDaysAgo(int n);
+
+  /// No description provided for @analyticsHoursAgo.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} sa önce'**
+  String analyticsHoursAgo(int n);
+
+  /// No description provided for @analyticsJustNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'az önce'**
+  String get analyticsJustNow;
 }
 
 class _AppLocalizationsDelegate

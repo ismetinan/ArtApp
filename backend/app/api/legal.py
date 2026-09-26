@@ -22,7 +22,7 @@ _PRIVACY_HTML = """<!doctype html>
 </head>
 <body>
   <h1>Artora Gizlilik Politikası</h1>
-  <p><em>Son güncelleme: 8 Ağustos 2026</em></p>
+  <p><em>Son güncelleme: 26 Eylül 2026</em></p>
 
   <h2>Hangi verileri topluyoruz?</h2>
   <ul>
@@ -32,6 +32,12 @@ _PRIVACY_HTML = """<!doctype html>
         yüklediğiniz görseller.</li>
     <li><strong>AI analiz sonuçları ve ilerleme verileri:</strong> seviye, XP,
         beceri skorları, tamamlanan dersler.</li>
+    <li><strong>Kullanım istatistikleri:</strong> uygulamayı hangi günlerde
+        kullandığınız, hangi dersleri açtığınız gibi uygulama içi etkileşimler,
+        cihaz platformu (iOS/Android) ve uygulama sürümü. Bu veriler yalnızca
+        uygulamayı iyileştirmek için, <strong>toplu ve anonim</strong> olarak
+        incelenir; reklam, izleme (tracking) veya üçüncü taraf analitik
+        hizmetleri için kullanılmaz ve paylaşılmaz.</li>
   </ul>
 
   <h2>Verileriniz nasıl kullanılıyor?</h2>

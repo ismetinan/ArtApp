@@ -9,8 +9,10 @@ from sqlalchemy import select
 
 from . import db as database
 from .api import (
+    admin_analytics,
     admin_stats,
     billing,
+    events,
     gallery,
     legal,
     mentors,
@@ -95,6 +97,8 @@ app.include_router(billing.router)
 app.include_router(waitlist.router)
 app.include_router(gallery.router)
 app.include_router(admin_stats.router)
+app.include_router(admin_analytics.router)
+app.include_router(events.router)
 app.include_router(legal.router)
 
 

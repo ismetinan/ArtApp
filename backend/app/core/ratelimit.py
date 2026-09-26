@@ -30,24 +30,31 @@ def _prune(now: float, window: float) -> None:
         del _BUCKETS[key]
 
 
+def hit(scope: str, key: str, limit: int, window_seconds: int, lang: str) -> None:
+    """Kayan pencere sayacı: (scope, key) pencere içinde limiti aştıysa 429.
+    key IP ya da kullanıcı kimliği olabilir — oturum açmış uçlar kullanıcıyla
+    sınırlanır (tek kullanıcı IP değiştirerek limiti aşamasın)."""
+    if not get_settings().rate_limit_enabled:
+        return
+    now = time.monotonic()
+    bucket_key = (scope, key)
+    bucket = _BUCKETS.get(bucket_key)
+    if bucket is None:
+        if len(_BUCKETS) >= _MAX_KEYS:
+            _prune(now, window_seconds)
+        bucket = _BUCKETS[bucket_key] = deque()
+    while bucket and bucket[0] <= now - window_seconds:
+        bucket.popleft()
+    if len(bucket) >= limit:
+        raise HTTPException(status_code=429, detail=msg("rate_limited", lang))
+    bucket.append(now)
+
+
 def rate_limit(scope: str, limit: int, window_seconds: int):
     """Dependency üretir: aynı IP'den pencere içinde limit aşılırsa 429."""
 
     def dependency(request: Request) -> None:
-        if not get_settings().rate_limit_enabled:
-            return
-        now = time.monotonic()
-        key = (scope, _client_ip(request))
-        bucket = _BUCKETS.get(key)
-        if bucket is None:
-            if len(_BUCKETS) >= _MAX_KEYS:
-                _prune(now, window_seconds)
-            bucket = _BUCKETS[key] = deque()
-        while bucket and bucket[0] <= now - window_seconds:
-            bucket.popleft()
-        if len(bucket) >= limit:
-            lang = negotiate_lang(request.headers.get("accept-language"))
-            raise HTTPException(status_code=429, detail=msg("rate_limited", lang))
-        bucket.append(now)
+        lang = negotiate_lang(request.headers.get("accept-language"))
+        hit(scope, _client_ip(request), limit, window_seconds, lang)
 
     return dependency

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'admin_analytics.dart';
 
-/// Beta admin paneli: mentor başvuruları + içerik şikayetleri (UGC moderasyonu).
+/// Admin paneli: kullanım analitiği + mentor başvuruları + içerik şikayetleri
+/// (UGC moderasyonu).
 /// Sadece is_admin hesaplarda profil ekranından erişilir.
 class AdminPanelScreen extends StatelessWidget {
   const AdminPanelScreen({super.key});
@@ -12,17 +14,18 @@ class AdminPanelScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text(t.adminPanelTitle),
           bottom: TabBar(tabs: [
+            Tab(text: t.adminTabAnalytics),
             Tab(text: t.adminTabApplications),
             Tab(text: t.adminTabReports),
           ]),
         ),
         body: const TabBarView(
-          children: [_ApplicationsTab(), _ReportsTab()],
+          children: [AdminAnalyticsTab(), _ApplicationsTab(), _ReportsTab()],
         ),
       ),
     );

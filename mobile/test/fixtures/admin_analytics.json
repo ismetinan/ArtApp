@@ -1,0 +1,518 @@
+{
+ "overview": {
+  "users_total": 3,
+  "users_registered": 0,
+  "users_guest": 3,
+  "guest_to_registered_rate": 0.0,
+  "premium_active": 0,
+  "dau": 3,
+  "wau": 3,
+  "mau": 3,
+  "stickiness": 1.0,
+  "new_users_7d": 3,
+  "platforms": {
+   "android": 2,
+   "ios": 1
+  },
+  "series_30d": [
+   {
+    "day": "2026-08-28",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-08-29",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-08-30",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-08-31",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-01",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-02",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-03",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-04",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-05",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-06",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-07",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-08",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-09",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-10",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-11",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-12",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-13",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-14",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-15",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-16",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-17",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-18",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-19",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-20",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-21",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-22",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-23",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-24",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-25",
+    "signups": 0,
+    "active": 0
+   },
+   {
+    "day": "2026-09-26",
+    "signups": 3,
+    "active": 3
+   }
+  ]
+ },
+ "funnel": {
+  "cohort_size": 3,
+  "steps": [
+   {
+    "key": "signed_up",
+    "users": 3,
+    "rate": 1.0
+   },
+   {
+    "key": "onboarded",
+    "users": 0,
+    "rate": 0.0
+   },
+   {
+    "key": "lesson_opened",
+    "users": 3,
+    "rate": 1.0
+   },
+   {
+    "key": "assignment_generated",
+    "users": 2,
+    "rate": 0.667
+   },
+   {
+    "key": "assignment_submitted",
+    "users": 2,
+    "rate": 0.667
+   },
+   {
+    "key": "lesson_completed",
+    "users": 2,
+    "rate": 0.667
+   },
+   {
+    "key": "returned_after_7d",
+    "users": 0,
+    "rate": 0.0
+   },
+   {
+    "key": "registered_account",
+    "users": 0,
+    "rate": 0.0
+   }
+  ],
+  "notes": [
+   "lesson_opened_tracked_since_v0.10"
+  ]
+ },
+ "retention": {
+  "cohorts": [
+   {
+    "week_start": "2026-08-03",
+    "size": 0,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   },
+   {
+    "week_start": "2026-08-10",
+    "size": 0,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   },
+   {
+    "week_start": "2026-08-17",
+    "size": 0,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   },
+   {
+    "week_start": "2026-08-24",
+    "size": 0,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   },
+   {
+    "week_start": "2026-08-31",
+    "size": 0,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   },
+   {
+    "week_start": "2026-09-07",
+    "size": 0,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   },
+   {
+    "week_start": "2026-09-14",
+    "size": 0,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   },
+   {
+    "week_start": "2026-09-21",
+    "size": 3,
+    "w1": null,
+    "w2": null,
+    "w4": null
+   }
+  ]
+ },
+ "lessons": {
+  "lessons": [
+   {
+    "node_id": "cizgi-temelleri",
+    "title": "Çizgi Temelleri",
+    "axis": "cizgi_kalitesi",
+    "opened": 3,
+    "assignment_generated": 2,
+    "submitters": 2,
+    "completed": 2,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "boyama",
+    "title": "Boyama",
+    "axis": "renk",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "deger-calismasi",
+    "title": "Değer (Value) Çalışması",
+    "axis": "isik_golge",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "figur-oranlari",
+    "title": "Figür Oranları",
+    "axis": "oran",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "iki-nokta-perspektif",
+    "title": "İki Noktalı Perspektif",
+    "axis": "perspektif",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "ileri-kompozisyon",
+    "title": "İleri Kompozisyon",
+    "axis": "kompozisyon",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "isik-mantigi",
+    "title": "Işığın Mantığı",
+    "axis": "isik_golge",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "jest-cizimi",
+    "title": "Jest Çizimi (Gesture)",
+    "axis": "anatomi",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "kafa-oranlari",
+    "title": "Kafa Oranları (Loomis)",
+    "axis": "oran",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "portre",
+    "title": "Portre Çizimi",
+    "axis": "anatomi",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "renk-temelleri",
+    "title": "Renk Temelleri",
+    "axis": "renk",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "sekil-ve-form",
+    "title": "Şekil ve Form",
+    "axis": "perspektif",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "tek-nokta-perspektif",
+    "title": "Tek Noktalı Perspektif",
+    "axis": "perspektif",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "temel-anatomi",
+    "title": "Temel Anatomi",
+    "axis": "anatomi",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "temel-kompozisyon",
+    "title": "Temel Kompozisyon",
+    "axis": "kompozisyon",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   },
+   {
+    "node_id": "temel-oranlar",
+    "title": "Temel Oranlar",
+    "axis": "oran",
+    "opened": 0,
+    "assignment_generated": 0,
+    "submitters": 0,
+    "completed": 0,
+    "stuck": 0,
+    "avg_task_match": null
+   }
+  ]
+ },
+ "economy": {
+  "jetons_spent_by_reason": {},
+  "jetons_granted_by_reason": {
+   "welcome": 9
+  },
+  "purchases_by_product": {},
+  "ai_jobs_30d": {
+   "by_status": {
+    "done": 2
+   },
+   "fail_rate": 0.0,
+   "avg_seconds": 0.0
+  }
+ },
+ "users": {
+  "total": 3,
+  "page": 0,
+  "page_size": 50,
+  "users": [
+   {
+    "id": 4,
+    "created_at": "2026-09-26T11:56:25.783079+00:00",
+    "last_seen_at": "2026-09-26T11:56:25.792803+00:00",
+    "platform": "android",
+    "app_version": "0.10.0+24",
+    "level": 1,
+    "is_guest": true,
+    "is_premium": false,
+    "lessons_completed": 0,
+    "analyses": 0,
+    "active_days": 1
+   },
+   {
+    "id": 3,
+    "created_at": "2026-09-26T11:56:25.717487+00:00",
+    "last_seen_at": "2026-09-26T11:56:25.726540+00:00",
+    "platform": "ios",
+    "app_version": "0.10.0+24",
+    "level": 1,
+    "is_guest": true,
+    "is_premium": false,
+    "lessons_completed": 1,
+    "analyses": 1,
+    "active_days": 1
+   },
+   {
+    "id": 2,
+    "created_at": "2026-09-26T11:56:25.578721+00:00",
+    "last_seen_at": "2026-09-26T11:56:25.606216+00:00",
+    "platform": "android",
+    "app_version": "0.10.0+24",
+    "level": 1,
+    "is_guest": true,
+    "is_premium": false,
+    "lessons_completed": 1,
+    "analyses": 1,
+    "active_days": 1
+   }
+  ]
+ }
+}

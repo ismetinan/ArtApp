@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from ..core.messages import msg, negotiate_lang
 from ..db import get_db
 from ..models.tables import User
+from ..services import activity
 from ..services.auth import hash_token
 
 _bearer = HTTPBearer(auto_error=False)
@@ -28,6 +29,8 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
     db: Session = Depends(get_db),
     lang: str = Depends(get_request_lang),
+    x_platform: str | None = Header(default=None),
+    x_app_version: str | None = Header(default=None),
 ) -> User:
     if credentials is None:
         raise HTTPException(status_code=401, detail=msg("session_missing", lang))
@@ -36,6 +39,7 @@ def get_current_user(
     ).scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=401, detail=msg("session_invalid", lang))
+    activity.record(db, user, x_platform, x_app_version)
     return user
 
 
