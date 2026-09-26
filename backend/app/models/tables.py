@@ -411,3 +411,21 @@ class UserBadge(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     code: Mapped[str] = mapped_column(String(32))
     awarded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class AdminAuditLog(Base):
+    """Admin kararlarının değiştirilemez kaydı (güvenlik, 2026-09): kim, ne,
+    hangi hedefe, ne zaman. Ele geçirilmiş bir admin hesabının ne yaptığını
+    sonradan görebilmek için. target_id FK DEĞİL — hedef silinse de kayıt kalır.
+    Admin hesabı silinirse admin_id NULL'lanır, kayıt korunur."""
+
+    __tablename__ = "admin_audit_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    admin_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    action: Mapped[str] = mapped_column(String(40))
+    target_type: Mapped[str] = mapped_column(String(24))
+    target_id: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, index=True
+    )

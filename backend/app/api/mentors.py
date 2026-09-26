@@ -24,7 +24,7 @@ from ..models.tables import (
     Submission,
     User,
 )
-from ..services import donations, earnings, jetons, moderation
+from ..services import audit, donations, earnings, jetons, moderation
 from ..services.push import send_push
 
 REQUEST_TIMEOUT = timedelta(hours=48)
@@ -764,6 +764,7 @@ def decide_donation_link(
             status_code=404, detail=msg("application_not_found", admin.language)
         )
     profile.donation_status = "approved" if decision == "approve" else "rejected"
+    audit.log(db, admin, f"donation_{decision}", "mentor_profile", profile.id)
     db.commit()
     return {"id": profile.id, "donation_status": profile.donation_status}
 
@@ -788,6 +789,7 @@ def decide_application(
     profile.status = "approved" if decision == "approve" else "rejected"
     if decision == "reject":
         profile.rejected_at = datetime.now(timezone.utc)  # tekrar başvuru beklemesi
+    audit.log(db, admin, f"application_{decision}", "mentor_profile", profile.id)
     db.commit()
     applicant = db.get(User, profile.user_id)
     if applicant is not None:

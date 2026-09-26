@@ -293,14 +293,16 @@ async def submit_assignment_async(
             status_code=409, detail=msg("analysis_in_progress", user.language)
         )
 
+    # Önce harca, SONRA depola: tersi sırada jetonu olmayan biri sınırsız dosya
+    # yükleyebiliyordu (her biri 402 alıp depoda öksüz kalıyordu). spend_ai
+    # commit etmez — yükleme geçersizse harcama da geri sarılır.
+    cost = get_settings().ai_cost_redline
+    spend_ai(db, user, cost, "ai_redline")  # yetersizse 402, hiçbir şey yazılmaz
     try:
         content = await read_upload(file)
         rel_path = save_drawing(content, file.filename or "odev.png")
     except UploadError as e:
         raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))
-
-    cost = get_settings().ai_cost_redline
-    spend_ai(db, user, cost, "ai_redline")  # yetersizse 402, hiçbir şey yazılmaz
     submission = Submission(
         user_id=user.id, node_id=node.id, kind="assignment", file_path=rel_path
     )
@@ -358,14 +360,13 @@ async def free_analysis_async(
                 status_code=429, detail=msg("free_analysis_limit", user.language)
             )
 
+    cost = settings.ai_cost_free_analysis
+    spend_ai(db, user, cost, "ai_free_analysis")  # önce harca (bkz. submit-async)
     try:
         content = await read_upload(file)
         rel_path = save_drawing(content, file.filename or "serbest.png")
     except UploadError as e:
         raise HTTPException(status_code=422, detail=msg(e.code, user.language, **e.params))
-
-    cost = settings.ai_cost_free_analysis
-    spend_ai(db, user, cost, "ai_free_analysis")
     submission = Submission(user_id=user.id, kind="free", file_path=rel_path)
     db.add(submission)
     db.flush()

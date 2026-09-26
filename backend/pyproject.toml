@@ -14,7 +14,6 @@ dependencies = [
     "python-multipart>=0.0.9",
     "google-genai>=1.0",
     "httpx>=0.27",
-    "pillow>=10.4",
     "bcrypt>=4.2",
     "email-validator>=2.2",
     "google-auth>=2.30",
@@ -22,8 +21,14 @@ dependencies = [
     "sentry-sdk[fastapi]>=2.0",
     "firebase-admin>=6.5",
     # App Store imzalı işlem (JWS) doğrulaması — apple_iap.py
-    "cryptography>=43.0",
+    # >=50: PYSEC-2026-3552 (pip-audit, 2026-09)
+    "cryptography>=50.0",
     "pyjwt>=2.9",
+    # Dolaylı bağımlılık (Google istemcileri üzerinden) — güvenlik tabanı:
+    # PYSEC-2026-3628 (pip-audit, 2026-09)
+    "h2>=4.4.1",
+    # Sıkıştırma bombası / görsel ayrıştırma düzeltmeleri için güncel taban
+    "pillow>=11.0",
 ]
 
 [project.optional-dependencies]

@@ -65,7 +65,14 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Artora API", lifespan=lifespan)
+_docs = get_settings().enable_api_docs
+app = FastAPI(
+    title="Artora API",
+    lifespan=lifespan,
+    docs_url="/docs" if _docs else None,
+    redoc_url="/redoc" if _docs else None,
+    openapi_url="/openapi.json" if _docs else None,
+)
 
 # Onboarding 3×8 MB çizim + multipart ek yükü rahat sığar; daha büyüğü
 # gövde okunmadan reddedilir (bellek/disk DoS koruması).
@@ -85,6 +92,11 @@ async def security_middleware(request: Request, call_next):
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "no-referrer")
+    # Railway TLS sonlandırıyor; tarayıcı bir kez gördükten sonra HTTP'ye
+    # düşmesin (/join, /privacy gibi tarayıcıda açılan sayfalar için)
+    response.headers.setdefault(
+        "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+    )
     return response
 
 

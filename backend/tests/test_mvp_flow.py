@@ -2,12 +2,9 @@
 
 import io
 
-PNG = (
-    b"\x89PNG\r\n\x1a\n" + bytes.fromhex(
-        "0000000d49484452000000010000000108060000001f15c489"
-        "0000000d4944415478da63fcffff3f0300050201e2260ad90000000049454e44ae426082"
-    )
-)
+# Geçerli 1×1 PNG. (Eskisinin IDAT checksum'ı bozuktu; yükleme artık Pillow
+# ile doğrulandığı için — bkz. services/storage.strip_metadata — reddediliyor.)
+from tests.test_mentors import PNG  # noqa: E402
 
 
 def _png_file(name="cizim.png"):
@@ -24,7 +21,12 @@ def test_health(client):
     assert client.get("/health").json() == {"status": "ok"}
 
 
-def test_full_mvp_loop(client):
+def test_full_mvp_loop(client, monkeypatch):
+    from app.core.config import get_settings
+
+    # Mock skorları görsel hash'inden türüyor; "önkoşullu ders kilitli"
+    # kontrolü skorla atlamaya (skip_unlock_score) takılmasın
+    monkeypatch.setattr(get_settings(), "skip_unlock_score", 101)
     headers = _guest(client)
 
     # 1. Onboarding: 3 çizim → seviye + ability skorları

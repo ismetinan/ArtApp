@@ -11,7 +11,14 @@ from ..api.deps import get_current_user
 from ..core.config import get_settings
 from ..core.messages import msg
 from ..db import get_db
-from ..models.tables import AbilityHistory, AbilityScore, MentorProfile, Submission, User
+from ..models.tables import (
+    AbilityHistory,
+    AbilityScore,
+    MentorProfile,
+    MentorshipRequest,
+    Submission,
+    User,
+)
 from ..services import badges
 from ..services import billing as billing_service
 from ..services import jetons
@@ -22,15 +29,32 @@ from ..services.storage import load_drawing
 router = APIRouter(tags=["profile"])
 
 
+def _can_view(db: Session, user: User, submission: Submission) -> bool:
+    if submission.user_id == user.id or submission.is_public:
+        return True
+    return (
+        db.execute(
+            select(MentorshipRequest.id).where(
+                MentorshipRequest.submission_id == submission.id,
+                MentorshipRequest.mentor_id == user.id,
+            )
+        ).first()
+        is not None
+    )
+
+
 @router.get("/submissions/{submission_id}/image")
 def get_submission_image(
     submission_id: int,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Çizim dosyasını döner. Sadece sahibi — veya herkese açıksa herkes — görebilir."""
+    """Çizim dosyasını döner. Görebilenler: sahibi, herkese açıksa herkes, ve
+    bu çizim için mentor isteğini üstlenmiş mentor (en az yetki: yalnız kendi
+    isteğinin çizimi). Son dal eksikti — çizimler varsayılan özel olduğu için
+    mentorlar kritik edecekleri çizimi göremiyordu (404)."""
     submission = db.get(Submission, submission_id)
-    if submission is None or (submission.user_id != user.id and not submission.is_public):
+    if submission is None or not _can_view(db, user, submission):
         raise HTTPException(status_code=404, detail=msg("submission_not_found", user.language))
     try:
         content = load_drawing(submission.file_path)
@@ -140,7 +164,6 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
             {
                 "submission_id": s.id,
                 "node_id": s.node_id,
-                "file_path": s.file_path,
                 "ai_result": s.ai_result,
                 "is_public": s.is_public,
                 "created_at": s.created_at.isoformat(),

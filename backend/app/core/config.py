@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     task_match_threshold: int = 50
 
     sentry_dsn: str = ""
+    # /docs, /redoc, /openapi.json — prod'da KAPALI: tüm API yüzeyini (admin
+    # uçları dahil) haritalayıp saldırgana sunuyordu. Yerelde ENABLE_API_DOCS=true.
+    enable_api_docs: bool = False
 
     # FCM push: Firebase service account JSON'unun TAM içeriği (env'de string).
     # Boşsa push servisi sessiz no-op — dev/test Firebase'siz çalışır.

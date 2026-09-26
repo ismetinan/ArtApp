@@ -11,6 +11,7 @@ from ..core.ratelimit import rate_limit
 from ..db import get_db
 from ..models.tables import (
     AbilityHistory,
+    AdminAuditLog,
     AbilityScore,
     AnalysisJob,
     AiUsage,
@@ -314,6 +315,12 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
         UserBadge,
     ):
         db.execute(delete(table).where(table.user_id == user.id))
+    # Denetim kaydı korunur, yalnız admin bağlantısı kopar
+    db.execute(
+        AdminAuditLog.__table__.update()
+        .where(AdminAuditLog.admin_id == user.id)
+        .values(admin_id=None)
+    )
     db.delete(user)
     db.commit()
     return {"deleted": True}

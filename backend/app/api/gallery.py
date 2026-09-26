@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import ContentReport, SkillNode, Submission, User
+from ..services import audit
 from .deps import get_current_user
 from .mentors import require_admin
 
@@ -161,5 +162,6 @@ def decide_report(
     db.execute(
         delete(ContentReport).where(ContentReport.submission_id == submission_id)
     )
+    audit.log(db, admin, f"report_{decision}", "submission", submission_id)
     db.commit()
     return {"submission_id": submission_id, "decision": decision}
