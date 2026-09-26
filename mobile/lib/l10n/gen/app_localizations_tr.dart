@@ -1069,4 +1069,23 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get analyticsJustNow => 'az önce';
+
+  @override
+  String get badgesTitle => 'Rozetler';
+
+  @override
+  String get celebrationTitle => 'Yeni rozetler!';
+
+  @override
+  String get celebrationOk => 'Harika!';
+
+  @override
+  String launchBonusBody(int n) {
+    return 'Hesabına $n jeton hediye edildi — Artora\'nın ilk günlerinde burada olduğun için teşekkürler!';
+  }
+
+  @override
+  String campaignGuestBody(int n, String date) {
+    return 'Kurucu Çizer kampanyası: $date tarihine kadar hesap oluştur, $n jeton hediye kazan.';
+  }
 }

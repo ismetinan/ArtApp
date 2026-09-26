@@ -6,6 +6,7 @@ import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'admin_panel.dart';
 import 'auth_form.dart';
+import 'badges.dart';
 import 'journey.dart';
 import 'mentor_panel.dart';
 import 'onboarding.dart';
@@ -20,6 +21,12 @@ class ProfileScreen extends StatefulWidget {
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+String _shortDate(BuildContext context, String iso) {
+  final d = DateTime.tryParse(iso);
+  if (d == null) return iso;
+  return MaterialLocalizations.of(context).formatMediumDate(d);
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -77,7 +84,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ListTile(
                     leading: const Icon(Icons.shield_outlined),
                     title: Text(t.createAccountCard),
-                    subtitle: Text(t.createAccountCardBody),
+                    // Kampanya aktifse kayıt teşviki: jeton yalnız hesaba verilir
+                    subtitle: Text(p['launch_campaign'] != null
+                        ? t.campaignGuestBody(
+                            (p['launch_campaign']['bonus_jetons'] ?? 0) as int,
+                            _shortDate(context, p['launch_campaign']['until'] as String),
+                          )
+                        : t.createAccountCardBody),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
                       final upgraded = await Navigator.of(context).push<bool>(
@@ -200,6 +213,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
+              if ((p['badges'] as List?)?.isNotEmpty ?? false) ...[
+                const SizedBox(height: 16),
+                Text(t.badgesTitle, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                BadgeStrip(
+                  badges: (p['badges'] as List)
+                      .map((b) => BadgeInfo.fromJson(Map<String, dynamic>.from(b)))
+                      .toList(),
+                ),
+              ],
               const SizedBox(height: 16),
               Text(
                 t.abilityChartTitle,

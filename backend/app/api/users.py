@@ -25,6 +25,7 @@ from ..models.tables import (
     Submission,
     User,
     UserActivityDay,
+    UserBadge,
     UserProgress,
 )
 from ..services import jetons
@@ -310,6 +311,7 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
     for table in (
         AnalysisJob, Assignment, AbilityHistory,
         Submission, UserProgress, AbilityScore, AiUsage, Purchase, UserActivityDay, AppEvent,
+        UserBadge,
     ):
         db.execute(delete(table).where(table.user_id == user.id))
     db.delete(user)

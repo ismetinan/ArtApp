@@ -1066,4 +1066,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get analyticsJustNow => 'just now';
+
+  @override
+  String get badgesTitle => 'Badges';
+
+  @override
+  String get celebrationTitle => 'New badges!';
+
+  @override
+  String get celebrationOk => 'Awesome!';
+
+  @override
+  String launchBonusBody(int n) {
+    return '$n jetons were gifted to your account — thanks for being here in Artora\'s first days!';
+  }
+
+  @override
+  String campaignGuestBody(int n, String date) {
+    return 'Founding Artist campaign: create an account by $date and get $n free jetons.';
+  }
 }

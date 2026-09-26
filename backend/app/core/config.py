@@ -1,3 +1,4 @@
+from datetime import date
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -108,6 +109,12 @@ class Settings(BaseSettings):
     # Görsel token'ı piksel sayısıyla ölçekleniyor ve maliyetin çoğu girdi
     # tarafında; 1024 kaliteyi düşürmeden token'ı ~2,5x azaltıyor. 0 = kapalı.
     ai_image_max_edge: int = 1024
+
+    # Çıkış kampanyası (2026-09): bu tarihe (dahil, UTC) kadar uygulamayı açan
+    # herkes "Kurucu Çizer" rozetini, KAYITLI hesaplar ek olarak bir kerelik
+    # ücretsiz jeton alır. Boş = kampanya kapalı. Örn. LAUNCH_CAMPAIGN_UNTIL=2026-10-31
+    launch_campaign_until: date | None = None
+    launch_bonus_jetons: int = 10
 
 
 @lru_cache

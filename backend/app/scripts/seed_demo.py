@@ -51,6 +51,7 @@ from ..models.tables import (
     Submission,
     User,
     UserActivityDay,
+    UserBadge,
     UserProgress,
 )
 from ..services.auth import generate_token, hash_password, hash_token
@@ -109,7 +110,9 @@ def _purge(db) -> None:
         | (MentorshipRequest.mentor_id.in_(ids))
     ).delete(synchronize_session=False)
     # Reviewer oturumlarının ürettiği satırlar (aktiflik, olay, analiz işi…)
-    for table in (AnalysisJob, Assignment, AbilityHistory, UserActivityDay, AppEvent):
+    for table in (
+        AnalysisJob, Assignment, AbilityHistory, UserActivityDay, AppEvent, UserBadge
+    ):
         db.query(table).filter(table.user_id.in_(ids)).delete(synchronize_session=False)
     db.query(AbilityScore).filter(AbilityScore.user_id.in_(ids)).delete(
         synchronize_session=False

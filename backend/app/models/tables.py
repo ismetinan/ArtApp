@@ -397,3 +397,17 @@ class AppEvent(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_now, index=True
     )
+
+
+class UserBadge(Base):
+    """Kazanılmış rozet (2026-09). Katalog kodda: services/badges.py.
+    UniqueConstraint aynı rozetin iki kez verilmesini engeller — kampanya
+    jetonu da bu satıra bağlı olduğu için para akışı güvencesidir."""
+
+    __tablename__ = "user_badges"
+    __table_args__ = (UniqueConstraint("user_id", "code"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    code: Mapped[str] = mapped_column(String(32))
+    awarded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

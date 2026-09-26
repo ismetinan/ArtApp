@@ -1951,6 +1951,36 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'az önce'**
   String get analyticsJustNow;
+
+  /// No description provided for @badgesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Rozetler'**
+  String get badgesTitle;
+
+  /// No description provided for @celebrationTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni rozetler!'**
+  String get celebrationTitle;
+
+  /// No description provided for @celebrationOk.
+  ///
+  /// In tr, this message translates to:
+  /// **'Harika!'**
+  String get celebrationOk;
+
+  /// No description provided for @launchBonusBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesabına {n} jeton hediye edildi — Artora\'nın ilk günlerinde burada olduğun için teşekkürler!'**
+  String launchBonusBody(int n);
+
+  /// No description provided for @campaignGuestBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kurucu Çizer kampanyası: {date} tarihine kadar hesap oluştur, {n} jeton hediye kazan.'**
+  String campaignGuestBody(int n, String date);
 }
 
 class _AppLocalizationsDelegate

@@ -345,5 +345,10 @@
   "analyticsUserStats": "Lv {level} · {lessons} lessons · {analyses} analyses · {days} active days",
   "analyticsDaysAgo": "{n}d ago",
   "analyticsHoursAgo": "{n}h ago",
-  "analyticsJustNow": "just now"
+  "analyticsJustNow": "just now",
+  "badgesTitle": "Badges",
+  "celebrationTitle": "New badges!",
+  "celebrationOk": "Awesome!",
+  "launchBonusBody": "{n} jetons were gifted to your account — thanks for being here in Artora's first days!",
+  "campaignGuestBody": "Founding Artist campaign: create an account by {date} and get {n} free jetons."
 }

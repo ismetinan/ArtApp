@@ -243,12 +243,35 @@ class AnalysisJobInfo {
         error = j['error'];
 }
 
+/// Kazanılmış rozet (sunucu yerelleştirilmiş başlık/açıklama gönderir).
+class BadgeInfo {
+  final String code, icon, title, description;
+
+  BadgeInfo.fromJson(Map<String, dynamic> j)
+      : code = j['code'],
+        icon = j['icon'] ?? '',
+        title = j['title'] ?? '',
+        description = j['description'] ?? '';
+}
+
+/// Gösterilmeyi bekleyen kutlama: yeni rozetler ve/veya kampanya jetonu.
+class Celebration {
+  final List<BadgeInfo> badges;
+  final int bonusJetons;
+  const Celebration(this.badges, this.bonusJetons);
+}
+
 class ApiClient {
   ApiClient._();
   static final instance = ApiClient._();
 
   String? token;
   bool isGuest = true;
+
+  /// Rozet/kampanya kutlamaları. getProfile hangi ekrandan çağrılırsa
+  /// çağrılsın sunucu yeni rozeti YALNIZ bir kez bildirir; kaybolmasın diye
+  /// buraya düşer ve HomeShell dinleyip diyaloğu gösterir.
+  final celebrations = ValueNotifier<Celebration?>(null);
 
   /// Backend'deki mentor_market_enabled flag'i — mentor UI'ı buna göre görünür.
   bool mentorMarketEnabled = false;
@@ -640,6 +663,15 @@ class ApiClient {
   Future<Map<String, dynamic>> getProfile() async {
     final r = await http.get(Uri.parse('$apiBase/profile'), headers: authHeaders);
     final j = _decode(r);
+    final newBadges = ((j['new_badges'] ?? []) as List)
+        .map((b) => BadgeInfo.fromJson(Map<String, dynamic>.from(b)))
+        .toList();
+    final bonus = (j['launch_bonus_granted'] ?? 0) as int;
+    if (newBadges.isNotEmpty || bonus > 0) {
+      final prev = celebrations.value;
+      celebrations.value = Celebration(
+          [...?prev?.badges, ...newBadges], (prev?.bonusJetons ?? 0) + bonus);
+    }
     mentorMarketEnabled = j['mentor_market_enabled'] ?? mentorMarketEnabled;
     jetonAiEconomy = j['jeton_ai_economy'] ?? jetonAiEconomy;
     weeklyJetonFloor = j['weekly_jeton_floor'] ?? weeklyJetonFloor;

@@ -541,5 +541,12 @@
   "@analyticsDaysAgo": {"placeholders": {"n": {"type": "int"}}},
   "analyticsHoursAgo": "{n} sa önce",
   "@analyticsHoursAgo": {"placeholders": {"n": {"type": "int"}}},
-  "analyticsJustNow": "az önce"
+  "analyticsJustNow": "az önce",
+  "badgesTitle": "Rozetler",
+  "celebrationTitle": "Yeni rozetler!",
+  "celebrationOk": "Harika!",
+  "launchBonusBody": "Hesabına {n} jeton hediye edildi — Artora'nın ilk günlerinde burada olduğun için teşekkürler!",
+  "@launchBonusBody": {"placeholders": {"n": {"type": "int"}}},
+  "campaignGuestBody": "Kurucu Çizer kampanyası: {date} tarihine kadar hesap oluştur, {n} jeton hediye kazan.",
+  "@campaignGuestBody": {"placeholders": {"n": {"type": "int"}, "date": {"type": "String"}}}
 }

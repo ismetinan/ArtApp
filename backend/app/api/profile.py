@@ -12,6 +12,7 @@ from ..core.config import get_settings
 from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import AbilityHistory, AbilityScore, MentorProfile, Submission, User
+from ..services import badges
 from ..services import billing as billing_service
 from ..services import jetons
 from ..services import moderation
@@ -43,7 +44,10 @@ def get_submission_image(
 def get_profile(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Haftalık ücretsiz jeton (tembel): ≥7 gün geçtiyse bir kez işler. Aktif
     # ekonomiye göre ya damlar (eski) ya tabana tamamlar (yeni) — bkz. jetons.py.
-    if jetons.maybe_grant_weekly(db, user):
+    changed = jetons.maybe_grant_weekly(db, user)
+    # Rozetler + çıkış kampanyası (tembel, aynı desen)
+    new_badges, launch_bonus = badges.evaluate(db, user)
+    if changed or new_badges or launch_bonus:
         db.commit()
     scores = db.execute(
         select(AbilityScore).where(AbilityScore.user_id == user.id)
@@ -125,6 +129,12 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
             }
             for h in history
         ],
+        # Rozetler: tümü + bu çağrıda YENİ kazanılanlar (istemci kutlar)
+        "badges": badges.list_for(db, user),
+        "new_badges": [badges.to_json(c, user.language) for c in new_badges],
+        # Çıkış kampanyası: aktifse bant bilgisi; bu çağrıda verilen jeton
+        "launch_campaign": badges.campaign_info(user),
+        "launch_bonus_granted": launch_bonus,
         # "Gelişim Macerası": kronolojik, her ödev kendi AI notlarıyla
         "gelisim_macerasi": [
             {
