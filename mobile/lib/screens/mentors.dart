@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'info_hint.dart';
 import 'store.dart';
 
 /// Backend'deki MAX_OPEN_REQUESTS ile aynı — yalnız bilgilendirme metninde.
@@ -28,8 +29,7 @@ class _MentorsScreenState extends State<MentorsScreen> {
     if (ApiClient.instance.mentorMarketEnabled) _load();
   }
 
-  void _load() => setState(() => _future =
-      ApiClient.instance.getMentors(style: _style, query: _search.text.trim()));
+  void _load() => setState(() { _future = ApiClient.instance.getMentors(style: _style, query: _search.text.trim()); });
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +61,14 @@ class _MentorsScreenState extends State<MentorsScreen> {
       appBar: AppBar(title: Text(t.tabMentors)),
       body: Column(
         children: [
+          // Mentorların ne işe yaradığı — bir kez okununca kapatılabilir
+          InfoHint(
+            icon: Icons.school_outlined,
+            text: ApiClient.instance.jetonAiEconomy
+                ? t.mentorsHintFree
+                : t.mentorsHintPaid,
+            prefsKey: 'hint_mentors_dismissed',
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             child: TextField(

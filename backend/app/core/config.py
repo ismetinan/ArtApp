@@ -72,6 +72,16 @@ class Settings(BaseSettings):
     android_package_name: str = "com.ismetinan.artapp"
     # App Store: imzalı işlemin bundleId'si bununla eşleşmeli
     ios_bundle_id: str = "com.ismetinan.artapp"
+    # Uygulama güncelleme uyarısı (2026-09). Sürüm ADI ile karşılaştırılır
+    # ("1.1.0") — derleme numarası platformlar arasında farklı (Codemagic iOS'ta
+    # TestFlight'a göre artırıyor). Platform başına ayrı: Apple incelemesi
+    # gecikirken iOS kullanıcısına henüz yayında olmayan sürüm önerilmesin.
+    # Boş = uyarı yok. LATEST altı → kapatılabilir öneri; MIN altı → zorunlu.
+    app_latest_version_android: str = ""
+    app_latest_version_ios: str = ""
+    app_min_version_android: str = ""
+    app_min_version_ios: str = ""
+    app_store_url_ios: str = "https://apps.apple.com/app/id6797175551"
     # iOS mağazası AYRI bayrak: Play'de satış açılırken App Store ürünleri
     # henüz hazır olmayabilir. Aynı bayrağı paylaşsalardı iOS'ta fiyatsız,
     # düğmeleri ölü bir mağaza açılırdı (StoreKit ürün olmadan da "available"

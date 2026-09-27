@@ -26,7 +26,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
     _future = ApiClient.instance.getProfile();
   }
 
-  void _reload() => setState(() => _future = ApiClient.instance.getProfile());
+  void _reload() => setState(() { _future = ApiClient.instance.getProfile(); });
 
   @override
   Widget build(BuildContext context) {

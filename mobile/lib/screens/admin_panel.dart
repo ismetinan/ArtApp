@@ -49,7 +49,7 @@ class _ApplicationsTabState extends State<_ApplicationsTab> {
   }
 
   void _refresh() {
-    setState(() => _future = ApiClient.instance.getMentorApplications());
+    setState(() { _future = ApiClient.instance.getMentorApplications(); });
   }
 
   Future<void> _decide(Map<String, dynamic> app, bool approve) async {
@@ -239,7 +239,7 @@ class _ReportsTabState extends State<_ReportsTab> {
   }
 
   void _refresh() {
-    setState(() => _future = ApiClient.instance.getContentReports());
+    setState(() { _future = ApiClient.instance.getContentReports(); });
   }
 
   Future<void> _decide(int submissionId, bool hide) async {

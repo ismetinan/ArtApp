@@ -23,16 +23,29 @@ class SkillTreeScreen extends StatefulWidget {
   State<SkillTreeScreen> createState() => _SkillTreeScreenState();
 }
 
+/// Serbest AI analizi alt çubuğun ortasındaki butondan (HomeShell) açılıyor.
+/// Akış, bekleme ve uygulama-ölümü kurtarması burada kaldığı için buton bu
+/// iki kanal üzerinden konuşur: [freeAnalysisTrigger] artınca seçim sayfası
+/// açılır, [freeAnalysisBusy] analiz sürerken butonda spinner gösterir.
+final freeAnalysisTrigger = ValueNotifier<int>(0);
+final freeAnalysisBusy = ValueNotifier<bool>(false);
+
 class _SkillTreeScreenState extends State<SkillTreeScreen>
     with WidgetsBindingObserver {
   late Future<({List<SkillNode> nodes, String? recommendedNodeId})> _future;
   Locale? _lastLocale;
-  bool _freeBusy = false;
+  bool get _freeBusy => freeAnalysisBusy.value;
+  set _freeBusy(bool v) => freeAnalysisBusy.value = v;
   bool _recovering = false;
+
+  void _onFreeAnalysisTrigger() {
+    if (mounted && !_freeBusy) _freeAnalysisSheet();
+  }
 
   @override
   void initState() {
     super.initState();
+    freeAnalysisTrigger.addListener(_onFreeAnalysisTrigger);
     _future = ApiClient.instance.getTree();
     // Android seçici/analiz sırasında uygulamayı öldürdüyse kurtarma
     WidgetsBinding.instance.addObserver(this);
@@ -44,6 +57,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
 
   @override
   void dispose() {
+    freeAnalysisTrigger.removeListener(_onFreeAnalysisTrigger);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -151,7 +165,7 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
     _lastLocale = locale;
   }
 
-  void _reload() => setState(() => _future = ApiClient.instance.getTree());
+  void _reload() => setState(() { _future = ApiClient.instance.getTree(); });
 
   /// Serbest çizim analizi: ders dışı bitmiş bir işi yükle → redline al.
   Future<void> _freeAnalysis() async {
@@ -250,23 +264,8 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(t.tabLessons),
-        actions: [
-          _freeBusy
-              ? const Padding(
-                  padding: EdgeInsets.all(14),
-                  child: SizedBox(
-                      width: 20, height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2)),
-                )
-              : IconButton(
-                  icon: const Icon(Icons.auto_awesome),
-                  tooltip: t.freeAnalysisTitle,
-                  onPressed: _freeAnalysisSheet,
-                ),
-        ],
-      ),
+      // Serbest analiz butonu alt çubuğun ortasına taşındı (HomeShell)
+      appBar: AppBar(title: Text(t.tabLessons)),
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
@@ -349,7 +348,10 @@ class _SkillTreeScreenState extends State<SkillTreeScreen>
               Text(t.freeAnalysisTitle,
                   style: Theme.of(ctx).textTheme.titleMedium),
               const SizedBox(height: 8),
-              Text(t.freeAnalysisHint),
+              // Yeni ekonomide haftalık ücretsiz hak yok, analiz jetonla
+              Text(ApiClient.instance.jetonAiEconomy
+                  ? t.freeAnalysisHintAi(ApiClient.instance.aiCostFreeAnalysis)
+                  : t.freeAnalysisHint),
               const SizedBox(height: 16),
               FilledButton.icon(
                 icon: const Icon(Icons.folder),

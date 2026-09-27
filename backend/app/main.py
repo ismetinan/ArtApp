@@ -10,6 +10,7 @@ from sqlalchemy import select
 from . import db as database
 from .api import (
     admin_analytics,
+    app_config,
     admin_stats,
     billing,
     events,
@@ -112,6 +113,7 @@ app.include_router(admin_stats.router)
 app.include_router(admin_analytics.router)
 app.include_router(events.router)
 app.include_router(legal.router)
+app.include_router(app_config.router)
 
 
 @app.get("/health")

@@ -38,7 +38,7 @@ class _AdminAnalyticsTabState extends State<AdminAnalyticsTab>
 
   Future<void> _refresh() async {
     final f = _load();
-    setState(() => _future = f);
+    setState(() { _future = f; });
     await f;
   }
 

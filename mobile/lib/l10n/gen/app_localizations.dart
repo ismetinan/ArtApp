@@ -497,13 +497,13 @@ abstract class AppLocalizations {
   /// No description provided for @freeAnalysisTitle.
   ///
   /// In tr, this message translates to:
-  /// **'Serbest Analiz'**
+  /// **'AI Geri Bildirim'**
   String get freeAnalysisTitle;
 
   /// No description provided for @freeAnalysisHint.
   ///
   /// In tr, this message translates to:
-  /// **'Ders dışı bitmiş bir çizimini yükle, AI teknik analiz yapsın (haftada 1 ücretsiz).'**
+  /// **'İstediğin bir çizimden AI geri bildirimi al — oran, perspektif, çizgi ve ışık-gölge üzerine teknik notlar (haftada 1 ücretsiz).\n\nDers ödevlerini ilgili dersin içinden yükle; orada ders ilerlemen de kaydedilir.'**
   String get freeAnalysisHint;
 
   /// No description provided for @levelRoadmapTitle.
@@ -1993,6 +1993,84 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Bu çizim verilen görevi henüz karşılamadığı için ders tamamlanmadı. Görevdeki adımlara göre yeniden çizip tekrar yükleyebilirsin — geri bildirimin yukarıda.'**
   String get taskNotPassed;
+
+  /// No description provided for @storeButton.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mağaza'**
+  String get storeButton;
+
+  /// No description provided for @freeAnalysisHintAi.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstediğin bir çizimden AI geri bildirimi al — oran, perspektif, çizgi ve ışık-gölge üzerine teknik notlar. Her analiz {cost} jetona mal olur.\n\nDers ödevlerini ilgili dersin içinden yükle; orada ders ilerlemen de kaydedilir.'**
+  String freeAnalysisHintAi(int cost);
+
+  /// No description provided for @mentorsHintFree.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentorlar, deneyimli çizerlerdir. Bir ödevini mentora gönderirsen sana kişisel, yapıcı bir geri bildirim yazar — AI\'ın yetmediği yerde bir insan gözü. Mentorluk ücretsiz: ödevinin analiz ekranından \"Havuza sor\" ile müsait bir mentora, ya da aşağıdan birini seçip doğrudan ona gönderebilirsin.'**
+  String get mentorsHintFree;
+
+  /// No description provided for @mentorsHintPaid.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mentorlar, deneyimli çizerlerdir. Bir ödevini mentora gönderirsen sana kişisel, yapıcı bir geri bildirim yazar — AI\'ın yetmediği yerde bir insan gözü. Ödevinin analiz ekranından \"Havuza sor\" ile müsait bir mentora, ya da aşağıdan birini seçip doğrudan ona gönderebilirsin.'**
+  String get mentorsHintPaid;
+
+  /// No description provided for @galleryHintLocked.
+  ///
+  /// In tr, this message translates to:
+  /// **'Topluluk, çizerlerin paylaştığı çizimlerden oluşur. {min}. seviyeye ulaşınca sen de Gelişim Macerası\'ndan çizimlerini burada paylaşabilirsin (şu an {level}. seviyedesin).'**
+  String galleryHintLocked(int min, int level);
+
+  /// No description provided for @galleryHintUnlocked.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sen de paylaşabilirsin: Profil → Gelişim Macerası\'nda bir çizimini \"herkese açık\" yap, burada görünsün.'**
+  String get galleryHintUnlocked;
+
+  /// No description provided for @galleryEmptyLocked.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz paylaşılan çizim yok.'**
+  String get galleryEmptyLocked;
+
+  /// No description provided for @updateAvailableTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni sürüm hazır'**
+  String get updateAvailableTitle;
+
+  /// No description provided for @updateAvailableBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Artora\'nın yeni sürümünde yeni özellikler ve iyileştirmeler var. Şimdi güncellemek ister misin?'**
+  String get updateAvailableBody;
+
+  /// No description provided for @updateRequiredTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelleme gerekiyor'**
+  String get updateRequiredTitle;
+
+  /// No description provided for @updateRequiredBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu sürüm artık desteklenmiyor. Artora\'yı kullanmaya devam etmek için lütfen uygulamayı güncelle.'**
+  String get updateRequiredBody;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Güncelle'**
+  String get updateNow;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonra'**
+  String get updateLater;
 }
 
 class _AppLocalizationsDelegate

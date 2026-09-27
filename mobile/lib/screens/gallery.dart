@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../l10n/gen/app_localizations.dart';
+import 'info_hint.dart';
 
 /// Topluluk sekmesi (Faz 3): herkese açık paylaşılan çizimlerin akışı.
 /// Kaynak: Gelişim Macerası'ndaki gizlilik anahtarıyla "açık" yapılan işler.
@@ -21,7 +22,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     _future = ApiClient.instance.getGallery();
   }
 
-  void _refresh() => setState(() => _future = ApiClient.instance.getGallery());
+  void _refresh() => setState(() { _future = ApiClient.instance.getGallery(); });
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,15 @@ class _GalleryScreenState extends State<GalleryScreen> {
           IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
         ],
       ),
-      body: FutureBuilder<List<GalleryItem>>(
+      body: Column(children: [
+        const _ShareHint(),
+        Expanded(child: _body(t)),
+      ]),
+    );
+  }
+
+  Widget _body(AppLocalizations t) {
+    return FutureBuilder<List<GalleryItem>>(
         future: _future,
         builder: (context, snap) {
           if (snap.hasError) {
@@ -47,7 +56,13 @@ class _GalleryScreenState extends State<GalleryScreen> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
-                child: Text(t.galleryEmpty, textAlign: TextAlign.center),
+                // Paylaşım kilitliyken "sen de aç" demek üstteki notla çelişir
+                child: Text(
+                    (ApiClient.instance.userLevel.value ?? 0) <
+                            ApiClient.instance.communityShareMinLevel
+                        ? t.galleryEmptyLocked
+                        : t.galleryEmpty,
+                    textAlign: TextAlign.center),
               ),
             );
           }
@@ -66,7 +81,39 @@ class _GalleryScreenState extends State<GalleryScreen> {
             ),
           );
         },
-      ),
+    );
+  }
+}
+
+/// Topluluğun ne olduğu + paylaşım kilidi. Seviye eşiğin altındaysa kalıcı
+/// "N. seviyede sen de paylaşabilirsin" notu; eşiği geçtiyse nasıl
+/// paylaşılacağını anlatan, kapatılabilir not.
+class _ShareHint extends StatelessWidget {
+  const _ShareHint();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final api = ApiClient.instance;
+    return ValueListenableBuilder<int?>(
+      valueListenable: api.userLevel,
+      builder: (context, level, _) {
+        if (level == null) return const SizedBox.shrink();
+        final min = api.communityShareMinLevel;
+        if (level < min) {
+          return InfoHint(
+            key: const ValueKey('locked'),
+            icon: Icons.lock_outline,
+            text: t.galleryHintLocked(min, level),
+          );
+        }
+        return InfoHint(
+          key: const ValueKey('unlocked'),
+          icon: Icons.public,
+          text: t.galleryHintUnlocked,
+          prefsKey: 'hint_gallery_share_dismissed',
+        );
+      },
     );
   }
 }

@@ -119,8 +119,8 @@
   "ownCourseNote": "Bu sıra bir öneri — kendi kursun veya kaynağın varsa aynı konuyu oradan çalışıp ödevini yine buraya yükleyebilirsin.",
   "assignmentSection": "Ödevin",
   "assignmentGenerate": "AI'dan ödev al",
-  "freeAnalysisTitle": "Serbest Analiz",
-  "freeAnalysisHint": "Ders dışı bitmiş bir çizimini yükle, AI teknik analiz yapsın (haftada 1 ücretsiz).",
+  "freeAnalysisTitle": "AI Geri Bildirim",
+  "freeAnalysisHint": "İstediğin bir çizimden AI geri bildirimi al — oran, perspektif, çizgi ve ışık-gölge üzerine teknik notlar (haftada 1 ücretsiz).\n\nDers ödevlerini ilgili dersin içinden yükle; orada ders ilerlemen de kaydedilir.",
   "levelRoadmapTitle": "Seviye Yol Haritası",
   "levelRoadmapEntry": "{level}. Seviye — {xp} XP",
   "@levelRoadmapEntry": {
@@ -551,5 +551,20 @@
   "@campaignGuestBody": {"placeholders": {"n": {"type": "int"}, "date": {"type": "String"}}},
   "taskMatchLabel": "Ödev uyumu: %{n}",
   "@taskMatchLabel": {"placeholders": {"n": {"type": "int"}}},
-  "taskNotPassed": "Bu çizim verilen görevi henüz karşılamadığı için ders tamamlanmadı. Görevdeki adımlara göre yeniden çizip tekrar yükleyebilirsin — geri bildirimin yukarıda."
+  "taskNotPassed": "Bu çizim verilen görevi henüz karşılamadığı için ders tamamlanmadı. Görevdeki adımlara göre yeniden çizip tekrar yükleyebilirsin — geri bildirimin yukarıda.",
+  "storeButton": "Mağaza",
+  "freeAnalysisHintAi": "İstediğin bir çizimden AI geri bildirimi al — oran, perspektif, çizgi ve ışık-gölge üzerine teknik notlar. Her analiz {cost} jetona mal olur.\n\nDers ödevlerini ilgili dersin içinden yükle; orada ders ilerlemen de kaydedilir.",
+  "@freeAnalysisHintAi": {"placeholders": {"cost": {"type": "int"}}},
+  "mentorsHintFree": "Mentorlar, deneyimli çizerlerdir. Bir ödevini mentora gönderirsen sana kişisel, yapıcı bir geri bildirim yazar — AI'ın yetmediği yerde bir insan gözü. Mentorluk ücretsiz: ödevinin analiz ekranından \"Havuza sor\" ile müsait bir mentora, ya da aşağıdan birini seçip doğrudan ona gönderebilirsin.",
+  "mentorsHintPaid": "Mentorlar, deneyimli çizerlerdir. Bir ödevini mentora gönderirsen sana kişisel, yapıcı bir geri bildirim yazar — AI'ın yetmediği yerde bir insan gözü. Ödevinin analiz ekranından \"Havuza sor\" ile müsait bir mentora, ya da aşağıdan birini seçip doğrudan ona gönderebilirsin.",
+  "galleryHintLocked": "Topluluk, çizerlerin paylaştığı çizimlerden oluşur. {min}. seviyeye ulaşınca sen de Gelişim Macerası'ndan çizimlerini burada paylaşabilirsin (şu an {level}. seviyedesin).",
+  "@galleryHintLocked": {"placeholders": {"min": {"type": "int"}, "level": {"type": "int"}}},
+  "galleryHintUnlocked": "Sen de paylaşabilirsin: Profil → Gelişim Macerası'nda bir çizimini \"herkese açık\" yap, burada görünsün.",
+  "galleryEmptyLocked": "Henüz paylaşılan çizim yok.",
+  "updateAvailableTitle": "Yeni sürüm hazır",
+  "updateAvailableBody": "Artora'nın yeni sürümünde yeni özellikler ve iyileştirmeler var. Şimdi güncellemek ister misin?",
+  "updateRequiredTitle": "Güncelleme gerekiyor",
+  "updateRequiredBody": "Bu sürüm artık desteklenmiyor. Artora'yı kullanmaya devam etmek için lütfen uygulamayı güncelle.",
+  "updateNow": "Güncelle",
+  "updateLater": "Sonra"
 }

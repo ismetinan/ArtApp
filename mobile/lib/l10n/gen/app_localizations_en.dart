@@ -229,11 +229,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assignmentGenerate => 'Get an assignment from AI';
 
   @override
-  String get freeAnalysisTitle => 'Free Analysis';
+  String get freeAnalysisTitle => 'AI Feedback';
 
   @override
   String get freeAnalysisHint =>
-      'Upload a finished drawing outside the lessons and get a technical AI analysis (1 free per week).';
+      'Get AI feedback on any drawing you like — technical notes on proportion, perspective, line and light & shadow (1 free per week).\n\nUpload lesson homework from inside the lesson so your progress is saved too.';
 
   @override
   String get levelRoadmapTitle => 'Level Roadmap';
@@ -1094,4 +1094,52 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get taskNotPassed =>
       'This drawing doesn\'t meet the given task yet, so the lesson isn\'t completed. Redraw it following the task\'s steps and upload again — your feedback is above.';
+
+  @override
+  String get storeButton => 'Store';
+
+  @override
+  String freeAnalysisHintAi(int cost) {
+    return 'Get AI feedback on any drawing you like — technical notes on proportion, perspective, line and light & shadow. Each analysis costs $cost jeton.\n\nUpload lesson homework from inside the lesson so your progress is saved too.';
+  }
+
+  @override
+  String get mentorsHintFree =>
+      'Mentors are experienced artists. Send them one of your homework drawings and they\'ll write you personal, constructive feedback — a human eye where AI isn\'t enough. Mentoring is free: use \"Ask the pool\" on a homework\'s analysis screen to reach an available mentor, or pick someone below and send it to them directly.';
+
+  @override
+  String get mentorsHintPaid =>
+      'Mentors are experienced artists. Send them one of your homework drawings and they\'ll write you personal, constructive feedback — a human eye where AI isn\'t enough. Use \"Ask the pool\" on a homework\'s analysis screen to reach an available mentor, or pick someone below and send it to them directly.';
+
+  @override
+  String galleryHintLocked(int min, int level) {
+    return 'The community is made of drawings shared by artists. Once you reach level $min, you can share your own drawings here from Progress Journey (you\'re level $level now).';
+  }
+
+  @override
+  String get galleryHintUnlocked =>
+      'You can share too: in Profile → Progress Journey, make a drawing \"public\" and it will appear here.';
+
+  @override
+  String get galleryEmptyLocked => 'No shared drawings yet.';
+
+  @override
+  String get updateAvailableTitle => 'New version available';
+
+  @override
+  String get updateAvailableBody =>
+      'The new version of Artora has new features and improvements. Would you like to update now?';
+
+  @override
+  String get updateRequiredTitle => 'Update required';
+
+  @override
+  String get updateRequiredBody =>
+      'This version is no longer supported. Please update the app to keep using Artora.';
+
+  @override
+  String get updateNow => 'Update';
+
+  @override
+  String get updateLater => 'Later';
 }

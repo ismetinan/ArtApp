@@ -10,6 +10,9 @@ os.environ["RATE_LIMIT_ENABLED"] = "false"
 # Topluluk paylaşımı seviye kapısı testlerde kapalı (fikstürler seviye-1 misafir
 # hesaplarıyla paylaşır); test_gallery.py gate testi bilinçli olarak 3'e çeker
 os.environ["COMMUNITY_SHARE_MIN_LEVEL"] = "0"
+# Prod varsayılanını test et: geliştiricinin yerel .env'inde ENABLE_API_DOCS=true
+# olabilir (gerçek env değişkeni .env'in önüne geçer)
+os.environ["ENABLE_API_DOCS"] = "false"
 
 
 @pytest.fixture()

@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () =>
-                setState(() => _future = ApiClient.instance.getProfile()),
+                setState(() { _future = ApiClient.instance.getProfile(); }),
           ),
         ],
       ),
@@ -100,9 +100,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       );
                       if (upgraded == true) {
-                        setState(
-                          () => _future = ApiClient.instance.getProfile(),
-                        );
+                        setState(() { _future = ApiClient.instance.getProfile(); });
                       }
                     },
                   ),
@@ -198,6 +196,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     : null,
                               ),
                             ],
+                            // Jeton çipine dokunmanın mağazaya götürdüğü
+                            // anlaşılmıyordu → açıkça etiketli buton
+                            if (ApiClient.instance.billingEnabled)
+                              FilledButton.tonalIcon(
+                                icon: const Icon(Icons.storefront, size: 18),
+                                label: Text(t.storeButton),
+                                style: FilledButton.styleFrom(
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                onPressed: () => _openStore(context, p),
+                              ),
                             if (p['is_premium'] == true)
                               Chip(
                                 label: Text(t.premiumBadge),
@@ -298,7 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
                     // Gizlilik anahtarı değişmiş olabilir
                     if (context.mounted) {
-                      setState(() => _future = ApiClient.instance.getProfile());
+                      setState(() { _future = ApiClient.instance.getProfile(); });
                     }
                   },
                 ),
@@ -309,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mentor: p['mentor'] as Map<String, dynamic>?,
                   gallery: gallery,
                   onChanged: () =>
-                      setState(() => _future = ApiClient.instance.getProfile()),
+                      setState(() { _future = ApiClient.instance.getProfile(); }),
                 ),
                 const SizedBox(height: 8),
                 Card(
@@ -486,7 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
     if (bought == true && mounted) {
-      setState(() => _future = ApiClient.instance.getProfile());
+      setState(() { _future = ApiClient.instance.getProfile(); });
     }
   }
 
@@ -914,7 +923,7 @@ class _MyRequestsSectionState extends State<_MyRequestsSection> {
   }
 
   void _reload() =>
-      setState(() => _future = ApiClient.instance.getMyMentorRequests());
+      setState(() { _future = ApiClient.instance.getMyMentorRequests(); });
 
   Future<void> _rate(MentorRequestInfo r, int rating) async {
     try {

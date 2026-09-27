@@ -283,6 +283,12 @@ class ApiClient {
   /// buraya düşer ve HomeShell dinleyip diyaloğu gösterir.
   final celebrations = ValueNotifier<Celebration?>(null);
 
+  /// Son profil yüklemesindeki seviye ve topluluk paylaşım eşiği. Topluluk
+  /// sekmesi "3. seviyede sen de paylaşabilirsin" notunu buna göre seçer;
+  /// profil her yüklendiğinde güncellenir (seviye atlayınca not değişsin).
+  final userLevel = ValueNotifier<int?>(null);
+  int communityShareMinLevel = 3;
+
   /// Backend'deki mentor_market_enabled flag'i — mentor UI'ı buna göre görünür.
   bool mentorMarketEnabled = false;
 
@@ -682,6 +688,9 @@ class ApiClient {
       celebrations.value = Celebration(
           [...?prev?.badges, ...newBadges], (prev?.bonusJetons ?? 0) + bonus);
     }
+    communityShareMinLevel =
+        j['community_share_min_level'] ?? communityShareMinLevel;
+    userLevel.value = j['level'] as int?;
     mentorMarketEnabled = j['mentor_market_enabled'] ?? mentorMarketEnabled;
     jetonAiEconomy = j['jeton_ai_economy'] ?? jetonAiEconomy;
     weeklyJetonFloor = j['weekly_jeton_floor'] ?? weeklyJetonFloor;

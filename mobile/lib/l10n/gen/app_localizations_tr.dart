@@ -230,11 +230,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get assignmentGenerate => 'AI\'dan ödev al';
 
   @override
-  String get freeAnalysisTitle => 'Serbest Analiz';
+  String get freeAnalysisTitle => 'AI Geri Bildirim';
 
   @override
   String get freeAnalysisHint =>
-      'Ders dışı bitmiş bir çizimini yükle, AI teknik analiz yapsın (haftada 1 ücretsiz).';
+      'İstediğin bir çizimden AI geri bildirimi al — oran, perspektif, çizgi ve ışık-gölge üzerine teknik notlar (haftada 1 ücretsiz).\n\nDers ödevlerini ilgili dersin içinden yükle; orada ders ilerlemen de kaydedilir.';
 
   @override
   String get levelRoadmapTitle => 'Seviye Yol Haritası';
@@ -1097,4 +1097,52 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get taskNotPassed =>
       'Bu çizim verilen görevi henüz karşılamadığı için ders tamamlanmadı. Görevdeki adımlara göre yeniden çizip tekrar yükleyebilirsin — geri bildirimin yukarıda.';
+
+  @override
+  String get storeButton => 'Mağaza';
+
+  @override
+  String freeAnalysisHintAi(int cost) {
+    return 'İstediğin bir çizimden AI geri bildirimi al — oran, perspektif, çizgi ve ışık-gölge üzerine teknik notlar. Her analiz $cost jetona mal olur.\n\nDers ödevlerini ilgili dersin içinden yükle; orada ders ilerlemen de kaydedilir.';
+  }
+
+  @override
+  String get mentorsHintFree =>
+      'Mentorlar, deneyimli çizerlerdir. Bir ödevini mentora gönderirsen sana kişisel, yapıcı bir geri bildirim yazar — AI\'ın yetmediği yerde bir insan gözü. Mentorluk ücretsiz: ödevinin analiz ekranından \"Havuza sor\" ile müsait bir mentora, ya da aşağıdan birini seçip doğrudan ona gönderebilirsin.';
+
+  @override
+  String get mentorsHintPaid =>
+      'Mentorlar, deneyimli çizerlerdir. Bir ödevini mentora gönderirsen sana kişisel, yapıcı bir geri bildirim yazar — AI\'ın yetmediği yerde bir insan gözü. Ödevinin analiz ekranından \"Havuza sor\" ile müsait bir mentora, ya da aşağıdan birini seçip doğrudan ona gönderebilirsin.';
+
+  @override
+  String galleryHintLocked(int min, int level) {
+    return 'Topluluk, çizerlerin paylaştığı çizimlerden oluşur. $min. seviyeye ulaşınca sen de Gelişim Macerası\'ndan çizimlerini burada paylaşabilirsin (şu an $level. seviyedesin).';
+  }
+
+  @override
+  String get galleryHintUnlocked =>
+      'Sen de paylaşabilirsin: Profil → Gelişim Macerası\'nda bir çizimini \"herkese açık\" yap, burada görünsün.';
+
+  @override
+  String get galleryEmptyLocked => 'Henüz paylaşılan çizim yok.';
+
+  @override
+  String get updateAvailableTitle => 'Yeni sürüm hazır';
+
+  @override
+  String get updateAvailableBody =>
+      'Artora\'nın yeni sürümünde yeni özellikler ve iyileştirmeler var. Şimdi güncellemek ister misin?';
+
+  @override
+  String get updateRequiredTitle => 'Güncelleme gerekiyor';
+
+  @override
+  String get updateRequiredBody =>
+      'Bu sürüm artık desteklenmiyor. Artora\'yı kullanmaya devam etmek için lütfen uygulamayı güncelle.';
+
+  @override
+  String get updateNow => 'Güncelle';
+
+  @override
+  String get updateLater => 'Sonra';
 }
