@@ -165,8 +165,8 @@ diye reddeder.
 | Priority | Normal | |
 
 **Long Description (120)**
-- TR: `Kampanya süresince uygulamayı açan herkes Kurucu Çizer rozetini, hesap açanlar 10 hediye jeton alır.` (101)
-- EN: `Open the app during the campaign to earn the Founding Artist badge; create an account for 10 free jetons.` (103)
+- TR: `Kampanya süresince uygulamayı açan herkes Kurucu Çizer rozetini, hesap açanlar 10 hediye jeton alır.` (100)
+- EN: `Open the app during the campaign to earn the Founding Artist badge; create an account for 10 free jetons.` (105)
 
 **Görseller:** Etkinlik kartı için 16:9 (1920×1080) ve 9:16 (1080×1920)
 görsel istenir. Metin içermeyen, uygulamanın rengiyle bir rozet/roket
