@@ -432,3 +432,16 @@ class AdminAuditLog(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_now, index=True
     )
+
+
+class SubmissionLike(Base):
+    """Topluluk beğenisi (2026-10). Anonim: kimin beğendiği hiçbir yanıtta
+    dönmez, yalnız sayı. Kullanıcı başına gönderi başına tek beğeni."""
+
+    __tablename__ = "submission_likes"
+    __table_args__ = (UniqueConstraint("submission_id", "user_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    submission_id: Mapped[int] = mapped_column(ForeignKey("submissions.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

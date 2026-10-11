@@ -24,6 +24,7 @@ from ..models.tables import (
     MentorshipRequest,
     Purchase,
     Submission,
+    SubmissionLike,
     User,
     UserActivityDay,
     UserBadge,
@@ -303,6 +304,10 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
     # gelenler (FK sırası: submissions'tan önce silinmeli)
     own_submission_ids = select(Submission.id).where(Submission.user_id == user.id)
     db.execute(delete(ContentReport).where(ContentReport.reporter_id == user.id))
+    db.execute(delete(SubmissionLike).where(SubmissionLike.user_id == user.id))
+    db.execute(
+        delete(SubmissionLike).where(SubmissionLike.submission_id.in_(own_submission_ids))
+    )
     db.execute(
         delete(ContentReport).where(ContentReport.submission_id.in_(own_submission_ids))
     )

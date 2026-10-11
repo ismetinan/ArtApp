@@ -49,6 +49,7 @@ from ..models.tables import (
     MentorshipRequest,
     SkillNode,
     Submission,
+    SubmissionLike,
     User,
     UserActivityDay,
     UserBadge,
@@ -102,6 +103,10 @@ def _purge(db) -> None:
         except Exception:  # noqa: BLE001 - eksik dosya seed'i durdurmasın
             pass
 
+    sub_ids = [s.id for s in subs]
+    db.query(SubmissionLike).filter(
+        (SubmissionLike.user_id.in_(ids)) | (SubmissionLike.submission_id.in_(sub_ids))
+    ).delete(synchronize_session=False)
     db.query(JetonTransaction).filter(JetonTransaction.user_id.in_(ids)).delete(
         synchronize_session=False
     )

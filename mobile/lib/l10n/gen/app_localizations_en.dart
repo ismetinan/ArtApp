@@ -1118,7 +1118,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get galleryHintUnlocked =>
-      'You can share too: in Profile → Progress Journey, make a drawing \"public\" and it will appear here.';
+      'You can share too: in Profile → Progress Journey, make a drawing \"public\" and it will appear here. Leave a heart on drawings you like; the most liked stay on top.';
 
   @override
   String get galleryEmptyLocked => 'No shared drawings yet.';
@@ -1167,5 +1167,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String taskAiSaw(String desc) {
     return 'The AI saw: $desc';
+  }
+
+  @override
+  String likeSemantics(int n) {
+    return '$n likes';
   }
 }

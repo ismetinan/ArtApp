@@ -1121,7 +1121,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get galleryHintUnlocked =>
-      'Sen de paylaşabilirsin: Profil → Gelişim Macerası\'nda bir çizimini \"herkese açık\" yap, burada görünsün.';
+      'Sen de paylaşabilirsin: Profil → Gelişim Macerası\'nda bir çizimini \"herkese açık\" yap, burada görünsün. Beğendiğin çizimlere kalp bırakabilirsin; en çok beğenilenler en üstte durur.';
 
   @override
   String get galleryEmptyLocked => 'Henüz paylaşılan çizim yok.';
@@ -1170,5 +1170,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String taskAiSaw(String desc) {
     return 'AI çizimde şunu gördü: $desc';
+  }
+
+  @override
+  String likeSemantics(int n) {
+    return '$n beğeni';
   }
 }

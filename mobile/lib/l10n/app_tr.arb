@@ -559,7 +559,7 @@
   "mentorsHintPaid": "Mentorlar, deneyimli çizerlerdir. Bir ödevini mentora gönderirsen sana kişisel, yapıcı bir geri bildirim yazar — AI'ın yetmediği yerde bir insan gözü. Ödevinin analiz ekranından \"Havuza sor\" ile müsait bir mentora, ya da aşağıdan birini seçip doğrudan ona gönderebilirsin.",
   "galleryHintLocked": "Topluluk, çizerlerin paylaştığı çizimlerden oluşur. {min}. seviyeye ulaşınca sen de Gelişim Macerası'ndan çizimlerini burada paylaşabilirsin (şu an {level}. seviyedesin).",
   "@galleryHintLocked": {"placeholders": {"min": {"type": "int"}, "level": {"type": "int"}}},
-  "galleryHintUnlocked": "Sen de paylaşabilirsin: Profil → Gelişim Macerası'nda bir çizimini \"herkese açık\" yap, burada görünsün.",
+  "galleryHintUnlocked": "Sen de paylaşabilirsin: Profil → Gelişim Macerası'nda bir çizimini \"herkese açık\" yap, burada görünsün. Beğendiğin çizimlere kalp bırakabilirsin; en çok beğenilenler en üstte durur.",
   "galleryEmptyLocked": "Henüz paylaşılan çizim yok.",
   "updateAvailableTitle": "Yeni sürüm hazır",
   "updateAvailableBody": "Artora'nın yeni sürümünde yeni özellikler ve iyileştirmeler var. Şimdi güncellemek ister misin?",
@@ -575,5 +575,7 @@
   "@assignmentTime": {"placeholders": {"n": {"type": "int"}}},
   "nextStepTitle": "Sıradaki adım",
   "taskAiSaw": "AI çizimde şunu gördü: {desc}",
-  "@taskAiSaw": {"placeholders": {"desc": {"type": "String"}}}
+  "@taskAiSaw": {"placeholders": {"desc": {"type": "String"}}},
+  "likeSemantics": "{n} beğeni",
+  "@likeSemantics": {"placeholders": {"n": {"type": "int"}}}
 }

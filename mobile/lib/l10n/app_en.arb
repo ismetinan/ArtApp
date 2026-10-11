@@ -358,7 +358,7 @@
   "mentorsHintFree": "Mentors are experienced artists. Send them one of your homework drawings and they'll write you personal, constructive feedback — a human eye where AI isn't enough. Mentoring is free: use \"Ask the pool\" on a homework's analysis screen to reach an available mentor, or pick someone below and send it to them directly.",
   "mentorsHintPaid": "Mentors are experienced artists. Send them one of your homework drawings and they'll write you personal, constructive feedback — a human eye where AI isn't enough. Use \"Ask the pool\" on a homework's analysis screen to reach an available mentor, or pick someone below and send it to them directly.",
   "galleryHintLocked": "The community is made of drawings shared by artists. Once you reach level {min}, you can share your own drawings here from Progress Journey (you're level {level} now).",
-  "galleryHintUnlocked": "You can share too: in Profile → Progress Journey, make a drawing \"public\" and it will appear here.",
+  "galleryHintUnlocked": "You can share too: in Profile → Progress Journey, make a drawing \"public\" and it will appear here. Leave a heart on drawings you like; the most liked stay on top.",
   "galleryEmptyLocked": "No shared drawings yet.",
   "updateAvailableTitle": "New version available",
   "updateAvailableBody": "The new version of Artora has new features and improvements. Would you like to update now?",
@@ -372,5 +372,6 @@
   "assignmentChecklistHint": "The AI will look for these in the drawing you upload.",
   "assignmentTime": "~{n} min",
   "nextStepTitle": "Next step",
-  "taskAiSaw": "The AI saw: {desc}"
+  "taskAiSaw": "The AI saw: {desc}",
+  "likeSemantics": "{n} likes"
 }

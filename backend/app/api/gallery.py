@@ -8,19 +8,29 @@ ucundan servis edilir (is_public kontrolü orada zaten var).
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..core.messages import msg
+from ..core.ratelimit import hit
 from ..db import get_db
-from ..models.tables import ContentReport, SkillNode, Submission, User
+from ..models.tables import ContentReport, SkillNode, Submission, SubmissionLike, User
 from ..services import audit
-from ..services.internal import visibility_clause
+from ..services.internal import is_internal, visibility_clause
 from .deps import get_current_user
 from .mentors import require_admin
 
 router = APIRouter(tags=["gallery"])
 
 REPORT_REASONS = ("uygunsuz", "spam", "telif", "diger")
+
+
+def _like_counts():
+    return (
+        select(SubmissionLike.submission_id, func.count().label("n"))
+        .group_by(SubmissionLike.submission_id)
+        .subquery()
+    )
 
 
 @router.get("/gallery")
@@ -30,10 +40,14 @@ def get_gallery(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Herkese açık çizimler — EN ÇOK BEĞENİLEN en üstte, eşitlikte en yeni."""
+    likes = _like_counts()
+    like_n = func.coalesce(likes.c.n, 0)
     stmt = (
-        select(Submission, User.display_name, SkillNode)
+        select(Submission, User.display_name, SkillNode, like_n.label("likes"))
         .join(User, User.id == Submission.user_id)
         .outerjoin(SkillNode, SkillNode.id == Submission.node_id)
+        .outerjoin(likes, likes.c.submission_id == Submission.id)
         .where(
             Submission.is_public.is_(True),
             Submission.moderation_hidden.is_(False),
@@ -44,10 +58,19 @@ def get_gallery(
     if (vis := visibility_clause(user)) is not None:
         stmt = stmt.where(vis)
     rows = db.execute(
-        stmt.order_by(Submission.created_at.desc())
+        stmt.order_by(like_n.desc(), Submission.created_at.desc(), Submission.id.desc())
         .offset(offset)
         .limit(limit)
     ).all()
+
+    ids = [s.id for s, *_ in rows]
+    mine = set(
+        db.execute(
+            select(SubmissionLike.submission_id).where(
+                SubmissionLike.user_id == user.id, SubmissionLike.submission_id.in_(ids)
+            )
+        ).scalars()
+    ) if ids else set()
 
     def _title(node: SkillNode | None) -> str | None:
         if node is None:
@@ -64,10 +87,78 @@ def get_gallery(
                 "node_title": _title(node),
                 "is_mine": s.user_id == user.id,
                 "created_at": s.created_at.isoformat(),
+                # Anonim: yalnız sayı + bakan kişinin kendi beğenisi
+                "like_count": n,
+                "liked_by_me": s.id in mine,
             }
-            for s, name, node in rows
+            for s, name, node, n in rows
         ]
     }
+
+
+def _likeable(db: Session, user: User, submission_id: int) -> Submission:
+    """Beğenilebilir: herkese açık, gizlenmemiş, bakana görünür ve başkasının."""
+    sub = db.get(Submission, submission_id)
+    owner = db.get(User, sub.user_id) if sub is not None else None
+    if (
+        sub is None
+        or not sub.is_public
+        or sub.moderation_hidden
+        or (is_internal(owner) and not is_internal(user))
+    ):
+        raise HTTPException(status_code=404, detail=msg("submission_not_found", user.language))
+    if sub.user_id == user.id:
+        # Kendi çizimini beğenmek sıralamayı şişirmenin en kolay yolu olurdu
+        raise HTTPException(status_code=403, detail=msg("cannot_like_own", user.language))
+    return sub
+
+
+def _count(db: Session, submission_id: int) -> int:
+    return db.execute(
+        select(func.count()).select_from(SubmissionLike).where(
+            SubmissionLike.submission_id == submission_id
+        )
+    ).scalar_one()
+
+
+@router.put("/submissions/{submission_id}/like")
+def like_submission(
+    submission_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Beğen (idempotent: ikinci çağrı sayıyı değiştirmez)."""
+    _likeable(db, user, submission_id)
+    hit("like", f"u{user.id}", 120, 3600, user.language)
+    exists = db.execute(
+        select(SubmissionLike.id).where(
+            SubmissionLike.submission_id == submission_id, SubmissionLike.user_id == user.id
+        )
+    ).first()
+    if exists is None:
+        try:
+            with db.begin_nested():
+                db.add(SubmissionLike(submission_id=submission_id, user_id=user.id))
+        except IntegrityError:
+            pass  # eşzamanlı çift dokunuş
+        db.commit()
+    return {"like_count": _count(db, submission_id), "liked_by_me": True}
+
+
+@router.delete("/submissions/{submission_id}/like")
+def unlike_submission(
+    submission_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _likeable(db, user, submission_id)
+    db.execute(
+        delete(SubmissionLike).where(
+            SubmissionLike.submission_id == submission_id, SubmissionLike.user_id == user.id
+        )
+    )
+    db.commit()
+    return {"like_count": _count(db, submission_id), "liked_by_me": False}
 
 
 # ---------- UGC moderasyonu (Play politikası: bildir → incele → kaldır) ----------

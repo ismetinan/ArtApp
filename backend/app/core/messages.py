@@ -87,6 +87,10 @@ _CATALOG: dict[str, dict[str, str]] = {
         "tr": "İstek çok büyük",
         "en": "Request is too large",
     },
+    "cannot_like_own": {
+        "tr": "Kendi çizimini beğenemezsin.",
+        "en": "You can't like your own drawing.",
+    },
     "invalid_event": {
         "tr": "Bilinmeyen olay.",
         "en": "Unknown event.",

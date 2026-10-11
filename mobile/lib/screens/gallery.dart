@@ -118,19 +118,103 @@ class _ShareHint extends StatelessWidget {
   }
 }
 
-class _GalleryCard extends StatelessWidget {
+/// Beğeni butonu: kalp + sayı. İyimser güncelleme (anında tepki), hata olursa
+/// geri alınır. Kendi çiziminde yalnız sayı görünür — kendini beğenmek yok.
+/// Beğeni anonim: kimin beğendiği hiçbir yerde gösterilmez.
+class LikeButton extends StatefulWidget {
   final GalleryItem item;
-  const _GalleryCard({required this.item});
+  final bool large;
+  const LikeButton({super.key, required this.item, this.large = false});
+
+  @override
+  State<LikeButton> createState() => _LikeButtonState();
+}
+
+class _LikeButtonState extends State<LikeButton> {
+  bool _busy = false;
+
+  Future<void> _toggle() async {
+    final item = widget.item;
+    if (_busy || item.isMine) return;
+    final like = !item.likedByMe;
+    setState(() {
+      _busy = true;
+      item.likedByMe = like;
+      item.likeCount += like ? 1 : -1;
+    });
+    try {
+      final count = await ApiClient.instance.setLike(item.submissionId, like);
+      if (mounted) setState(() => item.likeCount = count);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        item.likedByMe = !like;
+        item.likeCount += like ? -1 : 1;
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(friendlyError(context, e))));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+    final item = widget.item;
+    final cs = Theme.of(context).colorScheme;
+    final liked = item.likedByMe;
+    final size = widget.large ? 28.0 : 20.0;
+    final icon = Icon(
+      liked ? Icons.favorite : Icons.favorite_border,
+      size: size,
+      color: liked ? Colors.red.shade400 : cs.onSurfaceVariant,
+    );
+    final count = Text('${item.likeCount}',
+        style: widget.large
+            ? Theme.of(context).textTheme.titleMedium
+            : Theme.of(context).textTheme.labelLarge);
+    return Semantics(
+      button: !item.isMine,
+      label: t.likeSemantics(item.likeCount),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: item.isMine ? null : _toggle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            icon,
+            const SizedBox(width: 4),
+            count,
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _GalleryCard extends StatefulWidget {
+  final GalleryItem item;
+  const _GalleryCard({required this.item});
+
+  @override
+  State<_GalleryCard> createState() => _GalleryCardState();
+}
+
+class _GalleryCardState extends State<_GalleryCard> {
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final item = widget.item;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => _GalleryDetailScreen(item: item)),
-        ),
+        // Detayda beğenilirse dönüşte kart da güncel sayıyı göstersin
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => _GalleryDetailScreen(item: item)))
+            .then((_) {
+          if (mounted) setState(() {});
+        }),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -143,18 +227,25 @@ class _GalleryCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(8, 6, 2, 6),
+              child: Row(
                 children: [
-                  Text(item.displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelLarge),
-                  Text(item.nodeTitle ?? t.freeAnalysisTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelLarge),
+                        Text(item.nodeTitle ?? t.freeAnalysisTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                  LikeButton(item: item),
                 ],
               ),
             ),
@@ -240,10 +331,17 @@ class _GalleryDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text(item.nodeTitle ?? t.freeAnalysisTitle,
-              style: Theme.of(context).textTheme.titleMedium),
-          Text(item.createdAt.split('T').first,
-              style: Theme.of(context).textTheme.bodySmall),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(item.nodeTitle ?? t.freeAnalysisTitle,
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(item.createdAt.split('T').first,
+                    style: Theme.of(context).textTheme.bodySmall),
+              ]),
+            ),
+            LikeButton(item: item, large: true),
+          ]),
         ],
       ),
     );

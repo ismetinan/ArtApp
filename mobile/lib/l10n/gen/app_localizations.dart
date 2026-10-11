@@ -2027,7 +2027,7 @@ abstract class AppLocalizations {
   /// No description provided for @galleryHintUnlocked.
   ///
   /// In tr, this message translates to:
-  /// **'Sen de paylaşabilirsin: Profil → Gelişim Macerası\'nda bir çizimini \"herkese açık\" yap, burada görünsün.'**
+  /// **'Sen de paylaşabilirsin: Profil → Gelişim Macerası\'nda bir çizimini \"herkese açık\" yap, burada görünsün. Beğendiğin çizimlere kalp bırakabilirsin; en çok beğenilenler en üstte durur.'**
   String get galleryHintUnlocked;
 
   /// No description provided for @galleryEmptyLocked.
@@ -2113,6 +2113,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'AI çizimde şunu gördü: {desc}'**
   String taskAiSaw(String desc);
+
+  /// No description provided for @likeSemantics.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n} beğeni'**
+  String likeSemantics(int n);
 }
 
 class _AppLocalizationsDelegate

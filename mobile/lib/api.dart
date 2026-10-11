@@ -88,12 +88,19 @@ class GalleryItem {
   final String? nodeTitle;
   final bool isMine;
 
+  /// Beğeni (anonim — yalnız sayı). Değişebilir: kalbe dokununca kart ve
+  /// detay ekranı aynı nesneyi günceller. Eski backend göndermezse 0.
+  int likeCount;
+  bool likedByMe;
+
   GalleryItem.fromJson(Map<String, dynamic> j)
       : submissionId = j['submission_id'],
         displayName = j['display_name'],
         nodeTitle = j['node_title'],
         isMine = j['is_mine'] == true,
-        createdAt = j['created_at'];
+        createdAt = j['created_at'],
+        likeCount = (j['like_count'] as num?)?.toInt() ?? 0,
+        likedByMe = j['liked_by_me'] == true;
 }
 
 class RedlineFinding {
@@ -693,6 +700,16 @@ class ApiClient {
     return (_decode(r)['items'] as List)
         .map((m) => GalleryItem.fromJson(Map<String, dynamic>.from(m)))
         .toList();
+  }
+
+  /// Topluluk gönderisini beğenir / beğeniyi geri alır. Sunucunun güncel
+  /// sayısını döner (başkaları da aynı anda beğenmiş olabilir).
+  Future<int> setLike(int submissionId, bool like) async {
+    final uri = Uri.parse('$apiBase/submissions/$submissionId/like');
+    final r = like
+        ? await http.put(uri, headers: authHeaders)
+        : await http.delete(uri, headers: authHeaders);
+    return (_decode(r)['like_count'] as num).toInt();
   }
 
   /// Topluluk gönderisini şikayet eder (UGC moderasyonu).
