@@ -27,3 +27,7 @@ mobile/ios/Pods/
 # IDE
 .idea/
 .vscode/
+
+# Mağaza ham görüntüleri / taslakları (başka kullanıcıların çizimleri olabilir)
+store_assets/android_raw/
+store_assets/appstore_draft/

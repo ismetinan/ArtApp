@@ -477,6 +477,16 @@ class ApiClient {
     }
   }
 
+  /// Sunucudaki hesap dilini uygulamanın etkin diline çeker (fire-and-forget;
+  /// başarısız olursa bir sonraki profil yüklemesinde yeniden denenir).
+  void _syncLanguage(String code) {
+    http
+        .patch(Uri.parse('$apiBase/users/me/language'),
+            headers: _jsonHeaders, body: jsonEncode({'language': code}))
+        .timeout(const Duration(seconds: 10))
+        .then((_) {}, onError: (_) {});
+  }
+
   /// Karanlık tema anahtarı: yerelde saklar, sunucuya yazılmaz (salt UI tercihi).
   Future<void> setDarkMode(bool value) async {
     darkMode = value;
@@ -744,6 +754,15 @@ class ApiClient {
   Future<Map<String, dynamic>> getProfile() async {
     final r = await http.get(Uri.parse('$apiBase/profile'), headers: authHeaders);
     final j = _decode(r);
+    // Dil eşitleme: AI çıktısı sunucudaki hesap dilinde üretiliyor, ama o dil
+    // yalnız hesap açılışında ve dil seçicide yazılıyordu. Telefon dili sonradan
+    // değişince arayüz İngilizce, AI geri bildirimi Türkçe kalıyordu. Artık
+    // uygulamanın etkin dili esas: farklıysa sessizce sunucuya yazılır.
+    final serverLang = j['language'] as String?;
+    if (serverLang != null && serverLang != language) {
+      j['language'] = language;
+      _syncLanguage(language);
+    }
     final newBadges = ((j['new_badges'] ?? []) as List)
         .map((b) => BadgeInfo.fromJson(Map<String, dynamic>.from(b)))
         .toList();
