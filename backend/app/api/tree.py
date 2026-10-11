@@ -144,9 +144,10 @@ def get_assignment(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Kayıtlı ödevi döndürür (kota harcamaz); yoksa null."""
+    """Kayıtlı ödevi döndürür (kota harcamaz); yoksa null. `brief`: yapılandırılmış
+    hâli (2026-10 sonrası üretilenlerde; eski ödevlerde null → istemci metni gösterir)."""
     row = _assignment_row(db, user, node_id)
-    return {"assignment": row.text if row else None}
+    return {"assignment": row.text if row else None, "brief": row.brief if row else None}
 
 
 @router.post("/skill-tree/{node_id}/assignment")
@@ -161,7 +162,7 @@ async def generate_assignment(
         raise HTTPException(status_code=404, detail=msg("node_not_found", user.language))
     row = _assignment_row(db, user, node_id)
     if row is not None:
-        return {"assignment": row.text}
+        return {"assignment": row.text, "brief": row.brief}
 
     # Ücretsiz (ai_cost_assignment=0): metin üretimi ucuz ve zaten önbellekli.
     spend_ai(db, user, get_settings().ai_cost_assignment, "ai_assignment")
@@ -170,13 +171,19 @@ async def generate_assignment(
             _node_title(node, user.language),
             _node_description(node, user.language),
             language=user.language,
+            # Ödev, dersin videosundaki egzersizle örtüşsün
+            resource_titles=[r.get("title", "") for r in (node.resources or [])][:5],
         )
     except Exception:
         logger.exception("AI ödev üretimi başarısız (node=%s)", node_id)
         raise HTTPException(status_code=503, detail=msg("ai_unavailable", user.language))
-    db.add(Assignment(user_id=user.id, node_id=node_id, text=brief.assignment_tr))
+    # Metin hâli saklanır (eski istemciler + uyum analizinin görev metni — başarı
+    # kriterlerini de içerir, model onları kontrol listesi olarak kullanır)
+    text = brief.to_text(user.language)
+    data = brief.model_dump()
+    db.add(Assignment(user_id=user.id, node_id=node_id, text=text, brief=data))
     db.commit()
-    return {"assignment": brief.assignment_tr}
+    return {"assignment": text, "brief": data}
 
 
 # ---------- Ödev gönderimi (çekirdek döngü) ----------

@@ -109,10 +109,43 @@ class RedlineFinding {
         y = (j['y'] as num).toDouble();
 }
 
+/// Ödev uyumunda tek bir başarı kriterinin durumu (met | partial | missing).
+class TaskCheck {
+  final String criterion, status;
+
+  TaskCheck.fromJson(Map<String, dynamic> j)
+      : criterion = j['criterion_tr'] ?? '',
+        status = j['status'] ?? 'missing';
+}
+
+/// Yapılandırılmış AI ödevi (2026-10). Eski ödevlerde gelmez → metin gösterilir.
+class AssignmentBrief {
+  final String goal;
+  final List<String> steps, criteria;
+  final int timeMinutes;
+
+  AssignmentBrief.fromJson(Map<String, dynamic> j)
+      : goal = j['goal_tr'] ?? '',
+        steps = List<String>.from(j['steps_tr'] ?? const []),
+        criteria = List<String>.from(j['success_criteria_tr'] ?? const []),
+        timeMinutes = (j['time_minutes'] as num?)?.toInt() ?? 0;
+
+  static AssignmentBrief? maybe(Object? j) => j is Map
+      ? AssignmentBrief.fromJson(Map<String, dynamic>.from(j))
+      : null;
+}
+
 class RedlineResult {
   final List<String> strengthsTr;
   final List<RedlineFinding> findings;
   final String overallCommentTr;
+
+  /// Bir sonraki çizimde odaklanılacak tek şey (eski kayıtlarda null).
+  final String? nextStep;
+
+  /// Uyum kararının dayanağı: model çizimde ne gördü, kriterler tek tek.
+  final String? drawingDescription;
+  final List<TaskCheck>? taskChecks;
 
   /// Ödev uyumu (0-100): yalnız AI ödevi verilmiş derslerde gelir.
   final int? taskMatch;
@@ -126,6 +159,11 @@ class RedlineResult {
         findings =
             (j['findings'] as List).map((f) => RedlineFinding.fromJson(f)).toList(),
         overallCommentTr = j['overall_comment_tr'],
+        nextStep = j['next_step_tr'],
+        drawingDescription = j['drawing_description_tr'],
+        taskChecks = (j['task_checks'] as List?)
+            ?.map((c) => TaskCheck.fromJson(Map<String, dynamic>.from(c)))
+            .toList(),
         taskMatch = (j['task_match'] as num?)?.round(),
         taskMatchComment = j['task_match_comment_tr'],
         taskPassed = j['task_passed'] as bool?;
@@ -552,17 +590,27 @@ class ApiClient {
   }
 
   /// Kayıtlı AI ödevini getirir (yoksa null; kota harcamaz).
-  Future<String?> getAssignment(String nodeId) async {
+  Future<({String? text, AssignmentBrief? brief})> getAssignment(
+      String nodeId) async {
     final r = await http.get(
         Uri.parse('$apiBase/skill-tree/$nodeId/assignment'), headers: authHeaders);
-    return _decode(r)['assignment'] as String?;
+    final j = _decode(r);
+    return (
+      text: j['assignment'] as String?,
+      brief: AssignmentBrief.maybe(j['brief']),
+    );
   }
 
   /// AI'a kişisel ödev görevi ürettirir (düğüm başına bir kez kota harcar).
-  Future<String> generateAssignment(String nodeId) async {
+  Future<({String? text, AssignmentBrief? brief})> generateAssignment(
+      String nodeId) async {
     final r = await http.post(
         Uri.parse('$apiBase/skill-tree/$nodeId/assignment'), headers: authHeaders);
-    return _decode(r)['assignment'] as String;
+    final j = _decode(r);
+    return (
+      text: j['assignment'] as String?,
+      brief: AssignmentBrief.maybe(j['brief']),
+    );
   }
 
   /// Serbest çizim analizi (ders dışı; ücretsizde haftada 1, 429 döner).

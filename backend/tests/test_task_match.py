@@ -4,8 +4,9 @@ Hata raporu: "AI'dan ödev al"a basıp istenenden alakasız bir şey çizen
 öğrenci de XP alıp dersi geçiyordu. Kök neden: redline modeli yalnız ders
 başlığını görüyordu, verilen görevi hiç görmüyordu; ilerleme koşulsuzdu.
 
-Mock sağlayıcı: görev verilmişse task_match=80, görselde "OFFTASK" baytları
-varsa 15 (bkz. ai/mock.py).
+Mock sağlayıcı: görev verilmişse kontrol listesi 4/5 → task_match=80; görselde
+"OFFTASK" baytları varsa konu tutmuyor → 10 (bkz. ai/mock.py). Puan 2026-10'dan
+beri SUNUCUDA kontrol listesinden hesaplanıyor.
 """
 
 import io
@@ -66,7 +67,9 @@ def test_off_task_drawing_gets_feedback_but_no_progress(client):
     assert job["status"] == "done"
     # Geri bildirim VAR
     assert job["analysis"]["findings"] and job["analysis"]["strengths_tr"]
-    assert job["analysis"]["task_match"] == 15
+    assert job["analysis"]["task_match"] == 10
+    assert job["analysis"]["subject_matches"] is False
+    assert job["analysis"]["drawing_description_tr"]
     assert job["analysis"]["task_passed"] is False
     # İlerleme YOK
     assert job["xp_awarded"] == 0
@@ -181,14 +184,78 @@ def test_prompt_includes_task_and_guards_injection():
     assert "task_match" not in redline_prompt("Çizgi Temelleri", "tr")
 
 
-def test_guard_clamps_task_match():
-    from app.ai.schemas import TaskRedlineResult
+def test_guard_scores_from_checklist_not_model_number():
+    """Puan her zaman kontrol listesinden; modelin uydurduğu sayı yok sayılır."""
+    from app.ai.schemas import RedlineResult, TaskCheck
     from app.ai.tone_guard import guard_redline
 
-    r = TaskRedlineResult(
+    r = RedlineResult(
         strengths_tr=["x"], findings=[], overall_comment_tr="y",
-        task_match=142.6, task_match_comment_tr="berbat bir uyum",
+        task_match=99, subject_matches=True, task_match_comment_tr="berbat bir uyum",
+        task_checks=[
+            TaskCheck(criterion_tr="a", status="met"),
+            TaskCheck(criterion_tr="b", status="partial"),
+            TaskCheck(criterion_tr="c", status="missing"),
+            TaskCheck(criterion_tr="d", status="??"),  # bilinmeyen → missing
+        ],
     )
     g = guard_redline(r, "tr")
-    assert g.task_match == 100
+    assert g.task_match == 38  # (1 + 0.5) / 4
     assert "berbat" not in g.task_match_comment_tr
+
+
+def test_subject_mismatch_caps_score():
+    from app.ai.schemas import SUBJECT_MISMATCH_CAP, TaskCheck, score_task
+
+    checks = [TaskCheck(criterion_tr=str(i), status="met") for i in range(3)]
+    assert score_task(checks, subject_matches=True) == 100
+    # Kriterler "var" görünse bile konu yanlışsa geçemez
+    assert score_task(checks, subject_matches=False) == SUBJECT_MISMATCH_CAP
+
+
+def test_legacy_single_number_still_clamped():
+    from app.ai.schemas import RedlineResult
+    from app.ai.tone_guard import guard_redline
+
+    r = RedlineResult(strengths_tr=["x"], findings=[], overall_comment_tr="y", task_match=142)
+    assert guard_redline(r, "tr").task_match == 100
+
+
+def test_guard_sorts_and_caps_findings():
+    from app.ai.schemas import RedlineFinding, RedlineResult
+    from app.ai.tone_guard import guard_redline
+
+    def f(sev):
+        return RedlineFinding(skill_axis="oran", x=0.5, y=0.5, severity=sev,
+                              message_tr=sev, suggestion_tr="s")
+
+    r = RedlineResult(strengths_tr=["x"], overall_comment_tr="y",
+                      findings=[f("dusuk"), f("orta"), f("yuksek"), f("dusuk"), f("orta")])
+    g = guard_redline(r, "tr")
+    assert [x.severity.value for x in g.findings] == ["yuksek", "orta", "orta"]
+
+
+def test_structured_brief_stored_and_returned(client):
+    h, _ = _user(client, "Yapılı")
+    body = client.post(f"/skill-tree/{NODE}/assignment", headers=h).json()
+    brief = body["brief"]
+    assert brief["steps_tr"] and brief["success_criteria_tr"] and brief["time_minutes"]
+    # Metin hâli kriterleri içeriyor → uyum analizinin kontrol listesi
+    assert "Başarı kriterleri" in body["assignment"]
+    assert client.get(f"/skill-tree/{NODE}/assignment", headers=h).json()["brief"] == brief
+
+
+def test_assignment_prompt_gets_lesson_videos(client, monkeypatch):
+    from app.ai.mock import MockAIProvider
+
+    seen = {}
+    original = MockAIProvider.assignment_brief
+
+    async def spy(self, title, desc, language="tr", resource_titles=None):
+        seen["titles"] = resource_titles
+        return await original(self, title, desc, language, resource_titles)
+
+    monkeypatch.setattr(MockAIProvider, "assignment_brief", spy)
+    h, _ = _user(client, "Videolu")
+    client.post(f"/skill-tree/{NODE}/assignment", headers=h)
+    assert any("Drawabox" in t for t in seen["titles"])

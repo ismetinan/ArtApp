@@ -5,7 +5,10 @@ Hedef kitle motivasyonu kırılgan, kendi kendine öğrenen çizerler. Bu katman
 2. Her analizde en az bir güçlü yön bulunmasını garanti eder.
 """
 
-from .schemas import LevelAssessment, RedlineResult, SkillAxis
+from .schemas import LevelAssessment, RedlineResult, SkillAxis, score_task
+
+MAX_FINDINGS = 3
+_SEVERITY_ORDER = {"yuksek": 0, "orta": 1, "dusuk": 2}
 
 # Bilerek geniş tutulmuş kaba/olumsuz kalıplar (Türkçe + İngilizce sızıntılara karşı)
 _HARSH_PATTERNS = [
@@ -45,8 +48,18 @@ def guard_redline(result: RedlineResult, language: str = "tr") -> RedlineResult:
     result.strengths_tr = [_soften(s, lang) for s in result.strengths_tr]
     if not result.strengths_tr:
         result.strengths_tr = [_FALLBACK_STRENGTH[lang]]
-    if result.task_match is not None:
-        # Modeller 72.5 ya da 0-1 aralığı dışı değer döndürebiliyor
+    # Okunabilirlik (2026-10): en önemli bulgular önce, en fazla MAX_FINDINGS.
+    # Model kurala uymayıp 5 bulgu döndürse de öğrenci 3'ten fazlasını görmez.
+    result.findings = sorted(
+        result.findings, key=lambda f: _SEVERITY_ORDER.get(f.severity.value, 1)
+    )[:MAX_FINDINGS]
+    if result.next_step_tr:
+        result.next_step_tr = _soften(result.next_step_tr, lang)
+    if result.task_checks is not None:
+        # Uyum puanı her zaman kontrol listesinden — modelin sayısı değil
+        result.task_match = score_task(result.task_checks, bool(result.subject_matches))
+    elif result.task_match is not None:
+        # Eski biçim (tek sayı): 72.5 / aralık dışı değerleri toparla
         result.task_match = max(0, min(100, round(float(result.task_match))))
     if result.task_match_comment_tr:
         result.task_match_comment_tr = _soften(result.task_match_comment_tr, lang)

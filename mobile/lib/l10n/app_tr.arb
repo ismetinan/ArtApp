@@ -566,5 +566,14 @@
   "updateRequiredTitle": "Güncelleme gerekiyor",
   "updateRequiredBody": "Bu sürüm artık desteklenmiyor. Artora'yı kullanmaya devam etmek için lütfen uygulamayı güncelle.",
   "updateNow": "Güncelle",
-  "updateLater": "Sonra"
+  "updateLater": "Sonra",
+  "assignmentGoal": "Amaç",
+  "assignmentSteps": "Adımlar",
+  "assignmentChecklist": "Kontrol listesi",
+  "assignmentChecklistHint": "AI, yüklediğin çizimde bu maddelere bakacak.",
+  "assignmentTime": "~{n} dk",
+  "@assignmentTime": {"placeholders": {"n": {"type": "int"}}},
+  "nextStepTitle": "Sıradaki adım",
+  "taskAiSaw": "AI çizimde şunu gördü: {desc}",
+  "@taskAiSaw": {"placeholders": {"desc": {"type": "String"}}}
 }

@@ -46,8 +46,10 @@ def test_full_mvp_loop(client, monkeypatch):
     by_id = {n["id"]: n for n in tree}
     assert by_id["cizgi-temelleri"]["status"] == "available"
     assert by_id["temel-oranlar"]["status"] == "locked"
-    assert by_id["cizgi-temelleri"]["resources"][0]["kind"] == "playlist"
-    assert by_id["kafa-oranlari"]["resources"][0]["youtube_id"] == "wAOldLWIDSM"
+    # 2026-10: Zeynep'in seçtiği videolar başta, eski playlist altta duruyor
+    assert by_id["cizgi-temelleri"]["resources"][0]["youtube_id"] == "0_AdsK8x9Lw"
+    assert by_id["cizgi-temelleri"]["resources"][-1]["kind"] == "playlist"
+    assert by_id["kafa-oranlari"]["resources"][0]["youtube_id"] == "1EPNYWeEf1U"
 
     # 3. Kilitli derse ödev gönderilemez
     r = client.post(

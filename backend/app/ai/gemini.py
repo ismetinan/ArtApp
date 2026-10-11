@@ -14,8 +14,9 @@ from .schemas import (
     AssignmentBrief,
     LevelAssessment,
     ModerationVerdict,
+    RedlineModelOut,
     RedlineResult,
-    TaskRedlineResult,
+    TaskRedlineModelOut,
 )
 
 
@@ -57,14 +58,18 @@ class GeminiProvider(AIProvider):
         assignment_text: str | None = None,
     ) -> RedlineResult:
         prompt = redline_prompt(lesson_context, language, assignment_text)
-        schema = TaskRedlineResult if assignment_text else RedlineResult
-        return await self._generate([_image_part(image), prompt], schema)
+        schema = TaskRedlineModelOut if assignment_text else RedlineModelOut
+        return (await self._generate([_image_part(image), prompt], schema)).to_result()
 
     async def assignment_brief(
-        self, node_title: str, node_description: str, language: str = "tr"
+        self,
+        node_title: str,
+        node_description: str,
+        language: str = "tr",
+        resource_titles: list[str] | None = None,
     ) -> AssignmentBrief:
-        prompt = assignment_prompt(node_title, node_description, language)
-        return await self._generate([prompt], AssignmentBrief)
+        prompt = assignment_prompt(node_title, node_description, language, resource_titles)
+        return (await self._generate([prompt], AssignmentBrief)).clean()
 
     async def moderation_check(self, image: bytes) -> ModerationVerdict:
         return await self._generate(

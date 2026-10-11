@@ -2071,6 +2071,48 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Sonra'**
   String get updateLater;
+
+  /// No description provided for @assignmentGoal.
+  ///
+  /// In tr, this message translates to:
+  /// **'Amaç'**
+  String get assignmentGoal;
+
+  /// No description provided for @assignmentSteps.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adımlar'**
+  String get assignmentSteps;
+
+  /// No description provided for @assignmentChecklist.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kontrol listesi'**
+  String get assignmentChecklist;
+
+  /// No description provided for @assignmentChecklistHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI, yüklediğin çizimde bu maddelere bakacak.'**
+  String get assignmentChecklistHint;
+
+  /// No description provided for @assignmentTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'~{n} dk'**
+  String assignmentTime(int n);
+
+  /// No description provided for @nextStepTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıradaki adım'**
+  String get nextStepTitle;
+
+  /// No description provided for @taskAiSaw.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI çizimde şunu gördü: {desc}'**
+  String taskAiSaw(String desc);
 }
 
 class _AppLocalizationsDelegate

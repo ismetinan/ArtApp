@@ -1142,4 +1142,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateLater => 'Later';
+
+  @override
+  String get assignmentGoal => 'Goal';
+
+  @override
+  String get assignmentSteps => 'Steps';
+
+  @override
+  String get assignmentChecklist => 'Checklist';
+
+  @override
+  String get assignmentChecklistHint =>
+      'The AI will look for these in the drawing you upload.';
+
+  @override
+  String assignmentTime(int n) {
+    return '~$n min';
+  }
+
+  @override
+  String get nextStepTitle => 'Next step';
+
+  @override
+  String taskAiSaw(String desc) {
+    return 'The AI saw: $desc';
+  }
 }

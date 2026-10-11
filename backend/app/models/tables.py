@@ -252,6 +252,9 @@ class Assignment(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     node_id: Mapped[str] = mapped_column(ForeignKey("skill_nodes.id"))
     text: Mapped[str] = mapped_column(Text)
+    # 2026-10: yapılandırılmış hâli (goal/steps/success_criteria/time). Eski
+    # ödevlerde NULL — istemci text'e düşer.
+    brief: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

@@ -142,6 +142,10 @@ class _RedlineScreenState extends State<RedlineScreen> {
                   style: Theme.of(context).textTheme.bodyLarge),
             ),
           ),
+          if (analysis.nextStep?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 8),
+            _NextStepCard(text: analysis.nextStep!),
+          ],
           if (widget.submissionId != null &&
               ApiClient.instance.mentorMarketEnabled &&
               !_requestSent) ...[
@@ -232,10 +236,80 @@ class _TaskMatchCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(analysis.taskMatchComment!),
           ],
+          // Kriter kriter karar: öğrenci neyin eksik kaldığını net görür
+          if (analysis.taskChecks?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 8),
+            for (final c in analysis.taskChecks!) _CheckRow(check: c),
+          ],
+          // Uymadıysa AI'ın çizimde ne gördüğünü göster — yanlış anlaşıldıysa
+          // öğrenci bunu fark edip daha net bir fotoğrafla tekrar deneyebilir
+          if (!passed && (analysis.drawingDescription?.isNotEmpty ?? false)) ...[
+            const SizedBox(height: 8),
+            Text(t.taskAiSaw(analysis.drawingDescription!),
+                style: Theme.of(context).textTheme.bodySmall),
+          ],
           if (!passed) ...[
             const SizedBox(height: 8),
             Text(t.taskNotPassed, style: const TextStyle(fontWeight: FontWeight.w600)),
           ],
+        ]),
+      ),
+    );
+  }
+}
+
+
+/// Uyum kontrol listesinin tek satırı: ✓ karşılandı, ◐ kısmen, ✗ eksik.
+class _CheckRow extends StatelessWidget {
+  final TaskCheck check;
+  const _CheckRow({required this.check});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final (icon, color) = switch (check.status) {
+      'met' => (Icons.check_circle, Colors.green.shade600),
+      'partial' => (Icons.contrast, Colors.orange.shade700),
+      _ => (Icons.cancel_outlined, cs.error),
+    };
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Icon(icon, size: 20, color: color),
+        const SizedBox(width: 8),
+        Expanded(child: Text(check.criterion)),
+      ]),
+    );
+  }
+}
+
+/// "Sıradaki adım": geri bildirimin tek, uygulanabilir özeti.
+class _NextStepCard extends StatelessWidget {
+  final String text;
+  const _NextStepCard({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      color: cs.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(Icons.flag_outlined, color: cs.onPrimaryContainer),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(t.nextStepTitle,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(color: cs.onPrimaryContainer)),
+              const SizedBox(height: 4),
+              Text(text, style: TextStyle(color: cs.onPrimaryContainer)),
+            ]),
+          ),
         ]),
       ),
     );

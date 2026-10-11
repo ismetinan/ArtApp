@@ -14,6 +14,7 @@ from ..core.messages import msg
 from ..db import get_db
 from ..models.tables import ContentReport, SkillNode, Submission, User
 from ..services import audit
+from ..services.internal import visibility_clause
 from .deps import get_current_user
 from .mentors import require_admin
 
@@ -29,7 +30,7 @@ def get_gallery(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    rows = db.execute(
+    stmt = (
         select(Submission, User.display_name, SkillNode)
         .join(User, User.id == Submission.user_id)
         .outerjoin(SkillNode, SkillNode.id == Submission.node_id)
@@ -38,7 +39,12 @@ def get_gallery(
             Submission.moderation_hidden.is_(False),
             Submission.kind.in_(("assignment", "free")),
         )
-        .order_by(Submission.created_at.desc())
+    )
+    # Demo hesapların çizimleri gerçek kullanıcılara görünmez
+    if (vis := visibility_clause(user)) is not None:
+        stmt = stmt.where(vis)
+    rows = db.execute(
+        stmt.order_by(Submission.created_at.desc())
         .offset(offset)
         .limit(limit)
     ).all()

@@ -47,10 +47,15 @@ class AIProvider(ABC):
 
     @abstractmethod
     async def assignment_brief(
-        self, node_title: str, node_description: str, language: str = "tr"
+        self,
+        node_title: str,
+        node_description: str,
+        language: str = "tr",
+        resource_titles: list[str] | None = None,
     ) -> AssignmentBrief:
         """Ders için somut, adım adım bir ödev görevi üretir (görsel girdisi yok).
 
         Uygunsa öğrenciden internetten basit bir referans obje/foto seçip onu
         farklı açılardan çizmesini ister (müşteri isteği, 2026-07-19).
+        resource_titles: dersin video başlıkları — ödev izlenen videoyla örtüşsün.
         """

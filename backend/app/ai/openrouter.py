@@ -20,8 +20,9 @@ from .schemas import (
     AssignmentBrief,
     LevelAssessment,
     ModerationVerdict,
+    RedlineModelOut,
     RedlineResult,
-    TaskRedlineResult,
+    TaskRedlineModelOut,
 )
 
 _API_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -126,16 +127,19 @@ class OpenRouterProvider(AIProvider):
             _image_part(image),
             {"type": "text", "text": redline_prompt(lesson_context, language, assignment_text)},
         ]
-        schema = TaskRedlineResult if assignment_text else RedlineResult
-        return await self._generate(content, schema)
+        schema = TaskRedlineModelOut if assignment_text else RedlineModelOut
+        return (await self._generate(content, schema)).to_result()
 
     async def assignment_brief(
-        self, node_title: str, node_description: str, language: str = "tr"
+        self,
+        node_title: str,
+        node_description: str,
+        language: str = "tr",
+        resource_titles: list[str] | None = None,
     ) -> AssignmentBrief:
-        content = [
-            {"type": "text", "text": assignment_prompt(node_title, node_description, language)}
-        ]
-        return await self._generate(content, AssignmentBrief)
+        prompt = assignment_prompt(node_title, node_description, language, resource_titles)
+        content = [{"type": "text", "text": prompt}]
+        return (await self._generate(content, AssignmentBrief)).clean()
 
     async def moderation_check(self, image: bytes) -> ModerationVerdict:
         content = [_image_part(image), {"type": "text", "text": MODERATION_PROMPT}]

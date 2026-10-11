@@ -25,6 +25,7 @@ from ..models.tables import (
     User,
 )
 from ..services import audit, donations, earnings, jetons, moderation
+from ..services.internal import is_internal, visibility_clause
 from ..services.push import send_push
 
 REQUEST_TIMEOUT = timedelta(hours=48)
@@ -148,11 +149,15 @@ def list_mentors(
     db: Session = Depends(get_db),
 ):
     """Onaylı mentorlar; stil filtresi + ad/bio araması, rating'e göre sıralı."""
-    rows = db.execute(
+    stmt = (
         select(MentorProfile, User.display_name)
         .join(User, User.id == MentorProfile.user_id)
         .where(MentorProfile.status == "approved")
-    ).all()
+    )
+    # Demo mentorlar gerçek kullanıcılara listelenmez
+    if (vis := visibility_clause(user)) is not None:
+        stmt = stmt.where(vis)
+    rows = db.execute(stmt).all()
     if style:
         # Filtre kanonik anahtarla gelir; eski kayıtlar eşlenerek karşılaştırılır
         wanted = STYLE_ALIASES.get(style, style)
@@ -182,9 +187,13 @@ def get_mentor(
     db: Session = Depends(get_db),
 ):
     profile = db.get(MentorProfile, profile_id)
-    if profile is None or profile.status != "approved":
+    owner = db.get(User, profile.user_id) if profile is not None else None
+    if (
+        profile is None
+        or profile.status != "approved"
+        or (is_internal(owner) and not is_internal(user))
+    ):
         raise HTTPException(status_code=404, detail=msg("mentor_not_found", user.language))
-    owner = db.get(User, profile.user_id)
     stats = _mentor_stats(db, [profile.user_id]).get(profile.user_id, (None, 0))
     return _profile_json(
         profile, owner.display_name if owner else "", stats, include_donation=True
@@ -321,7 +330,14 @@ async def create_mentor_request(
     if chosen_id is not None:
         # Seçmeli: profil onaylı + müsait + kendisi değil, yoksa 409
         mentor_profile = db.get(MentorProfile, chosen_id)
-        if mentor_profile is None or mentor_profile.status != "approved":
+        chosen_owner = (
+            db.get(User, mentor_profile.user_id) if mentor_profile is not None else None
+        )
+        if (
+            mentor_profile is None
+            or mentor_profile.status != "approved"
+            or (is_internal(chosen_owner) and not is_internal(user))
+        ):
             raise HTTPException(
                 status_code=404, detail=msg("mentor_not_found", user.language)
             )
@@ -341,13 +357,19 @@ async def create_mentor_request(
         cost = 0 if free_mentorship else DIRECT_COST
         gold_only = not free_mentorship  # eski model: seçmeli yalnız altınla
     else:
-        candidates = db.execute(
-            select(MentorProfile).where(
+        pool = (
+            select(MentorProfile)
+            .join(User, User.id == MentorProfile.user_id)
+            .where(
                 MentorProfile.status == "approved",
                 MentorProfile.is_available.is_(True),
                 MentorProfile.user_id != user.id,  # kendi ödevine kendisi atanmasın
             )
-        ).scalars().all()
+        )
+        # Gerçek öğrencinin isteği asla cevap vermeyecek demo mentora düşmesin
+        if (vis := visibility_clause(user)) is not None:
+            pool = pool.where(vis)
+        candidates = db.execute(pool).scalars().all()
         # Havuzda mentor SONRADAN rastgele atanıyor, bu yüzden kotalar önceden
         # kontrol edilemez — aday listesinden ÇIKARMA olarak uygulanır.
         candidates = [

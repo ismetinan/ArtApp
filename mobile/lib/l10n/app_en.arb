@@ -365,5 +365,12 @@
   "updateRequiredTitle": "Update required",
   "updateRequiredBody": "This version is no longer supported. Please update the app to keep using Artora.",
   "updateNow": "Update",
-  "updateLater": "Later"
+  "updateLater": "Later",
+  "assignmentGoal": "Goal",
+  "assignmentSteps": "Steps",
+  "assignmentChecklist": "Checklist",
+  "assignmentChecklistHint": "The AI will look for these in the drawing you upload.",
+  "assignmentTime": "~{n} min",
+  "nextStepTitle": "Next step",
+  "taskAiSaw": "The AI saw: {desc}"
 }

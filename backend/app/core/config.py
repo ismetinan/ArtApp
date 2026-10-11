@@ -13,7 +13,10 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     # Ücretsiz model listesi dönüşümlü; güncel liste: openrouter.ai/collections/free-models
     # (2026-09: nemotron-nano-12b-v2-vl:free kaldırıldı → yedek 404 veriyordu)
-    openrouter_model: str = "google/gemma-4-26b-a4b-it:free"
+    # 2026-10: flash-lite → flash. Değerlendirme seti (prototype/task_match_eval.py):
+    # ödev uyumunda ikisi de 32/32, ama flash'ın geri bildirimi belirgin daha
+    # isabetli. Maliyet analiz başına ~0,25 cent. Prod'da OPENROUTER_MODEL env'i geçerli.
+    openrouter_model: str = "google/gemini-2.5-flash"
     openrouter_fallback_model: str = "google/gemma-4-31b-it:free"
     # Modelden istenecek azami çıktı token'ı. GÖNDERİLMEZSE OpenRouter modelin
     # tüm çıktı bütçesini (65k) rezerve ediyor ve düşük bakiyeli hesaplarda istek

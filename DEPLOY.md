@@ -18,7 +18,7 @@ her adımın çıktısını (URL/ID/anahtar) Claude'a ver, gerisini o bağlar.
    ```
    AI_PROVIDER=openrouter
    OPENROUTER_API_KEY=<anahtarın>
-   OPENROUTER_MODEL=google/gemma-4-26b-a4b-it:free
+   OPENROUTER_MODEL=google/gemini-2.5-flash
    OPENROUTER_FALLBACK_MODEL=google/gemma-4-31b-it:free
    GOOGLE_CLIENT_ID=<adım 3'teki WEB client ID>
    AI_DAILY_LIMIT=10
@@ -252,9 +252,9 @@ sebebi olur.
 ### Railway değişkenleri
 
 ```
-OPENROUTER_MODEL=google/gemini-2.5-flash-lite     # ücretsiz katman
-OPENROUTER_PREMIUM_MODEL=google/gemini-2.5-flash  # Premium abone
-OPENROUTER_FALLBACK_MODEL=google/gemini-2.5-flash-lite
+OPENROUTER_MODEL=google/gemini-2.5-flash          # ücretsiz katman (2026-10: lite'tan yükseltildi)
+OPENROUTER_PREMIUM_MODEL=google/gemini-2.5-pro    # Premium abone (öneri; standarttan güçlü olmalı)
+OPENROUTER_FALLBACK_MODEL=google/gemini-2.5-flash-lite  # ana model düşerse
 AI_IMAGE_MAX_EDGE=1024                            # 0 = küçültme kapalı
 OPENROUTER_MAX_TOKENS=2000                        # çıktı tavanı (aşağıya bak)
 ```

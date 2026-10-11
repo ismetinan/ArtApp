@@ -9,6 +9,7 @@ import '../l10n/gen/app_localizations.dart';
 import '../analysis_watcher.dart';
 import '../pending_analysis.dart';
 import 'ai_wait.dart';
+import 'assignment_card.dart';
 import 'redline.dart';
 import 'store.dart';
 
@@ -468,6 +469,7 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
   bool _submitting = false;
   bool _completedNow = false;
   String? _assignment;
+  AssignmentBrief? _brief;
   bool _assignmentBusy = false;
 
   @override
@@ -480,8 +482,13 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
   Future<void> _loadAssignment() async {
     // Kayıtlı ödev varsa gösterilir — bu çağrı AI kotası harcamaz
     try {
-      final text = await ApiClient.instance.getAssignment(widget.node.id);
-      if (mounted && text != null) setState(() => _assignment = text);
+      final a = await ApiClient.instance.getAssignment(widget.node.id);
+      if (mounted && a.text != null) {
+        setState(() {
+          _assignment = a.text;
+          _brief = a.brief;
+        });
+      }
     } catch (_) {/* sessiz — bölüm butonla kalır */}
   }
 
@@ -490,8 +497,13 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
     // Burada sayfa geçişi yok, o yüzden finally güvenli.
     AiWait.show(context, title: AppLocalizations.of(context).aiWaitTitleAssignment);
     try {
-      final text = await ApiClient.instance.generateAssignment(widget.node.id);
-      if (mounted) setState(() => _assignment = text);
+      final a = await ApiClient.instance.generateAssignment(widget.node.id);
+      if (mounted) {
+        setState(() {
+          _assignment = a.text;
+          _brief = a.brief;
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
@@ -635,12 +647,7 @@ class _NodeDetailScreenState extends State<NodeDetailScreen> {
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             if (_assignment != null)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(_assignment!),
-                ),
-              )
+              AssignmentCard(text: _assignment, brief: _brief)
             else if (_assignmentBusy)
               const Center(child: CircularProgressIndicator())
             else

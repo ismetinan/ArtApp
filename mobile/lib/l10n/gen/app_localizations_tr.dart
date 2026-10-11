@@ -1145,4 +1145,30 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get updateLater => 'Sonra';
+
+  @override
+  String get assignmentGoal => 'Amaç';
+
+  @override
+  String get assignmentSteps => 'Adımlar';
+
+  @override
+  String get assignmentChecklist => 'Kontrol listesi';
+
+  @override
+  String get assignmentChecklistHint =>
+      'AI, yüklediğin çizimde bu maddelere bakacak.';
+
+  @override
+  String assignmentTime(int n) {
+    return '~$n dk';
+  }
+
+  @override
+  String get nextStepTitle => 'Sıradaki adım';
+
+  @override
+  String taskAiSaw(String desc) {
+    return 'AI çizimde şunu gördü: $desc';
+  }
 }

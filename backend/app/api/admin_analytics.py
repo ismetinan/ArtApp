@@ -19,7 +19,7 @@ from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
@@ -35,12 +35,11 @@ from ..models.tables import (
     UserActivityDay,
     UserProgress,
 )
+from ..services.internal import not_internal_clause
 from .mentors import require_admin
 
 router = APIRouter(prefix="/admin/analytics", tags=["admin"])
 
-# Demo/App Review hesapları (scripts/seed_demo.py) bu alan adını kullanır
-INTERNAL_EMAIL_SUFFIX = "@artora.app"
 
 
 def _utc(dt: datetime | None) -> datetime | None:
@@ -54,10 +53,7 @@ def _today() -> date:
 
 
 def _real_user_filter():
-    return and_(
-        User.is_admin.is_(False),
-        or_(User.email.is_(None), ~User.email.like(f"%{INTERNAL_EMAIL_SUFFIX}")),
-    )
+    return and_(User.is_admin.is_(False), not_internal_clause())
 
 
 def _real_ids():

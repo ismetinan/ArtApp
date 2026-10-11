@@ -29,12 +29,36 @@ uygulama açılışında upsert edilir; buradaki tablo o eşlemenin belgesidir).
 | [10 Minutes to Better Painting Series](https://youtube.com/playlist?list=PLLmXZMqb_9sbNLM83NrM005vRQHw1yTKn) | Playlist | Marco Bucci | boyama |
 | [Painting Tutorials / Demos](https://youtube.com/playlist?list=PLLmXZMqb_9sZbJOiJeq17nScRV0uo6ZQe) | Playlist | Marco Bucci | boyama |
 
+## Zeynep'in seçkisi (2026-10, Blok 1-5)
+
+Her dersin başında, önce izlenmesi önerilen videolar. Başlıklar oEmbed ile doğrulandı.
+
+| Kaynak | Tür | Yazar | Ağaç düğümü |
+|---|---|---|---|
+| [Drawabox Lesson 1: Drawing From Your Wrist and Shoulder](https://youtu.be/0_AdsK8x9Lw) | Video | Uncomfortable | cizgi-temelleri |
+| [Drawabox Lesson 1, Exercise 2: Ghosted Lines](https://youtu.be/LkJG6pKTuRc) | Video | Uncomfortable | cizgi-temelleri |
+| [Drawing Basics - Construction](https://youtu.be/qQ9LRsU8Mfs) | Video | The Virtual Instructor | sekil-ve-form |
+| [Basic rules of light and shadow for drawing](https://youtu.be/ljzaqOpQglg) | Video | Peonypaint | isik-mantigi |
+| [One and Two Point Perspective Tutorial](https://youtu.be/gY-2iUdm9Cc) | Video | MrNagele | tek-nokta-perspektif, iki-nokta-perspektif |
+| [1 Point Perspective Grid](https://youtu.be/ZnUetGLgo3g) | Video | Drawsh Studio | tek-nokta-perspektif |
+| [2 Point Perspective Grid](https://youtu.be/3n3gpGX_v2s) | Video | Drawsh Studio | iki-nokta-perspektif |
+| [The 11 Steps to Great Gesture Drawing](https://youtu.be/NAY5N76VP8M) | Video | Love Life Drawing | jest-cizimi |
+| [Mastering Human Proportions: The Art of 8-Head Height Drawing](https://youtu.be/ZgkC7Ksqo1g) | Video | Josh Papaleo | temel-oranlar |
+| [This bean changed the way I draw torsos forever.](https://youtu.be/3m619Jav5Qw) | Video | Javi can draw! | temel-anatomi |
+| [How to Draw the Head from Any Angle](https://youtu.be/1EPNYWeEf1U) | Video | Proko | kafa-oranlari |
+| [I'll teach you drawing bodies in 10 minutes](https://youtu.be/9m4Hf_6U4Rc) | Video | Draw like a Sir | figur-oranlari |
+| [Composition for Noobs](https://youtu.be/9VVzCr3c9Jk) | Video | Flow Studio | temel-kompozisyon |
+| [Draw backgrounds in 2 easy steps](https://youtu.be/H9f58K7r9X8) | Video | Ethan Becker | ileri-kompozisyon |
+| [Ambient Occlusion (and Ambient Light) for Painters](https://youtu.be/7fLV5ezO64w) | Video | Marco Bucci | deger-calismasi |
+| [Light and Shadow - 10 Minutes To Better Painting - Ep. 6](https://youtu.be/xcCJ2CU-bFw) | Video | Marco Bucci | deger-calismasi |
+| [Colour Harmony - 10 Minutes To Better Painting - Ep. 5](https://youtu.be/4LhcNbFMkTw) | Video | Marco Bucci | renk-temelleri |
+| [How To Paint ANY Material - Introduction to the Form Principle](https://youtu.be/XaVybuZsZs4) | Video | Forrest Imel | boyama |
+
 ## Açık noktalar
 
 - ⚠️ Orijinal listedeki `PLXY6FC0h64ts` playlist bağlantısı bozuk/kesik görünüyor
   (oEmbed onu Proko'nun "Drawing Dynamic Creatures" videosuna çözüyor). Doğru
   playlist'i yeniden kopyalayıp buraya eklersen ağaca alırız.
-- `temel-oranlar` düğümünün henüz kaynağı yok — temel ölçü/oran konulu bir video
-  önerisi gerekiyor.
+- ~~`temel-oranlar` düğümünün kaynağı yok~~ → 2026-10: 8-Head videosu eklendi.
 - Yeni kaynak ekleme akışı: bu tabloya satır ekle → `skill_tree.py`'de ilgili düğümün
   `resources` listesine işle → backend'i yeniden başlat (upsert otomatik).

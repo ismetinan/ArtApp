@@ -1,6 +1,6 @@
 """Yasal sayfalar — Play Console'un istediği herkese açık gizlilik politikası URL'si.
 
-Beta için backend'den servis edilir; ileride ayrı bir web sitesine taşınabilir.
+Backend'den servis edilir; ileride ayrı bir web sitesine taşınabilir.
 """
 
 from fastapi import APIRouter

@@ -12,25 +12,42 @@ from .schemas import (
     LevelAssessment,
     ModerationVerdict,
     RedlineFinding,
+    RedlineModelOut,
     RedlineResult,
     Severity,
     SkillAxis,
+    TaskCheck,
+    TaskRedlineModelOut,
 )
 
-_ASSIGNMENT_TEXTS = {
-    "tr": (
-        "'{node_title}' ödevi:\n"
-        "1. İnternetten basit bir referans obje seç (örn. bir kupa fotoğrafı).\n"
-        "2. Objeyi önden, üstten ve 3/4 açıdan üç ayrı kez çiz.\n"
-        "3. Her çizimde yapı çizgilerini silmeden bırak — analiz bunlara bakacak.\n"
-        "Bitince tek fotoğrafta yükle."
+_ASSIGNMENT_BRIEFS = {
+    "tr": dict(
+        goal_tr="'{node_title}' konusunu basit bir objeyle, farklı açılardan çizerek çalış.",
+        steps_tr=[
+            "İnternetten basit bir referans obje seç (örn. bir kupa fotoğrafı).",
+            "Objeyi önden, üstten ve 3/4 açıdan üç ayrı kez çiz.",
+            "Yapı çizgilerini silme; analiz bunlara da bakacak.",
+        ],
+        success_criteria_tr=[
+            "Aynı obje üç ayrı çizimde var.",
+            "Çizimler önden, üstten ve 3/4 açıdan.",
+            "Yapı çizgileri görünür.",
+        ],
+        time_minutes=30,
     ),
-    "en": (
-        "Assignment for '{node_title}':\n"
-        "1. Pick a simple reference object from the internet (e.g. a photo of a mug).\n"
-        "2. Draw the object three times: front, top and 3/4 view.\n"
-        "3. Leave your construction lines visible — the analysis will look at them.\n"
-        "Upload a single photo when done."
+    "en": dict(
+        goal_tr="Practice '{node_title}' by drawing one simple object from different angles.",
+        steps_tr=[
+            "Pick a simple reference object from the internet (e.g. a photo of a mug).",
+            "Draw the object three times: front, top and 3/4 view.",
+            "Keep your construction lines; the analysis looks at them too.",
+        ],
+        success_criteria_tr=[
+            "The same object appears in three separate drawings.",
+            "The drawings show front, top and 3/4 views.",
+            "Construction lines are visible.",
+        ],
+        time_minutes=30,
     ),
 }
 
@@ -68,6 +85,7 @@ _REDLINE_TEXTS = {
             "Yukarıdaki iki küçük noktaya odaklanırsan bir sonraki denemende "
             "farkı net göreceksin — devam et!"
         ),
+        next_step="Bir sonraki çizime başlamadan önce figürü baş boyu ölçüsüyle 8'e böl.",
     ),
     "en": dict(
         strengths=[
@@ -89,6 +107,7 @@ _REDLINE_TEXTS = {
             "small points above and you'll clearly see the difference in your "
             "next attempt — keep going!"
         ),
+        next_step="Before your next drawing, divide the figure into 8 head heights.",
     ),
 }
 
@@ -98,11 +117,15 @@ _TASK_COMMENTS = {
         "on": "Görevin adımlarının çoğu karşılanmış; istenen açıları çizmişsin.",
         "off": "Bu çizim verilen görevden farklı bir konuya odaklanıyor; görevdeki "
         "objeyi istenen açılardan çizmeyi dene.",
+        "desc_on": "Aynı obje üç farklı açıdan çizilmiş.",
+        "desc_off": "Görevdekinden farklı bir konu çizilmiş.",
     },
     "en": {
         "on": "Most of the task's steps are covered; you drew the requested views.",
         "off": "This drawing focuses on something other than the given task; try "
         "drawing the task's object from the requested angles.",
+        "desc_on": "The same object drawn from three different angles.",
+        "desc_off": "A different subject than the one in the task.",
     },
 }
 
@@ -138,11 +161,15 @@ class MockAIProvider(AIProvider):
         return ModerationVerdict(is_safe=True, category="ok")
 
     async def assignment_brief(
-        self, node_title: str, node_description: str, language: str = "tr"
+        self,
+        node_title: str,
+        node_description: str,
+        language: str = "tr",
+        resource_titles: list[str] | None = None,
     ) -> AssignmentBrief:
-        return AssignmentBrief(
-            assignment_tr=_ASSIGNMENT_TEXTS[_lang(language)].format(node_title=node_title)
-        )
+        data = dict(_ASSIGNMENT_BRIEFS[_lang(language)])
+        data["goal_tr"] = data["goal_tr"].format(node_title=node_title)
+        return AssignmentBrief(**data).clean()
 
     async def redline_analysis(
         self,
@@ -151,17 +178,9 @@ class MockAIProvider(AIProvider):
         language: str = "tr",
         assignment_text: str | None = None,
     ) -> RedlineResult:
-        t = _REDLINE_TEXTS[_lang(language)]
-        # Ödev uyumu: görev verildiyse 80; test kancası — içeriğinde "OFFTASK"
-        # baytları geçen görsel görevle alakasız sayılır (15).
-        task_match = task_comment = None
-        if assignment_text:
-            off = b"OFFTASK" in image
-            task_match = 15 if off else 80
-            task_comment = _TASK_COMMENTS[_lang(language)]["off" if off else "on"]
-        return RedlineResult(
-            task_match=task_match,
-            task_match_comment_tr=task_comment,
+        lang = _lang(language)
+        t = _REDLINE_TEXTS[lang]
+        common = dict(
             strengths_tr=list(t["strengths"]),
             findings=[
                 RedlineFinding(
@@ -182,4 +201,26 @@ class MockAIProvider(AIProvider):
                 ),
             ],
             overall_comment_tr=t["overall"].format(lesson_context=lesson_context),
+            next_step_tr=t["next_step"],
         )
+        if not assignment_text:
+            return RedlineModelOut(**common).to_result()
+        # Ödev uyumu, gerçek akıştaki gibi kontrol listesinden SUNUCUDA
+        # hesaplanır. Görev → 4/5 kriter (80). Test kancası: içeriğinde
+        # "OFFTASK" baytları geçen görsel görevle alakasız (konu tutmuyor → 10).
+        off = b"OFFTASK" in image
+        statuses = (
+            ["partial", "missing", "missing", "missing", "missing"]
+            if off
+            else ["met", "met", "met", "met", "missing"]
+        )
+        return TaskRedlineModelOut(
+            drawing_description_tr=_TASK_COMMENTS[lang]["desc_off" if off else "desc_on"],
+            subject_matches=not off,
+            task_checks=[
+                TaskCheck(criterion_tr=f"#{i}", status=st)
+                for i, st in enumerate(statuses, 1)
+            ],
+            task_match_comment_tr=_TASK_COMMENTS[lang]["off" if off else "on"],
+            **common,
+        ).to_result()
